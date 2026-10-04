@@ -29,7 +29,7 @@ export interface RoutePoint {
 
 /** Farther than this from any walkway end, a click is not a usable route point. */
 const MAX_SNAP_M = 250;
-const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_road.geojson`;
+const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_all.geojson`;
 
 type LoadState = "idle" | "loading" | "ready" | "error";
 

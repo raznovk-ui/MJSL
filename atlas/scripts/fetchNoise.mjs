@@ -4,9 +4,9 @@
  *
  *   npm run data:noise
  *
- * Source: "Bruit routier - Zones exposees, sur 24h (indicateur Lden)", Metropole
+ * Source: "Bruit multiexposition (route, fer, air, industrie) - Lden type A", Metropole
  * d'Aix-Marseille-Provence (study by Impedance Ingenierie), Licence Ouverte 2.0.
- * https://www.data.gouv.fr/datasets/bruit-routier-zones-exposees-sur-24h-indicateur-lden
+ * https://data.ampmetropole.fr/explore/dataset/fr-observatoire-du-bruit-bruit_cumul/
  *
  * The portal clips by area on its side, so only the study area is downloaded
  * instead of the whole Metropole (about 60 MB). Coordinates are rounded to
@@ -18,8 +18,8 @@ import { fileURLToPath } from "node:url";
 
 const BBOX = { south: 43.255, west: 5.335, north: 43.305, east: 5.385 }; // = src/app/studyArea.ts
 const DATASET =
-  "https://data.ampmetropole.fr/api/explore/v2.1/catalog/datasets/bruit-routier-type-a-lden-sur-24h-etude-de-bruit-impedance-ingenierie";
-const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "noise_lden_road.geojson");
+  "https://data.ampmetropole.fr/api/explore/v2.1/catalog/datasets/fr-observatoire-du-bruit-bruit_cumul";
+const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "noise_lden_all.geojson");
 
 const { south, west, north, east } = BBOX;
 const polygon = `POLYGON((${west} ${south}, ${east} ${south}, ${east} ${north}, ${west} ${north}, ${west} ${south}))`;
