@@ -9,3 +9,4 @@ export * from "./toGeojson.js";
 export * from "./noiseMap.js";
 export * from "./elevation.js";
 export { coordKey } from "./geo.js";
+export * from "./zones.js";

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { OVERPASS_PRESETS } from "../overpass/presets.js";
 import { useAppStore } from "../state.js";
+import { useWalkwayStore } from "../walkway/walkwayStore.js";
 
 const PAGE = 50;
 
@@ -10,28 +11,17 @@ const PAGE = 50;
  */
 export function DataTable() {
   const presets = useAppStore((s) => s.presets);
-  const observations = useAppStore((s) => s.observations);
-  const ruptures = useAppStore((s) => s.ruptures);
+  const zones = useWalkwayStore((s) => s.zones);
   const [limit, setLimit] = useState(PAGE);
 
   const rows = useMemo(
     () => [
-      // Contributed evidence first: the OSM indices are only context.
-      ...ruptures.map((rupture) => ({
-        preset: "Rupture",
-        id: rupture.id,
-        label: rupture.comment || "Rupture sans description",
-        type: `${rupture.blocking ? "Blocage dur" : "Friction"} · gravite ${rupture.severity}`,
-        wheelchair: rupture.dimensions.join(", "),
-      })),
-      ...observations.map((observation) => ({
-        preset: "Observation",
-        id: observation.id,
-        label: observation.title,
-        type: observation.geometry.type,
-        wheelchair: observation.ratings
-          .map((r) => `${r.dimension}=${r.score ?? "?"}`)
-          .join(", "),
+      ...zones.map((zone) => ({
+        preset: "Zone prioritaire",
+        id: zone.id,
+        label: `#${zone.rank} : ${zone.summary}`,
+        type: `${Math.round(zone.lengthM)} m`,
+        wheelchair: "",
       })),
       ...OVERPASS_PRESETS.flatMap((preset) =>
         (presets[preset.id]?.geojson?.features ?? []).map((feature) => ({
@@ -43,7 +33,7 @@ export function DataTable() {
         })),
       ),
     ],
-    [presets, observations, ruptures],
+    [presets, zones],
   );
 
   if (rows.length === 0) {

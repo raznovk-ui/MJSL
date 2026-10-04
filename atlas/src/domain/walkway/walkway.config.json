@@ -84,6 +84,13 @@
     }
   },
 
+  "zones": {
+    "_comment": "How the program draws priority zones by itself, with no one marking anything. A segment is a candidate when its score for the chosen profile is below 'scoreBelow' (or it is vetoed). Candidates that touch, or lie within 'mergeGapM' metres of each other, join into one zone. A zone shorter than 'minLengthM' metres in total is dropped as noise, EXCEPT a zone containing a vetoed segment: a hard block is always kept. Zones are ranked by severity = sum over their segments of length x (1 - score).",
+    "scoreBelow": 0.3,
+    "mergeGapM": 25,
+    "minLengthM": 50
+  },
+
   "kerbAttachM": 10,
 
   "classes": {

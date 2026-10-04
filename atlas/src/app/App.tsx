@@ -4,19 +4,10 @@ import { BasemapPicker } from "./components/BasemapPicker.js";
 import { LayerPanel } from "./components/LayerPanel.js";
 import { DataTable } from "./components/DataTable.js";
 import { StatusBar } from "./components/StatusBar.js";
-import { ImportWizard } from "./components/ImportWizard.js";
-import { ObservationList } from "./components/ObservationList.js";
-import { ObservationEditor } from "./components/ObservationEditor.js";
-import { PhotoImport } from "./components/PhotoImport.js";
-import { PhotoGallery } from "./components/PhotoGallery.js";
-import { RuptureList } from "./components/RuptureList.js";
-import { RuptureEditor } from "./components/RuptureEditor.js";
-import { AnalysisPanel } from "./components/AnalysisPanel.js";
-import { RedZoneList } from "./components/RedZoneList.js";
-import { CellInspector } from "./components/CellInspector.js";
-import { useScoring } from "./analysis/useScoring.js";
 import { Dashboard } from "./components/Dashboard.js";
 import { WalkwayPanel } from "./walkway/WalkwayPanel.js";
+import { ZoneList } from "./walkway/ZoneList.js";
+import { useWalkwayStore } from "./walkway/walkwayStore.js";
 import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
 import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
@@ -27,29 +18,14 @@ type View = "map" | "table" | "analysis";
 
 export function App() {
   const fetchPreset = useAppStore((s) => s.fetchPreset);
-  const loadStored = useAppStore((s) => s.loadStoredObservations);
-  const loadStoredPhotos = useAppStore((s) => s.loadStoredPhotos);
-  const loadStoredRuptures = useAppStore((s) => s.loadStoredRuptures);
-  const selectedRuptureId = useAppStore((s) => s.selectedRuptureId);
-  const selectedCell = useAppStore((s) => s.selectedCell);
-  const selectedObservationId = useAppStore((s) => s.selectedObservationId);
-  useScoring();
-  const addPointMode = useAppStore((s) => s.addPointMode);
-  const toggleAddPointMode = useAppStore((s) => s.toggleAddPointMode);
   const [view, setView] = useState<View>("map");
-  // On Tableau/Analyse there is nothing to inspect unless something is
-  // actively selected: showing an empty "fiche" panel there just steals width
-  // from the dashboard and the table.
-  const hasSelection = Boolean(selectedCell || selectedRuptureId || selectedObservationId);
-  const showInspector = view === "map" || hasSelection;
 
   useEffect(() => {
     // Fired without awaiting: a slow Overpass query must never hold the UI.
     for (const preset of OVERPASS_PRESETS) void fetchPreset(preset.id);
-    void loadStored();
-    void loadStoredPhotos();
-    void loadStoredRuptures();
-  }, [fetchPreset, loadStored, loadStoredPhotos, loadStoredRuptures]);
+    // The walkway scores and zones are computed with no input from anyone.
+    void useWalkwayStore.getState().load();
+  }, [fetchPreset]);
 
   return (
     <div className="flex min-h-screen flex-col text-slate-900 lg:h-screen" style={{ background: "var(--surface-alt)" }}>
@@ -87,33 +63,8 @@ export function App() {
           aria-label="Reglages des couches"
         >
           <div className="space-y-4">
-            <section aria-labelledby="saisie" className="card">
-              <h2 id="saisie" className="card-title">Saisie</h2>
-              <button
-                type="button"
-                onClick={toggleAddPointMode}
-                aria-pressed={addPointMode}
-                className="btn btn-toggle btn-block"
-              >
-                <IconPin />
-                {addPointMode ? "Clique sur la carte…" : "Ajouter un point"}
-              </button>
-            </section>
-            <section aria-labelledby="import" className="card">
-              <h2 id="import" className="card-title">Import</h2>
-              <ImportWizard />
-            </section>
-            <AnalysisPanel />
             <WalkwayPanel />
-            <RuptureList />
-            <section aria-labelledby="photos" className="card">
-              <h2 id="photos" className="card-title">Photos</h2>
-              <PhotoImport />
-              <div className="mt-2">
-                <PhotoGallery />
-              </div>
-            </section>
-            <ObservationList />
+            <ZoneList />
             <BasemapPicker />
             <LayerPanel />
             <section aria-labelledby="limites" className="card">
@@ -121,7 +72,7 @@ export function App() {
                 Limites
               </h2>
               <p className="text-xs text-slate-500">
-                Les objets OSM sont des indices a verifier sur le terrain, pas des preuves. Cet outil ne
+                Tout est calcule automatiquement a partir de donnees ouvertes ; les valeurs estimees sont des hypotheses a verifier sur le terrain. Cet outil ne
                 remplace pas la consultation des personnes handicapees et des habitants concernes.
               </p>
             </section>
@@ -155,30 +106,12 @@ export function App() {
             <DataTable />
           </div>
           <div className={`min-h-0 min-w-0 flex-1 overflow-y-auto p-4 ${view === "analysis" ? "" : "hidden"}`}>
-            <div className="space-y-4">
-              <Dashboard />
-              <RedZoneList />
-            </div>
+            <Dashboard />
           </div>
 
           <StatusBar />
         </main>
 
-        {showInspector && (
-          <aside
-            className="w-full shrink-0 overflow-y-auto border-t border-[var(--line)] lg:w-80 lg:border-l lg:border-t-0"
-            style={{ background: "var(--surface)" }}
-            aria-label="Fiche d'observation"
-          >
-            {selectedCell ? (
-              <CellInspector />
-            ) : selectedRuptureId ? (
-              <RuptureEditor />
-            ) : (
-              <ObservationEditor />
-            )}
-          </aside>
-        )}
       </div>
     </div>
   );

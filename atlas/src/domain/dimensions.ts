@@ -73,13 +73,3 @@ export function dimension(key: Dimension) {
   if (!found) throw new Error(`Unknown dimension: ${key}`);
   return found;
 }
-
-/** Maps a legacy MJSL property name (d1_physique, ...) onto a dimension key. */
-export const MJSL_PROPERTY_TO_DIMENSION: Readonly<Record<string, Dimension>> = {
-  d1_physique: "physical",
-  d2_sensoriel: "sensory",
-  d3_cognitif: "cognitive",
-  d4_economique: "economic",
-  d5_social: "socio_cultural",
-  d6_democratique: "political",
-};

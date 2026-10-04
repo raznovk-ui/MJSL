@@ -32,6 +32,7 @@ export interface WalkwayConfig {
     floorDb: number;
   };
   kerbAttachM: number;
+  zones: { scoreBelow: number; mergeGapM: number; minLengthM: number };
   autoData: {
     noiseMap: { bandMidpointOffsetDb: number; belowThresholdDb: number; sampleSpacingM: number; gapFallbackRoadM: number };
     slope: { minBaselineM: number };
@@ -112,6 +113,11 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   need(Object.keys(roadBase).some((k) => !k.startsWith("_")), `"noiseEstimate.roadBaseDb" needs at least one road type.`);
 
   need(isNumber(root.kerbAttachM), `"kerbAttachM" must be a number.`);
+
+  const zones = section(root, "zones", "");
+  need(isNumber(zones.scoreBelow) && (zones.scoreBelow as number) > 0 && (zones.scoreBelow as number) <= 1, `"zones.scoreBelow" must be a number above 0 and at most 1.`);
+  need(isNumber(zones.mergeGapM) && (zones.mergeGapM as number) >= 0, `"zones.mergeGapM" must be a number of metres, 0 or more.`);
+  need(isNumber(zones.minLengthM) && (zones.minLengthM as number) >= 0, `"zones.minLengthM" must be a number of metres, 0 or more.`);
 
   const auto = section(root, "autoData", "");
   const noiseMap = section(auto, "noiseMap", "autoData.");
@@ -208,6 +214,11 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       floorDb: noise.floorDb as number,
     },
     kerbAttachM: root.kerbAttachM as number,
+    zones: {
+      scoreBelow: zones.scoreBelow as number,
+      mergeGapM: zones.mergeGapM as number,
+      minLengthM: zones.minLengthM as number,
+    },
     autoData: {
       noiseMap: {
         bandMidpointOffsetDb: noiseMap.bandMidpointOffsetDb as number,

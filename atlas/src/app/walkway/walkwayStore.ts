@@ -3,6 +3,7 @@ import {
   applyElevations,
   buildNoiseIndex,
   buildSegments,
+  detectZones,
   endpointCoordinates,
   findRoute,
   nearestGraphNode,
@@ -13,6 +14,7 @@ import {
   type RouteResult,
   type Segment,
   type SegmentScore,
+  type Zone,
 } from "../../domain/walkway/index.js";
 import { loadPreset } from "../overpass/client.js";
 import { WALKWAY_PRESET } from "../overpass/walkwayPreset.js";
@@ -49,6 +51,11 @@ interface WalkwayState {
   visible: boolean;
   auto: AutoDataStatus;
 
+  /** Priority zones for the selected profile, found automatically. */
+  zones: Zone[];
+  selectedZoneId: string | null;
+  zonesVisible: boolean;
+
   routePicking: "from" | "to" | null;
   routeFrom: RoutePoint | null;
   routeTo: RoutePoint | null;
@@ -57,6 +64,8 @@ interface WalkwayState {
   load: (options?: { forceRefresh?: boolean }) => Promise<void>;
   setProfile: (id: string) => void;
   toggleVisible: () => void;
+  toggleZones: () => void;
+  selectZone: (id: string | null) => void;
   armPicking: (which: "from" | "to" | null) => void;
   pickPoint: (lng: number, lat: number) => void;
   clearRoute: () => void;
@@ -72,6 +81,10 @@ function scoreEverything(segments: Segment[]) {
     }
   }
   return scores;
+}
+
+function zonesOf(segments: Segment[], scores: WalkwayState["scores"], profileId: string): Zone[] {
+  return detectZones(segments, scores[profileId] ?? {}, profileId, WALKWAY_CONFIG);
 }
 
 function computeRoutes(segments: Segment[], from: RoutePoint, to: RoutePoint): RouteResult[] {
@@ -101,6 +114,10 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
   visible: true,
   auto: IDLE_AUTO,
 
+  zones: [],
+  selectedZoneId: null,
+  zonesVisible: true,
+
   routePicking: null,
   routeFrom: null,
   routeTo: null,
@@ -108,22 +125,24 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
 
   load: async ({ forceRefresh = false } = {}) => {
     if (get().loadState === "loading") return;
-    set({ loadState: "loading", error: null, auto: IDLE_AUTO });
+    set({ loadState: "loading", error: null, auto: IDLE_AUTO, zones: [], selectedZoneId: null });
     say("Chargement des troncons pietons (OSM) et de la carte de bruit officielle...");
     try {
       const [result, noiseIndex] = await Promise.all([loadPreset(WALKWAY_PRESET, { forceRefresh }), loadNoiseIndex()]);
       const segments = buildSegments(result.geojson, WALKWAY_CONFIG, noiseIndex ? { noiseIndex } : {});
       const hasRoads = segments.some((s) => s.sources?.noise === "estimated");
+      const scores = scoreEverything(segments);
       set({
         loadState: "ready",
         segments,
-        scores: scoreEverything(segments),
+        scores,
+        zones: zonesOf(segments, scores, get().profileId),
         routes: [],
         routeFrom: null,
         routeTo: null,
         auto: { ...IDLE_AUTO, noise: noiseIndex ? "official" : hasRoads ? "estimate" : "none" },
       });
-      say(`${segments.length} troncons pietons notes` + (result.fromCache ? " (cache local)." : " (Overpass)."));
+      say(`${segments.length} troncons pietons notes, ${get().zones.length} zones prioritaires` + (result.fromCache ? " (cache local)." : " (Overpass)."));
     } catch (error) {
       set({ loadState: "error", error: error instanceof Error ? error.message : String(error) });
       say("Echec du chargement des troncons pietons. Verifie la connexion.");
@@ -139,9 +158,12 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
     });
     const withSlope = applyElevations(base, altitudes, WALKWAY_CONFIG);
     const { routeFrom, routeTo } = get();
+    const rescored = scoreEverything(withSlope);
     set((s) => ({
       segments: withSlope,
-      scores: scoreEverything(withSlope),
+      scores: rescored,
+      zones: zonesOf(withSlope, rescored, s.profileId),
+      selectedZoneId: null,
       routes: routeFrom && routeTo ? computeRoutes(withSlope, routeFrom, routeTo) : s.routes,
       auto: {
         ...s.auto,
@@ -150,16 +172,18 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
       },
     }));
     const gained = withSlope.filter((s) => s.sources?.slope === "official").length;
-    say(complete ? `Pentes calculees pour ${gained} troncons (altitudes IGN).` : `Pentes partielles (${gained} troncons) : ${error ?? "erreur"}.`);
+    say(complete ? `Pentes calculees pour ${gained} troncons (altitudes IGN) : ${get().zones.length} zones prioritaires.` : `Pentes partielles (${gained} troncons) : ${error ?? "erreur"}.`);
   },
 
-  setProfile: (profileId) => set({ profileId }),
+  setProfile: (profileId) =>
+    set((s) => ({ profileId, zones: zonesOf(s.segments, s.scores, profileId), selectedZoneId: null })),
   toggleVisible: () => set((s) => ({ visible: !s.visible })),
+  toggleZones: () => set((s) => ({ zonesVisible: !s.zonesVisible })),
+  selectZone: (selectedZoneId) => set({ selectedZoneId }),
 
   armPicking: (which) => {
     set({ routePicking: which });
     if (which) {
-      useAppStore.setState({ addPointMode: false, addRuptureMode: false, placingPhotoId: null });
       say(which === "from" ? "Clique la carte pour le depart." : "Clique la carte pour l'arrivee.");
     }
   },

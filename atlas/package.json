@@ -8,7 +8,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "demo": "vite-node src/demo.ts",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
@@ -16,8 +15,6 @@
   },
   "dependencies": {
     "@turf/turf": "^7.1.0",
-    "exifr": "^7.1.3",
-    "h3-js": "^4.1.0",
     "jszip": "^3.10.2",
     "maplibre-gl": "^6.8.0",
     "react": "^19.2.8",

@@ -1,11 +1,13 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import type { Feature, FeatureCollection } from "geojson";
-import type { RouteResult, Segment, SegmentScore, WalkwayConfig } from "../../domain/walkway/index.js";
+import type { RouteResult, Segment, SegmentScore, WalkwayConfig, Zone } from "../../domain/walkway/index.js";
 import type { RoutePoint } from "./walkwayStore.js";
 
 export const WALKWAY_SOURCE = "walkway-segments";
 export const WALKWAY_ROUTE_SOURCE = "walkway-route";
 export const WALKWAY_POINTS_SOURCE = "walkway-route-points";
+export const ZONE_SOURCE = "walkway-zones";
+const ZONE_LAYERS = ["walkway-zone-halo", "walkway-zone-selected"];
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
@@ -53,6 +55,19 @@ function routeGeojson(segments: Segment[], route: RouteResult | undefined): Feat
   return { type: "FeatureCollection", features };
 }
 
+/** Zones as one MultiLineString each, so a zone is one feature with a rank. */
+export function zonesGeojson(zones: Zone[]): FeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: zones.map((zone) => ({
+      type: "Feature",
+      id: zone.rank,
+      properties: { id: zone.id, rank: zone.rank, summary: zone.summary },
+      geometry: { type: "MultiLineString", coordinates: zone.lines },
+    })),
+  };
+}
+
 function pointsGeojson(from: RoutePoint | null, to: RoutePoint | null): FeatureCollection {
   const features: Feature[] = [];
   if (from) features.push({ type: "Feature", properties: { role: "from" }, geometry: { type: "Point", coordinates: from.coord } });
@@ -62,11 +77,27 @@ function pointsGeojson(from: RoutePoint | null, to: RoutePoint | null): FeatureC
 
 /** Idempotent: safe to call on every style load and every data change. */
 export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig) {
-  for (const id of [WALKWAY_SOURCE, WALKWAY_ROUTE_SOURCE, WALKWAY_POINTS_SOURCE]) {
+  for (const id of [WALKWAY_SOURCE, WALKWAY_ROUTE_SOURCE, WALKWAY_POINTS_SOURCE, ZONE_SOURCE]) {
     if (!instance.getSource(id)) instance.addSource(id, { type: "geojson", data: EMPTY });
   }
-  // Under the observations and ruptures, which are the evidence.
-  const before = instance.getLayer("observations-line") ? "observations-line" : undefined;
+  const before = undefined;
+
+  // A wide pale halo under the lines: the zone is where the red lines cluster.
+  if (!instance.getLayer("walkway-zone-halo")) {
+    instance.addLayer({
+      id: "walkway-zone-halo", type: "line", source: ZONE_SOURCE,
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": "#7f1d1d", "line-width": 14, "line-opacity": 0.22 },
+    });
+  }
+  if (!instance.getLayer("walkway-zone-selected")) {
+    instance.addLayer({
+      id: "walkway-zone-selected", type: "line", source: ZONE_SOURCE,
+      filter: ["==", ["get", "id"], ""],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": "#111827", "line-width": 18, "line-opacity": 0.35 },
+    });
+  }
 
   if (!instance.getLayer("walkway-route-direct")) {
     instance.addLayer({
@@ -126,6 +157,9 @@ export interface WalkwayView {
   route: RouteResult | undefined;
   from: RoutePoint | null;
   to: RoutePoint | null;
+  zones: Zone[];
+  zonesVisible: boolean;
+  selectedZoneId: string | null;
 }
 
 export function syncWalkwayLayers(instance: MapLibreMap, view: WalkwayView, config: WalkwayConfig) {
@@ -134,6 +168,12 @@ export function syncWalkwayLayers(instance: MapLibreMap, view: WalkwayView, conf
   set(WALKWAY_SOURCE, segmentsGeojson(view.segments, view.scores, config));
   set(WALKWAY_ROUTE_SOURCE, routeGeojson(view.segments, view.route));
   set(WALKWAY_POINTS_SOURCE, pointsGeojson(view.from, view.to));
+  set(ZONE_SOURCE, zonesGeojson(view.zones));
+  if (instance.getLayer("walkway-zone-selected")) {
+    instance.setFilter("walkway-zone-selected", ["==", ["get", "id"], view.selectedZoneId ?? ""]);
+  }
+  const zoneVisibility = view.zonesVisible ? "visible" : "none";
+  for (const id of ZONE_LAYERS) if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", zoneVisibility);
   const visibility = view.visible ? "visible" : "none";
   for (const id of ["walkway-route-direct", "walkway-route-detour", "walkway-line", "walkway-line-red", "walkway-route-points"]) {
     if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", visibility);
