@@ -1,6 +1,7 @@
 import type { FeatureCollection } from "geojson";
 import { CACHE_TTL_MS, readCache, writeCache } from "./cache.js";
 import { osmToGeojson } from "./osmToGeojson.js";
+import { fetchSnapshot } from "./snapshot.js";
 import type { OverpassPreset } from "./presets.js";
 
 /**
@@ -51,6 +52,13 @@ async function fetchPreset(
   preset: OverpassPreset,
   { forceRefresh = false }: { forceRefresh?: boolean } = {},
 ): Promise<OverpassResult> {
+  // A prepared copy shipped with the app comes first: the app then works with no
+  // Overpass at all. "Refresh" skips it and asks Overpass for fresh data.
+  if (!forceRefresh) {
+    const snapshot = await fetchSnapshot(preset.id);
+    if (snapshot) return { geojson: snapshot, fromCache: true, timestamp: Date.now() };
+  }
+
   const key = `preset:${preset.id}`;
   const cached = await readCache<FeatureCollection>(key);
 

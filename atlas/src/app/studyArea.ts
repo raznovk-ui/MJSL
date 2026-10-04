@@ -21,7 +21,7 @@ export interface Tile { id: string; bbox: string }
  * The city is fetched in tiles: one request for all of Marseille would exceed
  * Overpass's time and size limits, and a failed tile can be retried on its own.
  */
-export function cityTiles(rows = 3, cols = 4): Tile[] {
+export function cityTiles(rows = 6, cols = 8): Tile[] {
   const { south, west, north, east } = STUDY_AREA.bbox;
   const tiles: Tile[] = [];
   for (let r = 0; r < rows; r += 1) {

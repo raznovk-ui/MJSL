@@ -11,7 +11,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "data:noise": "node scripts/fetchNoise.mjs"
+    "data:noise": "node scripts/fetchNoise.mjs",
+    "data:osm": "vite-node scripts/fetchOsm.ts"
   },
   "dependencies": {
     "@turf/turf": "^7.1.0",

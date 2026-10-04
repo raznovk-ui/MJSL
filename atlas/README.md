@@ -26,10 +26,27 @@ npm run dev      # http://localhost:5173
 npm test
 npm run build
 npm run data:noise   # re-telecharge la carte de bruit
+npm run data:osm     # prepare les donnees OpenStreetMap (voir ci-dessous)
 ```
 
 L'ancien outil de saisie (observations, photos, ruptures, cellules H3) a ete retire ;
 il reste dans l'historique git.
+
+## Presentation devant un jury : fonctionner sans Overpass
+
+Overpass (le serveur public d'OpenStreetMap) est parfois indisponible. Pour ne pas
+en dependre le jour J, prepare une copie des donnees **une fois**, quand il repond :
+
+```bash
+npm run data:osm        # 10 a 30 min ; peut etre relance, il reprend ou il s'est arrete
+git add public/data     # la copie fait partie du projet
+npm run build && npm run preview   # lancer l'app sans serveur de dev
+```
+
+L'application lit d'abord `public/data/osm/*.geojson.gz` ; elle ne contacte Overpass que
+si ces fichiers manquent, ou si on clique « Rafraichir depuis Overpass ». Les altitudes IGN
+sont, elles, mises en cache dans le navigateur apres le premier chargement : ouvre l'app
+une fois en ligne avant la presentation.
 
 ## Sources
 
