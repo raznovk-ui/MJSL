@@ -177,7 +177,7 @@ function syncPresetLayers(instance: MapLibreMap) {
         source: id,
         filter: ["!=", ["geometry-type"], "Point"],
         layout: { visibility, "line-cap": "round" },
-        paint: { "line-color": "#9e2f2f", "line-width": 4, "line-opacity": 0.85 },
+        paint: { "line-color": "#9e2f2f", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 3, 14, 5, 17, 8], "line-opacity": 0.85 },
       });
     }
     if (!instance.getLayer(pointId!)) {
@@ -188,7 +188,7 @@ function syncPresetLayers(instance: MapLibreMap) {
         filter: ["==", ["geometry-type"], "Point"],
         layout: { visibility },
         paint: {
-          "circle-radius": 5,
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 5, 14, 7, 17, 10],
           "circle-color": "#9e2f2f",
           // Shape and outline carry meaning too, never colour alone.
           "circle-stroke-color": "#ffffff",

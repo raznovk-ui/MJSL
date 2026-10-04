@@ -9,6 +9,10 @@ export const WALKWAY_POINTS_SOURCE = "walkway-route-points";
 export const ZONE_SOURCE = "walkway-zones";
 const ZONE_LAYERS = ["walkway-zone-halo", "walkway-zone-selected"];
 
+/** Widths grow with zoom, so everything stays visible when zoomed out. */
+const byZoom = (z11: number, z14: number, z17: number) =>
+  ["interpolate", ["linear"], ["zoom"], 11, z11, 14, z14, 17, z17] as unknown as number;
+
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 export function segmentsGeojson(
@@ -87,7 +91,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
     instance.addLayer({
       id: "walkway-zone-halo", type: "line", source: ZONE_SOURCE,
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#7f1d1d", "line-width": 14, "line-opacity": 0.22 },
+      paint: { "line-color": "#7f1d1d", "line-width": byZoom(10, 22, 34), "line-opacity": 0.25 },
     });
   }
   if (!instance.getLayer("walkway-zone-selected")) {
@@ -95,7 +99,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       id: "walkway-zone-selected", type: "line", source: ZONE_SOURCE,
       filter: ["==", ["get", "id"], ""],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#111827", "line-width": 18, "line-opacity": 0.35 },
+      paint: { "line-color": "#111827", "line-width": byZoom(14, 28, 42), "line-opacity": 0.4 },
     });
   }
 
@@ -104,7 +108,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       id: "walkway-route-direct", type: "line", source: WALKWAY_ROUTE_SOURCE,
       filter: ["==", ["get", "kind"], "direct"],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#1d4ed8", "line-width": 12, "line-opacity": 0.35 },
+      paint: { "line-color": "#1d4ed8", "line-width": byZoom(10, 16, 22), "line-opacity": 0.4 },
     }, before);
   }
   if (!instance.getLayer("walkway-route-detour")) {
@@ -112,7 +116,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       id: "walkway-route-detour", type: "line", source: WALKWAY_ROUTE_SOURCE,
       filter: ["==", ["get", "kind"], "detour"],
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#6d28d9", "line-width": 12, "line-opacity": 0.35 },
+      paint: { "line-color": "#6d28d9", "line-width": byZoom(10, 16, 22), "line-opacity": 0.4 },
     }, before);
   }
   if (!instance.getLayer("walkway-line")) {
@@ -122,7 +126,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": ["get", "colour"],
-        "line-width": ["case", ["==", ["get", "cls"], "none"], 2, 4],
+        "line-width": ["case", ["==", ["get", "cls"], "none"], byZoom(1.5, 2.5, 4), byZoom(3, 5, 8)],
         "line-opacity": 0.95,
       },
     }, before);
@@ -134,14 +138,14 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       id: "walkway-line-red", type: "line", source: WALKWAY_SOURCE,
       filter: ["==", ["get", "cls"], "red"],
       layout: { "line-join": "round" },
-      paint: { "line-color": config.classes.colours.red, "line-width": 4, "line-dasharray": [2, 1.5] },
+      paint: { "line-color": config.classes.colours.red, "line-width": byZoom(3, 5, 8), "line-dasharray": [2, 1.5] },
     }, before);
   }
   if (!instance.getLayer("walkway-route-points")) {
     instance.addLayer({
       id: "walkway-route-points", type: "circle", source: WALKWAY_POINTS_SOURCE,
       paint: {
-        "circle-radius": 8,
+        "circle-radius": byZoom(9, 11, 14),
         "circle-color": ["match", ["get", "role"], "from", "#0f766e", "#1d4ed8"],
         "circle-stroke-color": "#ffffff",
         "circle-stroke-width": 3,
