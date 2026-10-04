@@ -11,7 +11,8 @@
     "demo": "vite-node src/demo.ts",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "data:noise": "node scripts/fetchNoise.mjs"
   },
   "dependencies": {
     "@turf/turf": "^7.1.0",

@@ -1,6 +1,7 @@
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import { estimateNoiseDb } from "./indicators.js";
-import { distanceM, pointAlong, pointToPolylineM, polylineLengthM } from "./geo.js";
+import { coordKey, distanceM, pointAlong, pointToPolylineM, polylineLengthM } from "./geo.js";
+import { segmentNoiseReading, type NoiseIndex } from "./noiseMap.js";
 import type { WalkwayConfig } from "./loadConfig.js";
 import type { IndicatorKey, LngLat, Segment, ValueSource } from "./types.js";
 
@@ -60,8 +61,6 @@ function pointsOf(geometry: Geometry | null): LngLat[] {
   }
 }
 
-const coordKey = (c: LngLat) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
-
 interface WayPart {
   osmId: string;
   name?: string;
@@ -80,7 +79,11 @@ interface WayPart {
  * loaded data for rest, economic and estimated-noise to be computed at all,
  * because an empty list cannot tell "none exist" from "not loaded".
  */
-export function buildSegments(collection: FeatureCollection, config: WalkwayConfig): Segment[] {
+export function buildSegments(
+  collection: FeatureCollection,
+  config: WalkwayConfig,
+  options: { noiseIndex?: NoiseIndex } = {},
+): Segment[] {
   const features = collection.features as Feature[];
   const walkways: WayPart[] = [];
   const benches: LngLat[] = [];
@@ -124,7 +127,7 @@ export function buildSegments(collection: FeatureCollection, config: WalkwayConf
       const coords = way.coords.slice(start, end + 1);
       if (coords.length < 2) continue;
       const id = cuts.length > 2 ? `${way.osmId}#${k + 1}` : way.osmId;
-      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { benches, roads, privatizers, raisedKerbs }, config));
+      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { benches, roads, privatizers, raisedKerbs, noiseIndex: options.noiseIndex }, config));
     }
   }
   return segments;
@@ -135,6 +138,7 @@ interface Context {
   roads: { coords: LngLat[]; roadClass: string; speed?: number }[];
   privatizers: LngLat[];
   raisedKerbs: LngLat[];
+  noiseIndex?: NoiseIndex;
 }
 
 function describeSegment(
@@ -152,7 +156,16 @@ function describeSegment(
   const values: Segment["values"] = {};
 
   const widthM = parseMetres(tags.width) ?? parseMetres(tags["sidewalk:width"]);
-  if (widthM !== undefined) { values.widthM = widthM; sources.width = "osm"; }
+  if (widthM !== undefined) {
+    values.widthM = widthM;
+    sources.width = "osm";
+  } else {
+    // No width tag: use the typical width for this kind of path from the config.
+    // Labelled "estimated" so it is never mistaken for data, and never allowed to
+    // trigger a width veto (see vetoReasons).
+    const typical = config.autoData.widthDefaults[str(tags.highway) ?? ""];
+    if (typical !== undefined) { values.widthM = typical; sources.width = "estimated"; }
+  }
 
   const inclinePct = parseInclinePct(tags.incline);
   if (inclinePct !== undefined) { values.inclinePct = inclinePct; sources.slope = "osm"; }
@@ -183,15 +196,29 @@ function describeSegment(
     sources.economic = "osm";
   }
 
-  // Estimated noise only: nothing in OSM measures it.
-  if (ctx.roads.length > 0) {
-    let nearest: { roadClass: string; speed?: number; d: number } | null = null;
-    for (const road of ctx.roads) {
-      const d = pointToPolylineM(middle, road.coords);
-      if (!nearest || d < nearest.d) nearest = { roadClass: road.roadClass, speed: road.speed, d };
-    }
-    const db = nearest ? estimateNoiseDb(nearest.roadClass, nearest.speed, nearest.d, config) : undefined;
-    if (db !== undefined) { values.noiseDb = db; sources.noise = "estimated"; }
+  // Noise: the official map wins. Its gaps are the exception: a segment the map says
+  // nothing about, but that lies next to a major road, gets the road-distance
+  // estimate instead (labelled "estimated"), because "no band" there most likely
+  // means "not covered", not "quiet". Without the map, the estimate is all there is.
+  // Nothing in OSM measures noise.
+  let nearestRoad: { roadClass: string; speed?: number; d: number } | null = null;
+  for (const road of ctx.roads) {
+    const d = pointToPolylineM(middle, road.coords);
+    if (!nearestRoad || d < nearestRoad.d) nearestRoad = { roadClass: road.roadClass, speed: road.speed, d };
+  }
+  const estimated = nearestRoad
+    ? estimateNoiseDb(nearestRoad.roadClass, nearestRoad.speed, nearestRoad.d, config)
+    : undefined;
+
+  if (ctx.noiseIndex) {
+    const reading = segmentNoiseReading(coords, lengthM, ctx.noiseIndex, config);
+    const gapNextToRoad =
+      !reading.anyBand && nearestRoad !== null && nearestRoad.d <= config.autoData.noiseMap.gapFallbackRoadM && estimated !== undefined;
+    values.noiseDb = gapNextToRoad ? estimated : reading.db;
+    sources.noise = gapNextToRoad ? "estimated" : "official";
+  } else if (estimated !== undefined) {
+    values.noiseDb = estimated;
+    sources.noise = "estimated";
   }
 
   return { id, name: way.name, from, to, lengthM, geometry: coords, values, sources };

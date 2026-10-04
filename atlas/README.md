@@ -144,3 +144,18 @@ gets a score per profile (wheelchair user, blind person, ...). Code in
 - **Export:** the project `.zip` gains `troncons_scores.geojson` (score, class, veto and the
   source of each indicator) when segments are loaded.
 - Tests: `src/domain/walkway/__tests__/` (includes the field worked example).
+
+### Automatic data (nothing to type by hand)
+
+When the walkway segments are loaded, the program fills in the indicators itself and
+labels every value with its source (`measured` / `osm` / `official` / `estimated`):
+
+| Indicator | Filled in from | Notes |
+|---|---|---|
+| Noise | Official road-noise map (Lden 24 h, Metropole Aix-Marseille-Provence, Licence Ouverte 2.0), shipped trimmed in `public/data/noise_lden_road.geojson` | Where the map has no band for a segment but a major road is within `gapFallbackRoadM`, the road-distance estimate is used and labelled `estimated`: the map has gaps along parts of the Corniche. A 24 h average, not a midday dB(A). |
+| Slope | IGN altimetry (RGE ALTI, free, no key) at the two ends of each segment | Segments under 20 m, and steps, stay "no data". Altitudes are cached for good in IndexedDB, so only the first load calls IGN. |
+| Width | OSM `width` tag, else a typical value per kind of path (`autoData.widthDefaults`) | The default is a guess: labelled `estimated`, and it can lower a score but **never** trigger the width veto. |
+| Rest, economic, surface | OSM | Benches and terraces/parking must exist in the loaded data. |
+
+A value you measure yourself always wins over all of these. Refresh the noise file with
+`npm run data:noise`. All of these settings are in `walkway.config.json` under `autoData`.

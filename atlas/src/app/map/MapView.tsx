@@ -68,6 +68,8 @@ export function MapView() {
         customAttribution: [
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
           'Donnees interrogees via <a href="https://overpass-api.de/">Overpass API</a>',
+          'Bruit : <a href="https://www.data.gouv.fr/datasets/bruit-routier-zones-exposees-sur-24h-indicateur-lden">Metropole Aix-Marseille-Provence</a> (Licence Ouverte 2.0)',
+          'Altitudes : <a href="https://geoservices.ign.fr/rgealti">IGN RGE ALTI</a>',
         ],
       },
     });

@@ -29,9 +29,12 @@ export function vetoReasons(segment: Segment, profile: ProfileConfig): string[] 
   if (vetoes.stepsWithoutRamp && values.hasSteps === true && values.hasRamp !== true) {
     reasons.push("steps without a ramp");
   }
+  // An estimated width is a guess for a whole kind of path, not a fact about this
+  // segment, so it can lower a score but never veto one.
   if (
     typeof vetoes.widthBelowM === "number" &&
     typeof values.widthM === "number" &&
+    segment.sources?.width !== "estimated" &&
     values.widthM < vetoes.widthBelowM
   ) {
     reasons.push(`width ${values.widthM} m is below ${vetoes.widthBelowM} m`);

@@ -6,3 +6,6 @@ export * from "./route.js";
 export * from "./whatIf.js";
 export * from "./fromOsm.js";
 export * from "./toGeojson.js";
+export * from "./noiseMap.js";
+export * from "./elevation.js";
+export { coordKey } from "./geo.js";

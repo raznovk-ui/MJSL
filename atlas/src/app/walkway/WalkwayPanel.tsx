@@ -1,5 +1,12 @@
 import { useId, useMemo } from "react";
-import { WALKWAY_CONFIG, type RouteResult, type ScoreClass } from "../../domain/walkway/index.js";
+import {
+  WALKWAY_CONFIG,
+  type IndicatorKey,
+  type RouteResult,
+  type ScoreClass,
+  type Segment,
+  type ValueSource,
+} from "../../domain/walkway/index.js";
 import { useWalkwayStore } from "./walkwayStore.js";
 
 const CLASS_LABEL: Record<ScoreClass, string> = {
@@ -10,6 +17,13 @@ const CLASS_LABEL: Record<ScoreClass, string> = {
 };
 
 const { colours, redBelow, orangeBelow } = WALKWAY_CONFIG.classes;
+
+const SOURCE_LABEL: Record<ValueSource, string> = {
+  measured: "mesure",
+  osm: "OSM",
+  official: "officiel",
+  estimated: "estime",
+};
 
 function routeState(route: RouteResult): string {
   if (!route.connected) return "Aucun chemin";
@@ -28,6 +42,7 @@ export function WalkwayPanel() {
   const routeFrom = useWalkwayStore((s) => s.routeFrom);
   const routeTo = useWalkwayStore((s) => s.routeTo);
   const routes = useWalkwayStore((s) => s.routes);
+  const auto = useWalkwayStore((s) => s.auto);
   const { load, setProfile, toggleVisible, armPicking, clearRoute } = useWalkwayStore.getState();
 
   const counts = useMemo(() => {
@@ -36,22 +51,32 @@ export function WalkwayPanel() {
     return out;
   }, [scores, profileId]);
 
-  // How much of each indicator is real data, and from where. The colours are
-  // only as good as this: most OSM footways carry no width or slope tag.
+  // How much of each indicator is filled in, and from where. The colours are only
+  // as good as this: most OSM footways carry no width or slope tag.
   const coverage = useMemo(() => {
     const total = segments.length;
-    const bySource = (key: "width" | "noise" | "slope" | "surface" | "rest" | "economic", has: (s: (typeof segments)[number]) => boolean) => {
-      const known = segments.filter(has);
-      const estimated = known.filter((s) => s.sources?.[key] === "estimated").length;
-      return { known: known.length, estimated, total };
+    const row = (label: string, key: IndicatorKey, has: (s: Segment) => boolean) => {
+      const bySource: Record<string, number> = {};
+      let known = 0;
+      for (const segment of segments) {
+        if (!has(segment)) continue;
+        known += 1;
+        const source = segment.sources?.[key] ?? "measured";
+        bySource[source] = (bySource[source] ?? 0) + 1;
+      }
+      const detail = (["measured", "osm", "official", "estimated"] as const)
+        .filter((source) => bySource[source])
+        .map((source) => `${SOURCE_LABEL[source]} ${bySource[source]}`)
+        .join(", ");
+      return { label, known, total, detail };
     };
     return [
-      { label: "Largeur", ...bySource("width", (s) => s.values.widthM !== undefined) },
-      { label: "Pente", ...bySource("slope", (s) => s.values.inclinePct !== undefined) },
-      { label: "Revetement", ...bySource("surface", (s) => s.values.surface !== undefined) },
-      { label: "Bruit", ...bySource("noise", (s) => s.values.noiseDb !== undefined) },
-      { label: "Banc le plus proche", ...bySource("rest", (s) => s.values.restDistanceM !== undefined) },
-      { label: "Terrasses / parkings", ...bySource("economic", (s) => s.values.privatizedShare !== undefined) },
+      row("Largeur", "width", (s) => s.values.widthM !== undefined),
+      row("Pente", "slope", (s) => s.values.inclinePct !== undefined),
+      row("Revetement", "surface", (s) => s.values.surface !== undefined),
+      row("Bruit", "noise", (s) => s.values.noiseDb !== undefined),
+      row("Banc le plus proche", "rest", (s) => s.values.restDistanceM !== undefined),
+      row("Terrasses / parkings", "economic", (s) => s.values.privatizedShare !== undefined),
     ];
   }, [segments]);
 
@@ -88,6 +113,33 @@ export function WalkwayPanel() {
                 <option key={id} value={id}>{p.label}</option>
               ))}
             </select>
+          </div>
+
+          <div className="callout-info">
+            <p className="font-semibold">Remplissage automatique</p>
+            <ul className="mt-0.5 list-disc pl-4">
+              <li>
+                Bruit :{" "}
+                {auto.noise === "official"
+                  ? "carte officielle (Lden 24 h, Metropole AMP)"
+                  : auto.noise === "estimate"
+                    ? "estimation par la distance aux grands axes (carte officielle indisponible)"
+                    : "aucune donnee"}
+              </li>
+              <li>
+                Pente :{" "}
+                {auto.slope === "running"
+                  ? `altitudes IGN en cours${auto.slopeProgress && auto.slopeProgress.total ? ` (${auto.slopeProgress.done} / ${auto.slopeProgress.total} points)` : "..."}`
+                  : auto.slope === "done"
+                    ? "calculee a partir des altitudes IGN (troncons de 20 m et plus)"
+                    : auto.slope === "partial"
+                      ? `partielle : ${auto.slopeError ?? "erreur"}`
+                      : auto.slope === "error"
+                        ? `indisponible : ${auto.slopeError ?? "erreur"}`
+                        : "—"}
+              </li>
+              <li>Largeur : etiquette OSM, sinon valeur type par defaut (estimee, jamais eliminatoire).</li>
+            </ul>
           </div>
 
           <label className="flex gap-2 text-sm">
@@ -128,13 +180,13 @@ export function WalkwayPanel() {
               {coverage.map((c) => (
                 <li key={c.label}>
                   {c.label} : {c.known} / {c.total}
-                  {c.estimated > 0 ? " (estime, non mesure)" : c.known > 0 ? " (OSM)" : ""}
+                  {c.detail ? ` (${c.detail})` : ""}
                 </li>
               ))}
             </ul>
             <p className="mt-1 text-xs text-slate-500">
               Un indicateur absent est ignore, pas compte comme 0. Banc et terrasses sont calcules a partir des objets
-              OSM charges : un banc non cartographie est invisible ici.
+              OSM charges : un banc non cartographie est invisible ici. « estime » = hypothese par defaut, pas une mesure.
             </p>
           </details>
 

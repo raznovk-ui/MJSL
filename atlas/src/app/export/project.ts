@@ -22,6 +22,8 @@ export interface ProjectFile {
 export const ATTRIBUTION = [
   "Fonds de carte et indices : OpenStreetMap contributors (ODbL).",
   "Requetes : Overpass API.",
+  "Bruit routier (Lden 24 h) : Metropole d'Aix-Marseille-Provence, etude Impedance Ingenierie, Licence Ouverte 2.0.",
+  "Altitudes (pentes) : IGN, RGE ALTI, Licence Ouverte 2.0.",
   "Releves et notations MJSL : produits par l'auteur du projet.",
   "Les notes sont des jugements situes, pas des mesures.",
 ];

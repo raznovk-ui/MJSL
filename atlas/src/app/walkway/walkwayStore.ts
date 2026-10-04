@@ -1,11 +1,15 @@
 import { create } from "zustand";
 import {
+  applyElevations,
+  buildNoiseIndex,
   buildSegments,
+  endpointCoordinates,
   findRoute,
   nearestGraphNode,
   scoreAllProfiles,
   WALKWAY_CONFIG,
   type LngLat,
+  type NoiseIndex,
   type RouteResult,
   type Segment,
   type SegmentScore,
@@ -13,6 +17,7 @@ import {
 import { loadPreset } from "../overpass/client.js";
 import { WALKWAY_PRESET } from "../overpass/walkwayPreset.js";
 import { useAppStore } from "../state.js";
+import { getAltitudes } from "./elevationClient.js";
 
 /** A clicked point, snapped to the nearest junction of the walkway graph. */
 export interface RoutePoint {
@@ -22,8 +27,17 @@ export interface RoutePoint {
 
 /** Farther than this from any walkway end, a click is not a usable route point. */
 const MAX_SNAP_M = 250;
+const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_road.geojson`;
 
 type LoadState = "idle" | "loading" | "ready" | "error";
+
+/** What the program filled in by itself, and how far it got. */
+export interface AutoDataStatus {
+  noise: "official" | "estimate" | "none";
+  slope: "idle" | "running" | "done" | "partial" | "error";
+  slopeProgress: { done: number; total: number } | null;
+  slopeError: string | null;
+}
 
 interface WalkwayState {
   loadState: LoadState;
@@ -33,6 +47,7 @@ interface WalkwayState {
   scores: Record<string, Record<string, SegmentScore>>;
   profileId: string;
   visible: boolean;
+  auto: AutoDataStatus;
 
   routePicking: "from" | "to" | null;
   routeFrom: RoutePoint | null;
@@ -63,6 +78,20 @@ function computeRoutes(segments: Segment[], from: RoutePoint, to: RoutePoint): R
   return Object.keys(WALKWAY_CONFIG.profiles).map((id) => findRoute(segments, from.node, to.node, id, WALKWAY_CONFIG));
 }
 
+/** The official noise map, trimmed to the study area (npm run data:noise). Null if it cannot be read. */
+async function loadNoiseIndex(): Promise<NoiseIndex | null> {
+  try {
+    const response = await fetch(NOISE_MAP_URL);
+    if (!response.ok) return null;
+    const index = buildNoiseIndex(await response.json());
+    return index.polygons.length > 0 ? index : null;
+  } catch {
+    return null;
+  }
+}
+
+const IDLE_AUTO: AutoDataStatus = { noise: "none", slope: "idle", slopeProgress: null, slopeError: null };
+
 export const useWalkwayStore = create<WalkwayState>((set, get) => ({
   loadState: "idle",
   error: null,
@@ -70,6 +99,7 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
   scores: {},
   profileId: Object.keys(WALKWAY_CONFIG.profiles)[0]!,
   visible: true,
+  auto: IDLE_AUTO,
 
   routePicking: null,
   routeFrom: null,
@@ -78,17 +108,49 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
 
   load: async ({ forceRefresh = false } = {}) => {
     if (get().loadState === "loading") return;
-    set({ loadState: "loading", error: null });
-    say("Chargement des troncons pietons (OSM)...");
+    set({ loadState: "loading", error: null, auto: IDLE_AUTO });
+    say("Chargement des troncons pietons (OSM) et de la carte de bruit officielle...");
     try {
-      const result = await loadPreset(WALKWAY_PRESET, { forceRefresh });
-      const segments = buildSegments(result.geojson, WALKWAY_CONFIG);
-      set({ loadState: "ready", segments, scores: scoreEverything(segments), routes: [], routeFrom: null, routeTo: null });
+      const [result, noiseIndex] = await Promise.all([loadPreset(WALKWAY_PRESET, { forceRefresh }), loadNoiseIndex()]);
+      const segments = buildSegments(result.geojson, WALKWAY_CONFIG, noiseIndex ? { noiseIndex } : {});
+      const hasRoads = segments.some((s) => s.sources?.noise === "estimated");
+      set({
+        loadState: "ready",
+        segments,
+        scores: scoreEverything(segments),
+        routes: [],
+        routeFrom: null,
+        routeTo: null,
+        auto: { ...IDLE_AUTO, noise: noiseIndex ? "official" : hasRoads ? "estimate" : "none" },
+      });
       say(`${segments.length} troncons pietons notes` + (result.fromCache ? " (cache local)." : " (Overpass)."));
     } catch (error) {
       set({ loadState: "error", error: error instanceof Error ? error.message : String(error) });
       say("Echec du chargement des troncons pietons. Verifie la connexion.");
+      return;
     }
+
+    // Slopes come from altitude data and take a moment: the segments are usable
+    // meanwhile, and are re-scored once the altitudes arrive.
+    const base = get().segments;
+    set((s) => ({ auto: { ...s.auto, slope: "running", slopeProgress: { done: 0, total: 0 }, slopeError: null } }));
+    const { altitudes, complete, error } = await getAltitudes(endpointCoordinates(base), {
+      onProgress: (done, total) => set((s) => ({ auto: { ...s.auto, slopeProgress: { done, total } } })),
+    });
+    const withSlope = applyElevations(base, altitudes, WALKWAY_CONFIG);
+    const { routeFrom, routeTo } = get();
+    set((s) => ({
+      segments: withSlope,
+      scores: scoreEverything(withSlope),
+      routes: routeFrom && routeTo ? computeRoutes(withSlope, routeFrom, routeTo) : s.routes,
+      auto: {
+        ...s.auto,
+        slope: complete ? "done" : Object.keys(altitudes).length > 0 ? "partial" : "error",
+        slopeError: error ?? null,
+      },
+    }));
+    const gained = withSlope.filter((s) => s.sources?.slope === "official").length;
+    say(complete ? `Pentes calculees pour ${gained} troncons (altitudes IGN).` : `Pentes partielles (${gained} troncons) : ${error ?? "erreur"}.`);
   },
 
   setProfile: (profileId) => set({ profileId }),

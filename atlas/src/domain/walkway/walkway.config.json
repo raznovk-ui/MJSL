@@ -61,6 +61,29 @@
     "floorDb": 45
   },
 
+  "autoData": {
+    "_comment": "Values the program fills in BY ITSELF, so nothing has to be typed by hand. Each filled-in value is labelled with where it came from: 'official' (open government data), 'osm' (OpenStreetMap) or 'estimated' (a rule of thumb). A value you measure yourself always wins over all of these.",
+
+    "noiseMap": {
+      "_comment": "Official road-noise map (Lden = 24-hour average) of Aix-Marseille-Provence Metropole, Licence Ouverte 2.0. Each band is stored by its lower limit (55, 60, 65, 70, 75). A segment gets the middle of its band: lower limit + bandMidpointOffsetDb. Anywhere outside every band is below 55 dB and gets belowThresholdDb. sampleSpacingM = how often along the segment the map is read (the average is used). This is a 24-hour average, not a midday reading. The map has gaps, including along parts of the Corniche: when a segment has NO band at all but a major road is within gapFallbackRoadM metres, the road-distance estimate (section noiseEstimate) is used instead and the value is labelled 'estimated'.",
+      "bandMidpointOffsetDb": 2.5,
+      "gapFallbackRoadM": 40,
+      "belowThresholdDb": 52.5,
+      "sampleSpacingM": 25
+    },
+    "slope": {
+      "_comment": "Slope worked out from official IGN altitude data (RGE ALTI) at the two ends of a segment. Segments shorter than minBaselineM stay 'no data': over a few metres the altitude error would give a wild slope.",
+      "minBaselineM": 20
+    },
+    "widthDefaults": {
+      "_comment": "STARTING GUESSES, not data: a typical width in metres per kind of path, used only when OSM has no width tag. They are labelled 'estimated' and never trigger a width veto. Replace them with what you actually measure, or delete a line to leave that kind of path at 'no data'.",
+      "footway": 1.5,
+      "path": 1.0,
+      "pedestrian": 4.0,
+      "steps": 1.5
+    }
+  },
+
   "kerbAttachM": 10,
 
   "classes": {

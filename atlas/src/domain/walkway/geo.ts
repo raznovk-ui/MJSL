@@ -1,5 +1,8 @@
 import type { LngLat } from "./types.js";
 
+/** Stable key for a coordinate (about 0.1 m), shared by every place that matches points. */
+export const coordKey = (c: LngLat) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
+
 const R = 6371008.8;
 const rad = (d: number) => (d * Math.PI) / 180;
 

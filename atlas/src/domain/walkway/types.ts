@@ -2,8 +2,11 @@ import type { Dimension } from "../dimensions.js";
 
 export type LngLat = [number, number];
 
-/** Where a value came from. Measured beats OSM beats estimated. */
-export type ValueSource = "measured" | "osm" | "estimated";
+/**
+ * Where a value came from. Measured (by you) always wins. "official" is open
+ * government data (noise map, altitude); "estimated" is a rule of thumb.
+ */
+export type ValueSource = "measured" | "osm" | "official" | "estimated";
 
 export type IndicatorKey = "width" | "noise" | "slope" | "surface" | "rest" | "economic";
 

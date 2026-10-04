@@ -32,6 +32,12 @@ export interface WalkwayConfig {
     floorDb: number;
   };
   kerbAttachM: number;
+  autoData: {
+    noiseMap: { bandMidpointOffsetDb: number; belowThresholdDb: number; sampleSpacingM: number; gapFallbackRoadM: number };
+    slope: { minBaselineM: number };
+    /** OSM highway value -> typical width in metres. */
+    widthDefaults: Record<string, number>;
+  };
   classes: {
     redBelow: number;
     orangeBelow: number;
@@ -106,6 +112,21 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   need(Object.keys(roadBase).some((k) => !k.startsWith("_")), `"noiseEstimate.roadBaseDb" needs at least one road type.`);
 
   need(isNumber(root.kerbAttachM), `"kerbAttachM" must be a number.`);
+
+  const auto = section(root, "autoData", "");
+  const noiseMap = section(auto, "noiseMap", "autoData.");
+  for (const key of ["bandMidpointOffsetDb", "belowThresholdDb"]) {
+    need(isNumber(noiseMap[key]), `"autoData.noiseMap.${key}" must be a number.`);
+  }
+  need(isNumber(noiseMap.sampleSpacingM) && (noiseMap.sampleSpacingM as number) > 0, `"autoData.noiseMap.sampleSpacingM" must be a number above 0.`);
+  need(isNumber(noiseMap.gapFallbackRoadM) && (noiseMap.gapFallbackRoadM as number) >= 0, `"autoData.noiseMap.gapFallbackRoadM" must be a number of metres, 0 or more.`);
+  const slopeAuto = section(auto, "slope", "autoData.");
+  need(isNumber(slopeAuto.minBaselineM) && (slopeAuto.minBaselineM as number) > 0, `"autoData.slope.minBaselineM" must be a number above 0.`);
+  const widthDefaults = section(auto, "widthDefaults", "autoData.");
+  for (const [kind, value] of Object.entries(widthDefaults)) {
+    if (kind.startsWith("_")) continue;
+    need(isNumber(value) && value > 0, `"autoData.widthDefaults.${kind}" must be a width in metres, above 0.`);
+  }
 
   const classes = section(root, "classes", "");
   need(isNumber(classes.redBelow) && isNumber(classes.orangeBelow), `"classes.redBelow" and "classes.orangeBelow" must be numbers.`);
@@ -187,6 +208,16 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       floorDb: noise.floorDb as number,
     },
     kerbAttachM: root.kerbAttachM as number,
+    autoData: {
+      noiseMap: {
+        bandMidpointOffsetDb: noiseMap.bandMidpointOffsetDb as number,
+        belowThresholdDb: noiseMap.belowThresholdDb as number,
+        sampleSpacingM: noiseMap.sampleSpacingM as number,
+        gapFallbackRoadM: noiseMap.gapFallbackRoadM as number,
+      },
+      slope: { minBaselineM: slopeAuto.minBaselineM as number },
+      widthDefaults: stripNotes(widthDefaults) as Record<string, number>,
+    },
     classes: {
       redBelow: classes.redBelow as number,
       orangeBelow: classes.orangeBelow as number,
