@@ -126,7 +126,12 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": ["get", "colour"],
-        "line-width": ["case", ["==", ["get", "cls"], "none"], byZoom(1.5, 2.5, 4), byZoom(3, 5, 8)],
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          11, ["case", ["==", ["get", "cls"], "none"], 1.5, 3],
+          14, ["case", ["==", ["get", "cls"], "none"], 2.5, 5],
+          17, ["case", ["==", ["get", "cls"], "none"], 4, 8],
+        ],
         "line-opacity": 0.95,
       },
     }, before);
