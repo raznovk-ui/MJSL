@@ -27,6 +27,8 @@ export interface Zone {
   vetoReasons: string[];
   drivers: ZoneDriver[];
   basis: ZoneBasis;
+  /** Street names from OSM, longest stretch first (at most 3). */
+  streets: string[];
   bbox: [number, number, number, number];
   lines: LngLat[][];
   summary: string;
@@ -149,6 +151,7 @@ export function detectZones(
     const vetoReasons = new Set<string>();
     let vetoed = 0;
     const barrierTotals = new Map<IndicatorKey, { sum: number; length: number }>();
+    const streetLength = new Map<string, number>();
     const basis: ZoneBasis = { measured: 0, osm: 0, official: 0, estimated: 0 };
     let basisTotal = 0;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -157,6 +160,7 @@ export function detectZones(
       const score = scores[segment.id]!;
       const length = segment.lengthM ?? 0;
       lengthM += length;
+      if (segment.name) streetLength.set(segment.name, (streetLength.get(segment.name) ?? 0) + length);
       weightedScore += length * score.score!;
       severity += length * (1 - score.score!);
       if (score.vetoed) {
@@ -206,6 +210,7 @@ export function detectZones(
       vetoReasons: [...vetoReasons].slice(0, 3),
       drivers,
       basis: shares,
+      streets: [...streetLength.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name),
       bbox: [minX, minY, maxX, maxY],
       lines: members.map((s) => s.geometry!),
       summary: summarise(members.length, lengthM, meanScore, drivers, vetoed, [...vetoReasons], shares),

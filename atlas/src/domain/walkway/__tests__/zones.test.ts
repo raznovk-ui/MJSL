@@ -149,3 +149,14 @@ describe("zones config validation", () => {
     expect(message).toMatch(/zones.minLengthM" must be a number of metres/);
   });
 });
+
+describe("zone street names", () => {
+  it("lists the longest streets first", () => {
+    const a = seg("a", "n1", "n2", 5.350, 5.352, BAD);
+    const b = seg("b", "n2", "n3", 5.352, 5.353, BAD);
+    const c = seg("c", "n3", "n4", 5.353, 5.354, BAD);
+    a.name = "Rue Longue"; b.name = "Rue Courte"; c.name = "Rue Courte";
+    const [zone] = run([a, b, c]);
+    expect(zone!.streets).toEqual(["Rue Longue", "Rue Courte"]);
+  });
+});

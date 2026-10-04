@@ -9,6 +9,7 @@ export function ZoneList() {
   const loadState = useWalkwayStore((s) => s.loadState);
   const profileId = useWalkwayStore((s) => s.profileId);
   const selected = useWalkwayStore((s) => s.selectedZoneId);
+  const places = useWalkwayStore((s) => s.zonePlaces);
   const select = useWalkwayStore((s) => s.selectZone);
   const profile = WALKWAY_CONFIG.profiles[profileId];
 
@@ -34,7 +35,11 @@ export function ZoneList() {
                   aria-pressed={selected === zone.id}
                   className="btn btn-toggle btn-block !items-start !text-left"
                 >
-                  <span className="font-bold">#{zone.rank}</span>
+                  <span className="font-bold">
+                    #{zone.rank}
+                    {zone.streets.length > 0 && ` · ${zone.streets.join(", ")}`}
+                    {places[zone.id] && ` — ${places[zone.id]}`}
+                  </span>
                   <span className="block text-xs font-normal">{zone.summary}</span>
                 </button>
               </li>

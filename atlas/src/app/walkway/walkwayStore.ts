@@ -1,3 +1,4 @@
+import { reversePlace } from "./nominatimClient.js";
 import { create } from "zustand";
 import {
   applyElevations,
@@ -54,6 +55,8 @@ interface WalkwayState {
   /** Priority zones for the selected profile, found automatically. */
   zones: Zone[];
   selectedZoneId: string | null;
+  /** Place names from Nominatim, fetched only for zones a person selects. */
+  zonePlaces: Record<string, string>;
   zonesVisible: boolean;
 
   routePicking: "from" | "to" | null;
@@ -116,6 +119,7 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
 
   zones: [],
   selectedZoneId: null,
+  zonePlaces: {},
   zonesVisible: true,
 
   routePicking: null,
@@ -179,7 +183,17 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
     set((s) => ({ profileId, zones: zonesOf(s.segments, s.scores, profileId), selectedZoneId: null })),
   toggleVisible: () => set((s) => ({ visible: !s.visible })),
   toggleZones: () => set((s) => ({ zonesVisible: !s.zonesVisible })),
-  selectZone: (selectedZoneId) => set({ selectedZoneId }),
+  selectZone: (selectedZoneId) => {
+    set({ selectedZoneId });
+    const zone = get().zones.find((z) => z.id === selectedZoneId);
+    if (!zone || get().zonePlaces[zone.id]) return;
+    const [w, s, e, n] = zone.bbox;
+    reversePlace((s + n) / 2, (w + e) / 2)
+      .then((place) => {
+        if (place) set((st) => ({ zonePlaces: { ...st.zonePlaces, [zone.id]: place.label } }));
+      })
+      .catch(() => undefined); // a name is a convenience; the zone stands without it
+  },
 
   armPicking: (which) => {
     set({ routePicking: which });

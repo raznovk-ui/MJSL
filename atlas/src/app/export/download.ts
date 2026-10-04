@@ -17,7 +17,7 @@ export function downloadText(text: string, filename: string, mime: string) {
 
 export const ATTRIBUTION = [
   "Donnees OpenStreetMap (c) contributeurs OpenStreetMap, licence ODbL.",
-  "Interrogees via Overpass API.",
+  "Interrogees via Overpass API ; noms de lieux : Nominatim (OpenStreetMap).",
   "Bruit : carte de bruit routier (Lden), Metropole Aix-Marseille-Provence, Licence Ouverte 2.0 (data.gouv.fr).",
   "Altitudes : IGN RGE ALTI.",
 ];
