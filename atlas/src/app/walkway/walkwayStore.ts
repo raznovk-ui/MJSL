@@ -18,7 +18,8 @@ import {
   type Zone,
 } from "../../domain/walkway/index.js";
 import { loadPreset } from "../overpass/client.js";
-import { WALKWAY_PRESET } from "../overpass/walkwayPreset.js";
+import { WALKWAY_TILES } from "../overpass/walkwayPreset.js";
+import type { FeatureCollection } from "geojson";
 import { useAppStore } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
 
@@ -88,6 +89,54 @@ function scoreEverything(segments: Segment[]) {
   return scores;
 }
 
+/** Loads the city tile by tile (one at a time, to go easy on Overpass) and merges them. */
+async function loadCity(
+  forceRefresh: boolean,
+  onProgress: (done: number, total: number) => void,
+): Promise<{ geojson: FeatureCollection; fromCache: boolean; failed: number }> {
+  const seen = new Set<string>();
+  const features: FeatureCollection["features"] = [];
+  let fromCache = true;
+  let failed = 0;
+  let lastError: unknown = null;
+  const take = (geojson: FeatureCollection) => {
+    for (const f of geojson.features) {
+      const key = String(f.id ?? f.properties?.osm_id ?? "");
+      if (key) {
+        if (seen.has(key)) continue; // a way crossing a tile border comes back in both tiles
+        seen.add(key);
+      }
+      features.push(f);
+    }
+  };
+  // Overpass sometimes answers 429/504 under load. Tiles that fail are retried after a
+  // pause (the ones that worked are cached, so a retry only repeats the failures).
+  let pending = WALKWAY_TILES.map((_, i) => i);
+  for (let pass = 0; pass < 3 && pending.length > 0; pass += 1) {
+    if (pass > 0) await new Promise((r) => setTimeout(r, 8000 * pass));
+    const next: number[] = [];
+    for (const [n, i] of pending.entries()) {
+      onProgress(WALKWAY_TILES.length - pending.length + n, WALKWAY_TILES.length);
+      try {
+        const result = await loadPreset(WALKWAY_TILES[i]!, { forceRefresh });
+        if (!result.fromCache) {
+          fromCache = false;
+          await new Promise((r) => setTimeout(r, 1500)); // go easy on the public servers
+        }
+        take(result.geojson);
+      } catch (error) {
+        next.push(i);
+        lastError = error;
+      }
+    }
+    pending = next;
+  }
+  failed = pending.length;
+  if (failed === WALKWAY_TILES.length) throw lastError;
+  onProgress(WALKWAY_TILES.length, WALKWAY_TILES.length);
+  return { geojson: { type: "FeatureCollection", features }, fromCache, failed };
+}
+
 function zonesOf(segments: Segment[], scores: WalkwayState["scores"], profileId: string): Zone[] {
   return detectZones(segments, scores[profileId] ?? {}, profileId, WALKWAY_CONFIG);
 }
@@ -136,7 +185,7 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
     set({ loadState: "loading", error: null, auto: IDLE_AUTO, zones: [], selectedZoneId: null });
     say("Chargement des troncons pietons (OSM) et de la carte de bruit officielle...");
     try {
-      const [result, noiseIndex] = await Promise.all([loadPreset(WALKWAY_PRESET, { forceRefresh }), loadNoiseIndex()]);
+      const [result, noiseIndex] = await Promise.all([loadCity(forceRefresh, (done, total) => say(`Chargement de la ville : zone ${Math.min(done + 1, total)} sur ${total}...`)), loadNoiseIndex()]);
       const segments = buildSegments(result.geojson, WALKWAY_CONFIG, noiseIndex ? { noiseIndex } : {});
       const hasRoads = segments.some((s) => s.sources?.noise === "estimated");
       const scores = scoreEverything(segments);
@@ -150,7 +199,7 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
         routeTo: null,
         auto: { ...IDLE_AUTO, noise: noiseIndex ? "official" : hasRoads ? "estimate" : "none" },
       });
-      say(`${segments.length} troncons pietons notes, ${get().zones.length} zones prioritaires` + (result.fromCache ? " (cache local)." : " (Overpass)."));
+      say(`${segments.length} troncons pietons notes, ${get().zones.length} zones prioritaires` + (result.fromCache ? " (cache local)." : " (Overpass).") + (result.failed ? ` ${result.failed} zone(s) de la ville n'ont pas pu etre chargees : recharge la page.` : ""));
     } catch (error) {
       set({ loadState: "error", error: error instanceof Error ? error.message : String(error) });
       say("Echec du chargement des troncons pietons. Verifie la connexion.");

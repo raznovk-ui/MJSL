@@ -8,7 +8,8 @@ export type LngLat = [number, number];
  */
 export type ValueSource = "measured" | "osm" | "official" | "estimated";
 
-export type IndicatorKey = "width" | "noise" | "slope" | "surface" | "rest" | "economic";
+export type IndicatorKey = "width" | "noise" | "slope" | "surface" | "rest" | "economic"
+  | "lighting" | "landmarks" | "activities" | "civic";
 
 /**
  * Raw facts about one walkway segment. Anything left undefined is "no data":
@@ -23,6 +24,14 @@ export interface SegmentValues {
   restDistanceM?: number;
   /** Share of the segment next to terraces or parking, 0..1. */
   privatizedShare?: number;
+  /** Share of the segment with no street lighting nearby, 0..1. */
+  unlitShare?: number;
+  /** Shops, services and stops within reach: reference points for finding one's way. */
+  landmarkCount?: number;
+  /** Distance to the nearest place for activities (cafe, park, library, market...). */
+  activityDistanceM?: number;
+  /** Distance to the nearest place of local decision-making or civic life (town hall, community centre...). */
+  civicDistanceM?: number;
   hasSteps?: boolean;
   hasRamp?: boolean;
   kerbRaised?: boolean;

@@ -67,7 +67,7 @@ describe("missing data is never counted as 0", () => {
     // so after rescaling, physical carries the full weight: (1 - 2/3)^1.
     const s = scoreSegment({ id: "x", values: { widthM: 1.2 } }, "blind", config);
     expect(s.score).toBeCloseTo(1 / 3, 3);
-    expect(s.dimensionsMissing.sort()).toEqual(["economic", "sensory"]);
+    expect(s.dimensionsMissing.sort()).toEqual(["cognitive", "economic", "sensory", "socio_cultural"]);
   });
 
   it("a missing tag never triggers a veto", () => {
@@ -280,7 +280,7 @@ describe("config validation (plain-language errors)", () => {
   it("says when weights do not add up to 1", () => {
     const c = clone();
     c.profiles.blind.weights.physical = 0.5;
-    expect(() => validateWalkwayConfig(c)).toThrow(/Profile "blind": the weights add up to 1.2, they must add up to 1/);
+    expect(() => validateWalkwayConfig(c)).toThrow(/Profile "blind": the weights add up to 1.35, they must add up to 1/);
   });
 
   it("collects every problem at once", () => {

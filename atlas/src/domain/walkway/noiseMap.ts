@@ -1,3 +1,4 @@
+import { SpatialGrid } from "./spatial.js";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import { pointAlong } from "./geo.js";
 import type { WalkwayConfig } from "./loadConfig.js";
@@ -13,6 +14,7 @@ interface BandPolygon {
 
 export interface NoiseIndex {
   polygons: BandPolygon[];
+  grid: SpatialGrid<BandPolygon>;
 }
 
 function polygonsOf(geometry: Geometry | null): LngLat[][][] {
@@ -25,6 +27,7 @@ function polygonsOf(geometry: Geometry | null): LngLat[][][] {
 /** Reads the official Lden band polygons (property `isophone` = lower limit in dB). */
 export function buildNoiseIndex(collection: FeatureCollection): NoiseIndex {
   const polygons: BandPolygon[] = [];
+  const grid = new SpatialGrid<BandPolygon>();
   for (const feature of collection.features as Feature[]) {
     const band = Number((feature.properties as Record<string, unknown> | null)?.isophone);
     if (!Number.isFinite(band)) continue;
@@ -41,10 +44,12 @@ export function buildNoiseIndex(collection: FeatureCollection): NoiseIndex {
         if (y < minY) minY = y;
         if (y > maxY) maxY = y;
       }
-      polygons.push({ band, bbox: [minX, minY, maxX, maxY], rings });
+      const polygon: BandPolygon = { band, bbox: [minX, minY, maxX, maxY], rings };
+      polygons.push(polygon);
+      grid.addBox(minX, minY, maxX, maxY, polygon);
     }
   }
-  return { polygons };
+  return { polygons, grid };
 }
 
 /** Even-odd test across every ring, so holes are respected. */
@@ -68,7 +73,7 @@ function inside(point: LngLat, rings: LngLat[][]): boolean {
  */
 export function bandAt(index: NoiseIndex, point: LngLat): number | null {
   let best: number | null = null;
-  for (const polygon of index.polygons) {
+  for (const polygon of index.grid.near(point, 0)) {
     const [minX, minY, maxX, maxY] = polygon.bbox;
     if (point[0] < minX || point[0] > maxX || point[1] < minY || point[1] > maxY) continue;
     if ((best === null || polygon.band > best) && inside(point, polygon.rings)) best = polygon.band;

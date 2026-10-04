@@ -4,6 +4,7 @@ import { useWalkwayStore } from "./walkwayStore.js";
 
 const LABEL: Record<IndicatorKey, string> = {
   width: "Largeur", noise: "Bruit", slope: "Pente", surface: "Revetement", rest: "Distance a un banc", economic: "Privatisation",
+  lighting: "Eclairage", landmarks: "Reperes", activities: "Lieux d'activites", civic: "Lieux de decision",
 };
 const SOURCE: Record<ValueSource, string> = { measured: "mesure", osm: "OSM", official: "officiel", estimated: "estime" };
 
@@ -15,6 +16,10 @@ function rawValue(segment: Segment, key: IndicatorKey): string {
     case "slope": return v.inclinePct === undefined ? "—" : `${v.inclinePct.toFixed(1)} %`;
     case "surface": return v.surface ?? "—";
     case "rest": return v.restDistanceM === undefined ? "—" : `${Math.round(v.restDistanceM)} m`;
+    case "lighting": return v.unlitShare === undefined ? "—" : `${Math.round(v.unlitShare * 100)} % sans lumiere`;
+    case "landmarks": return v.landmarkCount === undefined ? "—" : `${v.landmarkCount} a proximite`;
+    case "activities": return v.activityDistanceM === undefined ? "—" : `${Math.round(v.activityDistanceM)} m`;
+    case "civic": return v.civicDistanceM === undefined ? "—" : `${Math.round(v.civicDistanceM)} m`;
     case "economic": return v.privatizedShare === undefined ? "—" : `${Math.round(v.privatizedShare * 100)} %`;
   }
 }
@@ -22,7 +27,7 @@ function rawValue(segment: Segment, key: IndicatorKey): string {
 function rule(key: IndicatorKey): string {
   const i = WALKWAY_CONFIG.indicators[key];
   if ("scores" in i) return "table de revetements";
-  if (!("noProblemAt" in i)) return "part privatisee (0 a 1)";
+  if (!("noProblemAt" in i)) return key === "lighting" ? "part non eclairee (0 a 1)" : "part privatisee (0 a 1)";
   return `0 a ${i.noProblemAt}, 1 a ${i.totalObstacleAt}`;
 }
 

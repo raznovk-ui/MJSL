@@ -21,6 +21,10 @@ export interface WalkwayConfig {
     rest: LinearIndicatorConfig;
     surface: { dimension: Dimension; scores: Record<string, number> };
     economic: { dimension: Dimension; bufferM: number };
+    lighting: { dimension: Dimension };
+    landmarks: LinearIndicatorConfig;
+    activities: LinearIndicatorConfig;
+    civic: LinearIndicatorConfig;
   };
   noiseEstimate: {
     roadBaseDb: Record<string, number>;
@@ -38,6 +42,14 @@ export interface WalkwayConfig {
     slope: { minBaselineM: number };
     /** OSM highway value -> typical width in metres. */
     widthDefaults: Record<string, number>;
+    /** Which OpenStreetMap places count, and how close "near" is. */
+    places: {
+      landmarkRadiusM: number;
+      lampRadiusM: number;
+      activityAmenities: string[];
+      activityLeisure: string[];
+      civicAmenities: string[];
+    };
   };
   classes: {
     redBelow: number;
@@ -105,6 +117,12 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const economic = section(indicators, "economic", "indicators.");
   need(isNumber(economic.bufferM) && (economic.bufferM as number) > 0, `"indicators.economic.bufferM" must be a number above 0.`);
 
+  const lightingBlock = section(indicators, "lighting", "indicators.");
+  const lightingDimension = dimensionOf(lightingBlock, "indicators.lighting.");
+  const landmarks = linear(indicators, "landmarks");
+  const activities = linear(indicators, "activities");
+  const civic = linear(indicators, "civic");
+
   const noise = section(root, "noiseEstimate", "");
   for (const key of ["defaultSpeedKmh", "referenceSpeedKmh", "dbPer10KmhAboveReference", "referenceDistanceM", "dbDropPerDoubling", "floorDb"]) {
     need(isNumber(noise[key]), `"noiseEstimate.${key}" must be a number.`);
@@ -133,6 +151,19 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
     if (kind.startsWith("_")) continue;
     need(isNumber(value) && value > 0, `"autoData.widthDefaults.${kind}" must be a width in metres, above 0.`);
   }
+
+  const places = section(auto, "places", "autoData.");
+  for (const key of ["landmarkRadiusM", "lampRadiusM"]) {
+    need(isNumber(places[key]) && (places[key] as number) > 0, `"autoData.places.${key}" must be a number of metres above 0.`);
+  }
+  const list = (key: string): string[] => {
+    const v = places[key];
+    need(Array.isArray(v) && v.every((x) => typeof x === "string"), `"autoData.places.${key}" must be a list of OpenStreetMap values in quotes.`);
+    return Array.isArray(v) ? (v as string[]) : [];
+  };
+  const activityAmenities = list("activityAmenities");
+  const activityLeisure = list("activityLeisure");
+  const civicAmenities = list("civicAmenities");
 
   const classes = section(root, "classes", "");
   need(isNumber(classes.redBelow) && isNumber(classes.orangeBelow), `"classes.redBelow" and "classes.orangeBelow" must be numbers.`);
@@ -203,6 +234,10 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       rest,
       surface: { dimension: surface.dimension as Dimension, scores: stripNotes(scores) as Record<string, number> },
       economic: { dimension: economic.dimension as Dimension, bufferM: economic.bufferM as number },
+      lighting: { dimension: lightingDimension },
+      landmarks,
+      activities,
+      civic,
     },
     noiseEstimate: {
       roadBaseDb: stripNotes(roadBase) as Record<string, number>,
@@ -228,6 +263,13 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       },
       slope: { minBaselineM: slopeAuto.minBaselineM as number },
       widthDefaults: stripNotes(widthDefaults) as Record<string, number>,
+      places: {
+        landmarkRadiusM: places.landmarkRadiusM as number,
+        lampRadiusM: places.lampRadiusM as number,
+        activityAmenities,
+        activityLeisure,
+        civicAmenities,
+      },
     },
     classes: {
       redBelow: classes.redBelow as number,

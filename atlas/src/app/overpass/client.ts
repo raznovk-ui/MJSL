@@ -3,7 +3,16 @@ import { CACHE_TTL_MS, readCache, writeCache } from "./cache.js";
 import { osmToGeojson } from "./osmToGeojson.js";
 import type { OverpassPreset } from "./presets.js";
 
-const ENDPOINT = "https://overpass-api.de/api/interpreter";
+/**
+ * Public Overpass servers, tried in order. When one is overloaded it answers 429/504
+ * WITHOUT CORS headers, which a browser reports as a "CORS error" with no status:
+ * the request itself is fine, the server is just refusing. Another mirror usually isn't.
+ */
+const ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+];
 
 export interface OverpassResult {
   geojson: FeatureCollection;
@@ -48,12 +57,7 @@ async function fetchPreset(
   }
 
   try {
-    const response = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: `data=${encodeURIComponent(preset.query)}`,
-    });
-    if (!response.ok) throw new Error(`Overpass HTTP ${response.status}`);
+    const response = await fetchFromMirrors(preset.query);
     const geojson = osmToGeojson(await response.json());
     await writeCache(key, geojson);
     return { geojson, fromCache: false, timestamp: Date.now() };
@@ -62,4 +66,22 @@ async function fetchPreset(
     if (cached) return { geojson: cached.payload, fromCache: true, timestamp: cached.timestamp };
     throw error;
   }
+}
+
+async function fetchFromMirrors(query: string): Promise<Response> {
+  let lastError: unknown = null;
+  for (const endpoint of ENDPOINTS) {
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(query)}`,
+      });
+      if (response.ok) return response;
+      lastError = new Error(`Overpass HTTP ${response.status}`);
+    } catch (error) {
+      lastError = error; // network or CORS failure from an overloaded server
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Overpass injoignable");
 }

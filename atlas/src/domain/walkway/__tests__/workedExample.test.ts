@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { WALKWAY_CONFIG as config } from "../loadConfig.js";
+import { WORKED_CONFIG as config } from "./workedConfig.js";
 import { findRoute } from "../route.js";
 import { scoreSegment } from "../score.js";
 import type { Segment } from "../types.js";

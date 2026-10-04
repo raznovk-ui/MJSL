@@ -77,6 +77,10 @@ export function WalkwayPanel() {
       row("Bruit", "noise", (s) => s.values.noiseDb !== undefined),
       row("Banc le plus proche", "rest", (s) => s.values.restDistanceM !== undefined),
       row("Terrasses / parkings", "economic", (s) => s.values.privatizedShare !== undefined),
+      row("Eclairage", "lighting", (s) => s.values.unlitShare !== undefined),
+      row("Reperes (commerces, arrets)", "landmarks", (s) => s.values.landmarkCount !== undefined),
+      row("Lieux d'activites", "activities", (s) => s.values.activityDistanceM !== undefined),
+      row("Lieux de decision / civiques", "civic", (s) => s.values.civicDistanceM !== undefined),
     ];
   }, [segments]);
 

@@ -16,7 +16,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const BBOX = { south: 43.255, west: 5.335, north: 43.305, east: 5.385 }; // = src/app/studyArea.ts
+const BBOX = { south: 43.17, west: 5.22, north: 43.39, east: 5.54 }; // = STUDY_AREA in src/app/studyArea.ts
 const DATASET =
   "https://data.ampmetropole.fr/api/explore/v2.1/catalog/datasets/fr-observatoire-du-bruit-bruit_cumul";
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "noise_lden_all.geojson");

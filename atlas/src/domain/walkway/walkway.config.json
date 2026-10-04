@@ -47,6 +47,29 @@
       "_comment": "The barrier is the share (0 to 1) of the segment that runs next to terraces (outdoor_seating=yes) or parking. 'bufferM' = how close, in metres, counts as 'next to'.",
       "dimension": "economic",
       "bufferM": 15
+    },
+
+    "lighting": {
+      "_comment": "COGNITIVE: can you see where you are going after dark. The barrier is the share (0 to 1) of the segment with no street lighting. Taken from the OSM tag lit (yes = 0, no = 1); without it, from the street lamps mapped within autoData.places.lampRadiusM metres (then labelled 'estimated'). Without any lighting data it stays 'no data'.",
+      "dimension": "cognitive"
+    },
+    "landmarks": {
+      "_comment": "COGNITIVE: reference points for finding your way = shops, services, stops and monuments within autoData.places.landmarkRadiusM metres. 3 or more is fine, none is a total obstacle (a featureless street is hard to find your way in).",
+      "dimension": "cognitive",
+      "noProblemAt": 3,
+      "totalObstacleAt": 0
+    },
+    "activities": {
+      "_comment": "SOCIAL (activities): distance in metres to the nearest place to meet or take part in things (cafe, library, market, park, playground, place of worship...). 150 m or less is fine, 800 m or more is a total obstacle.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 150,
+      "totalObstacleAt": 800
+    },
+    "civic": {
+      "_comment": "SOCIAL (decision making): distance in metres to the nearest place of local democracy and public service (town hall, community centre, social centre, courthouse, government office). 400 m or less is fine, 2000 m or more is a total obstacle. A proxy: OpenStreetMap cannot say who is actually heard.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 400,
+      "totalObstacleAt": 2000
     }
   },
 
@@ -80,7 +103,19 @@
       "footway": 1.5,
       "path": 1.0,
       "pedestrian": 4.0,
-      "steps": 1.5
+      "steps": 1.5,
+      "residential": 1.5,
+      "living_street": 3.0,
+      "tertiary": 1.5,
+      "unclassified": 1.5
+    },
+    "places": {
+      "_comment": "Which OpenStreetMap places count for the cognitive and social indicators, and what 'near' means (metres).",
+      "landmarkRadiusM": 50,
+      "lampRadiusM": 25,
+      "activityAmenities": ["cafe", "restaurant", "bar", "pub", "library", "community_centre", "social_centre", "arts_centre", "theatre", "cinema", "marketplace", "place_of_worship"],
+      "activityLeisure": ["park", "playground", "garden", "sports_centre"],
+      "civicAmenities": ["townhall", "community_centre", "social_centre", "social_facility", "courthouse"]
     }
   },
 
@@ -105,12 +140,12 @@
 
     "wheelchair": {
       "label": "Wheelchair user",
-      "weights": { "physical": 0.6, "sensory": 0.1, "economic": 0.3 },
+      "weights": { "physical": 0.4, "sensory": 0.1, "cognitive": 0.1, "economic": 0.2, "socio_cultural": 0.2 },
       "vetoes": { "stepsWithoutRamp": true, "widthBelowM": 0.9, "kerbRaised": true }
     },
     "blind": {
       "label": "Blind person",
-      "weights": { "physical": 0.3, "sensory": 0.5, "economic": 0.2 },
+      "weights": { "physical": 0.15, "sensory": 0.3, "cognitive": 0.25, "economic": 0.1, "socio_cultural": 0.2 },
       "vetoes": {}
     }
   }

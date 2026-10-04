@@ -41,6 +41,10 @@ const INDICATOR_LABEL: Record<IndicatorKey, string> = {
   surface: "revetement",
   rest: "absence de banc",
   economic: "privatisation (terrasses, parkings)",
+  lighting: "eclairage",
+  landmarks: "manque de reperes",
+  activities: "eloignement des lieux d'activites",
+  civic: "eloignement des lieux de decision",
 };
 
 class UnionFind {

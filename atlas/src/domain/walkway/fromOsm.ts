@@ -1,3 +1,4 @@
+import { SpatialGrid } from "./spatial.js";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import { estimateNoiseDb } from "./indicators.js";
 import { coordKey, distanceM, pointAlong, pointToPolylineM, polylineLengthM } from "./geo.js";
@@ -7,7 +8,9 @@ import type { IndicatorKey, LngLat, Segment, ValueSource } from "./types.js";
 
 type Tags = Record<string, unknown>;
 
-const WALKWAY_HIGHWAYS = new Set(["footway", "path", "pedestrian", "steps"]);
+const WALKWAY_HIGHWAYS = new Set(["footway", "path", "pedestrian", "steps", "residential", "living_street", "tertiary", "unclassified"]);
+/** Amenities that are street furniture or services of no use as a landmark. */
+const NOT_LANDMARKS = new Set(["bench", "parking", "parking_space", "bicycle_parking", "motorcycle_parking", "waste_basket", "recycling", "post_box", "vending_machine", "bicycle_rental", "charging_station", "fountain", "drinking_water"]);
 const MAJOR_ROADS = new Set(["trunk", "primary", "secondary"]);
 
 const str = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
@@ -90,6 +93,11 @@ export function buildSegments(
   const roads: { coords: LngLat[]; roadClass: string; speed?: number }[] = [];
   const privatizers: LngLat[] = [];
   const raisedKerbs: LngLat[] = [];
+  const lamps: LngLat[] = [];
+  const landmarks: LngLat[] = [];
+  const activityPlaces: LngLat[] = [];
+  const civicPlaces: LngLat[] = [];
+  const { activityAmenities, activityLeisure, civicAmenities } = config.autoData.places;
 
   for (const feature of features) {
     const tags = (feature.properties ?? {}) as Tags;
@@ -109,6 +117,50 @@ export function buildSegments(
     }
     if (str(tags.outdoor_seating) === "yes" || str(tags.amenity) === "parking") privatizers.push(...pointsOf(geometry));
     if (geometry?.type === "Point" && str(tags.kerb) === "raised") raisedKerbs.push(geometry.coordinates as LngLat);
+
+    // Places for the cognitive and social indicators.
+    const amenity = str(tags.amenity);
+    if (geometry?.type === "Point") {
+      const here = geometry.coordinates as LngLat;
+      if (highway === "street_lamp") lamps.push(here);
+      if ((amenity && !NOT_LANDMARKS.has(amenity)) || str(tags.shop) || str(tags.tourism) || str(tags.historic) || highway === "bus_stop") {
+        landmarks.push(here);
+      }
+    }
+    if ((amenity && activityAmenities.includes(amenity)) || (str(tags.leisure) && activityLeisure.includes(str(tags.leisure)!))) {
+      activityPlaces.push(...pointsOf(geometry));
+    }
+    if ((amenity && civicAmenities.includes(amenity)) || str(tags.office) === "government") civicPlaces.push(...pointsOf(geometry));
+  }
+
+  const index = {
+    benches: new SpatialGrid<LngLat>(),
+    roads: new SpatialGrid<Road>(),
+    privatizers: new SpatialGrid<LngLat>(),
+    raisedKerbs: new SpatialGrid<LngLat>(),
+    hasBenches: benches.length > 0,
+    hasPrivatizers: privatizers.length > 0,
+    lamps: new SpatialGrid<LngLat>(),
+    // Lamp data is patchy in OSM: an absent lamp only means "unlit" where lamps are mapped at all.
+    lampsUsable: lamps.length >= walkways.length * 0.1,
+    landmarks: new SpatialGrid<LngLat>(),
+    activities: new SpatialGrid<LngLat>(500),
+    civic: new SpatialGrid<LngLat>(500),
+    hasLandmarks: landmarks.length > 0,
+    hasActivities: activityPlaces.length > 0,
+    hasCivic: civicPlaces.length > 0,
+  };
+  for (const l of lamps) index.lamps.addPoint(l, l);
+  for (const l of landmarks) index.landmarks.addPoint(l, l);
+  for (const a of activityPlaces) index.activities.addPoint(a, a);
+  for (const c of civicPlaces) index.civic.addPoint(c, c);
+  for (const b of benches) index.benches.addPoint(b, b);
+  for (const k of raisedKerbs) index.raisedKerbs.addPoint(k, k);
+  for (const q of privatizers) index.privatizers.addPoint(q, q);
+  for (const road of roads) {
+    const xs = road.coords.map((c) => c[0]);
+    const ys = road.coords.map((c) => c[1]);
+    index.roads.addBox(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), road);
   }
 
   // Cut ways at nodes that more than one way uses, so junctions become graph nodes.
@@ -127,17 +179,32 @@ export function buildSegments(
       const coords = way.coords.slice(start, end + 1);
       if (coords.length < 2) continue;
       const id = cuts.length > 2 ? `${way.osmId}#${k + 1}` : way.osmId;
-      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { benches, roads, privatizers, raisedKerbs, noiseIndex: options.noiseIndex }, config));
+      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { ...index, noiseIndex: options.noiseIndex }, config));
     }
   }
   return segments;
 }
 
+/** How far to look for a bench or a major road before calling it absent (metres). */
+const MAX_SEARCH_M = 1000;
+
+interface Road { coords: LngLat[]; roadClass: string; speed?: number }
+
 interface Context {
-  benches: LngLat[];
-  roads: { coords: LngLat[]; roadClass: string; speed?: number }[];
-  privatizers: LngLat[];
-  raisedKerbs: LngLat[];
+  benches: SpatialGrid<LngLat>;
+  roads: SpatialGrid<Road>;
+  privatizers: SpatialGrid<LngLat>;
+  raisedKerbs: SpatialGrid<LngLat>;
+  hasBenches: boolean;
+  hasPrivatizers: boolean;
+  lamps: SpatialGrid<LngLat>;
+  lampsUsable: boolean;
+  landmarks: SpatialGrid<LngLat>;
+  activities: SpatialGrid<LngLat>;
+  civic: SpatialGrid<LngLat>;
+  hasLandmarks: boolean;
+  hasActivities: boolean;
+  hasCivic: boolean;
   noiseIndex?: NoiseIndex;
 }
 
@@ -178,23 +245,70 @@ function describeSegment(
 
   const middle = pointAlong(coords, lengthM / 2);
 
-  if (ctx.benches.length > 0) {
-    values.restDistanceM = Math.min(...ctx.benches.map((b) => pointToPolylineM(b, coords)));
+  // Anything within r of the polyline is within r + length/2 of its middle, so the
+  // grid query around the middle never misses a true neighbour.
+  const reach = (r: number) => r + lengthM / 2;
+
+  if (ctx.hasBenches) {
+    let rest = MAX_SEARCH_M; // no bench within the search radius: far enough to be a total obstacle
+    for (const r of [150, 400, MAX_SEARCH_M]) {
+      const d = Math.min(...ctx.benches.near(middle, reach(r)).map((b) => pointToPolylineM(b, coords)), Infinity);
+      if (d <= r) { rest = d; break; }
+    }
+    values.restDistanceM = rest;
     sources.rest = "osm";
   }
 
-  if (ctx.raisedKerbs.some((k) => pointToPolylineM(k, coords) <= config.kerbAttachM)) values.kerbRaised = true;
+  if (ctx.raisedKerbs.near(middle, reach(config.kerbAttachM)).some((k) => pointToPolylineM(k, coords) <= config.kerbAttachM)) {
+    values.kerbRaised = true;
+  }
 
-  if (ctx.privatizers.length > 0) {
+  const buffer = config.indicators.economic.bufferM;
+  const privatizers = ctx.privatizers.near(middle, reach(buffer));
+  if (ctx.hasPrivatizers) {
     const steps = Math.max(2, Math.ceil(lengthM / 5));
     let near = 0;
     for (let i = 0; i <= steps; i += 1) {
       const p = pointAlong(coords, (lengthM * i) / steps);
-      if (ctx.privatizers.some((q) => distanceM(p, q) <= config.indicators.economic.bufferM)) near += 1;
+      if (privatizers.some((q) => distanceM(p, q) <= buffer)) near += 1;
     }
     values.privatizedShare = near / (steps + 1);
     sources.economic = "osm";
   }
+
+  // Cognitive and social indicators, all from OpenStreetMap places.
+  const places = config.autoData.places;
+  const lit = str(tags.lit)?.toLowerCase();
+  if (lit === "no") { values.unlitShare = 1; sources.lighting = "osm"; }
+  else if (lit && lit !== "disused") { values.unlitShare = 0; sources.lighting = "osm"; }
+  else if (ctx.lampsUsable) {
+    const lamps = ctx.lamps.near(middle, reach(places.lampRadiusM));
+    const steps = Math.max(2, Math.ceil(lengthM / 10));
+    let lit = 0;
+    for (let i = 0; i <= steps; i += 1) {
+      const p = pointAlong(coords, (lengthM * i) / steps);
+      if (lamps.some((l) => distanceM(p, l) <= places.lampRadiusM)) lit += 1;
+    }
+    values.unlitShare = 1 - lit / (steps + 1);
+    sources.lighting = "estimated";
+  }
+
+  if (ctx.hasLandmarks) {
+    values.landmarkCount = ctx.landmarks
+      .near(middle, reach(places.landmarkRadiusM))
+      .filter((l) => pointToPolylineM(l, coords) <= places.landmarkRadiusM).length;
+    sources.landmarks = "osm";
+  }
+
+  const nearest = (grid: SpatialGrid<LngLat>): number => {
+    for (const r of [300, 1000, 3000]) {
+      const d = Math.min(...grid.near(middle, reach(r)).map((q) => pointToPolylineM(q, coords)), Infinity);
+      if (d <= r) return d;
+    }
+    return 3000; // nothing within 3 km: as far as the scale goes
+  };
+  if (ctx.hasActivities) { values.activityDistanceM = nearest(ctx.activities); sources.activities = "osm"; }
+  if (ctx.hasCivic) { values.civicDistanceM = nearest(ctx.civic); sources.civic = "osm"; }
 
   // Noise: the official map wins. Its gaps are the exception: a segment the map says
   // nothing about, but that lies next to a major road, gets the road-distance
@@ -202,9 +316,12 @@ function describeSegment(
   // means "not covered", not "quiet". Without the map, the estimate is all there is.
   // Nothing in OSM measures noise.
   let nearestRoad: { roadClass: string; speed?: number; d: number } | null = null;
-  for (const road of ctx.roads) {
-    const d = pointToPolylineM(middle, road.coords);
-    if (!nearestRoad || d < nearestRoad.d) nearestRoad = { roadClass: road.roadClass, speed: road.speed, d };
+  for (const r of [100, 300, MAX_SEARCH_M]) {
+    for (const road of ctx.roads.near(middle, r)) {
+      const d = pointToPolylineM(middle, road.coords);
+      if (!nearestRoad || d < nearestRoad.d) nearestRoad = { roadClass: road.roadClass, speed: road.speed, d };
+    }
+    if (nearestRoad && nearestRoad.d <= r) break;
   }
   const estimated = nearestRoad
     ? estimateNoiseDb(nearestRoad.roadClass, nearestRoad.speed, nearestRoad.d, config)

@@ -49,6 +49,16 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
     result("economic", indicators.economic.dimension, isNum(values.privatizedShare)
       ? clamp01(values.privatizedShare)
       : null),
+    result("lighting", indicators.lighting.dimension, isNum(values.unlitShare) ? clamp01(values.unlitShare) : null),
+    result("landmarks", indicators.landmarks.dimension, isNum(values.landmarkCount)
+      ? linearBarrier(values.landmarkCount, indicators.landmarks.noProblemAt, indicators.landmarks.totalObstacleAt)
+      : null),
+    result("activities", indicators.activities.dimension, isNum(values.activityDistanceM)
+      ? linearBarrier(values.activityDistanceM, indicators.activities.noProblemAt, indicators.activities.totalObstacleAt)
+      : null),
+    result("civic", indicators.civic.dimension, isNum(values.civicDistanceM)
+      ? linearBarrier(values.civicDistanceM, indicators.civic.noProblemAt, indicators.civic.totalObstacleAt)
+      : null),
   ];
 }
 
