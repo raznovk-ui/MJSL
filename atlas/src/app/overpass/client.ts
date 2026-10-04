@@ -8,6 +8,8 @@ import type { OverpassPreset } from "./presets.js";
  * WITHOUT CORS headers, which a browser reports as a "CORS error" with no status:
  * the request itself is fine, the server is just refusing. Another mirror usually isn't.
  */
+const REQUEST_TIMEOUT_MS = 70_000;
+
 const ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.private.coffee/api/interpreter",
@@ -76,6 +78,8 @@ async function fetchFromMirrors(query: string): Promise<Response> {
         method: "POST",
         headers: { "content-type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(query)}`,
+        // An unreachable server can leave a request hanging for minutes: give up and try the next.
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (response.ok) return response;
       lastError = new Error(`Overpass HTTP ${response.status}`);
