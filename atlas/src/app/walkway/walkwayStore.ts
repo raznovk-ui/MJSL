@@ -55,6 +55,8 @@ interface WalkwayState {
   /** Priority zones for the selected profile, found automatically. */
   zones: Zone[];
   selectedZoneId: string | null;
+  inspectedId: string | null;
+  inspectSegment: (id: string | null) => void;
   /** Place names from Nominatim, fetched only for zones a person selects. */
   zonePlaces: Record<string, string>;
   zonesVisible: boolean;
@@ -119,6 +121,8 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
 
   zones: [],
   selectedZoneId: null,
+  inspectedId: null,
+  inspectSegment: (inspectedId) => set({ inspectedId }),
   zonePlaces: {},
   zonesVisible: true,
 

@@ -69,7 +69,13 @@ export function MapView() {
       // The only interaction left is choosing the two ends of a route.
       if (useWalkwayStore.getState().routePicking) {
         useWalkwayStore.getState().pickPoint(event.lngLat.lng, event.lngLat.lat);
+        return;
       }
+      // Otherwise a click on a walkway shows how its score was calculated.
+      const hit = instance.queryRenderedFeatures(event.point, {
+        layers: ["walkway-line", "walkway-line-red"].filter((id) => instance.getLayer(id)),
+      });
+      useWalkwayStore.getState().inspectSegment(hit.length ? String(hit[0]!.properties?.id ?? "") : null);
     });
     return () => {
       instance.remove();

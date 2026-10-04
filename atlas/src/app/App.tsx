@@ -7,6 +7,7 @@ import { StatusBar } from "./components/StatusBar.js";
 import { Dashboard } from "./components/Dashboard.js";
 import { WalkwayPanel } from "./walkway/WalkwayPanel.js";
 import { ZoneList } from "./walkway/ZoneList.js";
+import { SegmentInspector } from "./walkway/SegmentInspector.js";
 import { useWalkwayStore } from "./walkway/walkwayStore.js";
 import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
 import { IconPin } from "./components/icons.js";
@@ -65,6 +66,7 @@ export function App() {
           <div className="space-y-4">
             <WalkwayPanel />
             <ZoneList />
+            <SegmentInspector />
             <BasemapPicker />
             <LayerPanel />
             <section aria-labelledby="limites" className="card">
