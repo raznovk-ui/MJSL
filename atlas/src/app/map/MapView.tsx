@@ -10,6 +10,9 @@ import { RUPTURE_COLOURS } from "../ruptureStyle.js";
 import { cellsToGeojson, redZonesToGeojson } from "../analysis/cells.js";
 import { INSUFFICIENT_FILL, INSUFFICIENT_LINE } from "../analysis/palette.js";
 import type { FeatureCollection } from "geojson";
+import { WALKWAY_CONFIG } from "../../domain/walkway/index.js";
+import { syncWalkwayLayers } from "../walkway/walkwayLayers.js";
+import { useWalkwayStore } from "../walkway/walkwayStore.js";
 
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 
@@ -31,6 +34,14 @@ export function MapView() {
   const placingPhotoId = useAppStore((s) => s.placingPhotoId);
   const addRuptureMode = useAppStore((s) => s.addRuptureMode);
   const ruptures = useAppStore((s) => s.ruptures);
+  const routePicking = useWalkwayStore((s) => s.routePicking);
+  const walkSegments = useWalkwayStore((s) => s.segments);
+  const walkScores = useWalkwayStore((s) => s.scores);
+  const walkProfile = useWalkwayStore((s) => s.profileId);
+  const walkVisible = useWalkwayStore((s) => s.visible);
+  const walkRoutes = useWalkwayStore((s) => s.routes);
+  const walkFrom = useWalkwayStore((s) => s.routeFrom);
+  const walkTo = useWalkwayStore((s) => s.routeTo);
   const activeLayer = useAppStore((s) => s.activeLayer);
   const globalMode = useAppStore((s) => s.globalMode);
   const showCells = useAppStore((s) => s.showCells);
@@ -71,6 +82,10 @@ export function MapView() {
       // Read the flags at click time: registering this once avoids rebinding on
       // every state change, and the store is the source of truth anyway.
       const state = useAppStore.getState();
+      if (useWalkwayStore.getState().routePicking) {
+        useWalkwayStore.getState().pickPoint(event.lngLat.lng, event.lngLat.lat);
+        return;
+      }
       if (state.placingPhotoId) {
         void state.placePhotoAt(event.lngLat.lng, event.lngLat.lat);
         return;
@@ -117,8 +132,22 @@ export function MapView() {
   useEffect(() => {
     const instance = map.current;
     if (!instance) return;
-    instance.getCanvas().style.cursor = addPointMode || placingPhotoId || addRuptureMode ? "crosshair" : "";
-  }, [addPointMode, placingPhotoId, addRuptureMode]);
+    instance.getCanvas().style.cursor = addPointMode || placingPhotoId || addRuptureMode || routePicking ? "crosshair" : "";
+  }, [addPointMode, placingPhotoId, addRuptureMode, routePicking]);
+
+  // Walkway segments coloured by the selected profile, plus the chosen route.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncWalkwayLayers(instance, {
+      segments: walkSegments,
+      scores: walkScores[walkProfile],
+      visible: walkVisible,
+      route: walkRoutes.find((r) => r.profileId === walkProfile),
+      from: walkFrom,
+      to: walkTo,
+    }, WALKWAY_CONFIG);
+  }, [styleReady, walkSegments, walkScores, walkProfile, walkVisible, walkRoutes, walkFrom, walkTo]);
 
   useEffect(() => {
     const instance = map.current;

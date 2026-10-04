@@ -121,3 +121,26 @@ not. Open `npm run dev` in Chrome, Firefox or Edge and look before trusting it.
 - **Photo clustering.** With a handful of test photos, there's no crowding
   problem yet to solve.
 - KML, GPX and shapefile import remain unsupported (GeoJSON and CSV only).
+
+## Walkway profiles (per-segment scoring by type of person)
+
+A second, separate score next to the H3 cell scoring above: each stretch of walkway
+gets a score per profile (wheelchair user, blind person, ...). Code in
+`src/domain/walkway/`, panel in `src/app/walkway/`.
+
+- **Change numbers in ONE file:** `src/domain/walkway/walkway.config.json`
+  (thresholds, weights, surface table, vetoes, noise-estimate rule, colour classes).
+  It is checked when the app starts, with plain-language errors (e.g. "weights add up to 1.2").
+  To add a profile (elderly, stroller, ...) copy a block in `profiles` — see `_howToAddProfile`.
+- **Score:** barriers 0..1 per indicator, averaged per dimension over the indicators that
+  have data, then `score = 0 if a veto applies, else product of (1 - barrier)^weight`.
+  A missing value is left out (weights rescaled), never counted as 0; a segment with
+  nothing to score is "no data", not 1.
+- **Route:** weakest segment on the shortest path; vetoed segments are removed to find a
+  detour and its extra length. **What-if:** `whatIf(segments, changes, config, route?)`.
+- **Data:** loaded on demand from Overpass (`overpass/walkwayPreset.ts`). Width and slope
+  are rarely tagged in OSM, so most segments score from the few indicators that exist;
+  noise is *estimated* from major roads. The panel lists how much of each indicator is real.
+- **Export:** the project `.zip` gains `troncons_scores.geojson` (score, class, veto and the
+  source of each indicator) when segments are loaded.
+- Tests: `src/domain/walkway/__tests__/` (includes the field worked example).

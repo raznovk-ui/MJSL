@@ -50,6 +50,8 @@ export interface ExportInput {
   photos: StoredPhoto[];
   /** Photos are re-encoded without EXIF unless the user opts out. */
   keepExif?: boolean;
+  /** Extra text files to add as-is, by file name (e.g. the scored walkway segments). */
+  extraFiles?: Record<string, string>;
 }
 
 /**
@@ -77,6 +79,7 @@ export async function buildArchive(input: ExportInput): Promise<Blob> {
   zip.file("mjsl.geojson", JSON.stringify(toGeojson(input.observations, input.ruptures), null, 2));
   zip.file("zones_rouges.geojson", JSON.stringify(redZonesGeojson(input.redZones), null, 2));
   zip.file("LISEZ-MOI.txt", README);
+  for (const [name, content] of Object.entries(input.extraFiles ?? {})) zip.file(name, content);
 
   const folder = zip.folder("photos");
   for (const photo of input.photos) {

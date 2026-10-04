@@ -16,6 +16,7 @@ import { RedZoneList } from "./components/RedZoneList.js";
 import { CellInspector } from "./components/CellInspector.js";
 import { useScoring } from "./analysis/useScoring.js";
 import { Dashboard } from "./components/Dashboard.js";
+import { WalkwayPanel } from "./walkway/WalkwayPanel.js";
 import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
 import { STUDY_AREA } from "./studyArea.js";
@@ -102,6 +103,7 @@ export function App() {
               <ImportWizard />
             </section>
             <AnalysisPanel />
+            <WalkwayPanel />
             <RuptureList />
             <section aria-labelledby="photos" className="card">
               <h2 id="photos" className="card-title">Photos</h2>

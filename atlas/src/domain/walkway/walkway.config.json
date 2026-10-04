@@ -1,0 +1,87 @@
+{
+  "_comment": "MJSL walkway scoring settings. This is the ONLY file you need to edit to change numbers. Change numbers only: keep the quotes, commas and brackets. Lines starting with _comment are notes and are ignored. If something is wrong the app tells you what, in plain words, when it starts.",
+
+  "indicators": {
+    "_comment": "Each indicator becomes a barrier from 0 (no problem) to 1 (total obstacle). 'noProblemAt' is the value that gives barrier 0, 'totalObstacleAt' the value that gives barrier 1; in between it is a straight line. 'dimension' says which group the indicator belongs to: physical, sensory, cognitive, economic, socio_cultural (social) or political (participation).",
+
+    "width": {
+      "_comment": "Usable width in metres (OSM tags width or sidewalk:width). 1.80 m or more is fine, 0.90 m or less is a total obstacle.",
+      "dimension": "physical",
+      "noProblemAt": 1.8,
+      "totalObstacleAt": 0.9
+    },
+    "noise": {
+      "_comment": "Noise in dB, measured or estimated. 55 dB or less is fine, 85 dB or more is a total obstacle.",
+      "dimension": "sensory",
+      "noProblemAt": 55,
+      "totalObstacleAt": 85
+    },
+    "slope": {
+      "_comment": "Slope in percent (OSM tag incline), sign ignored. 4 % or less is fine, 12 % or more is a total obstacle.",
+      "dimension": "physical",
+      "noProblemAt": 4,
+      "totalObstacleAt": 12
+    },
+    "rest": {
+      "_comment": "Distance in metres from the segment to the nearest bench. Within 50 m is fine, 200 m or more is a total obstacle.",
+      "dimension": "physical",
+      "noProblemAt": 50,
+      "totalObstacleAt": 200
+    },
+    "surface": {
+      "_comment": "Barrier per surface type (OSM tag surface), from 0 to 1. A surface not in this list counts as 'no data', never as 0.",
+      "dimension": "physical",
+      "scores": {
+        "asphalt": 0,
+        "concrete": 0,
+        "paving_stones": 0,
+        "paved": 0,
+        "sett": 0.5,
+        "cobblestone": 0.5,
+        "gravel": 0.8,
+        "fine_gravel": 0.8,
+        "sand": 0.8
+      }
+    },
+    "economic": {
+      "_comment": "The barrier is the share (0 to 1) of the segment that runs next to terraces (outdoor_seating=yes) or parking. 'bufferM' = how close, in metres, counts as 'next to'.",
+      "dimension": "economic",
+      "bufferM": 15
+    }
+  },
+
+  "noiseEstimate": {
+    "_comment": "Used ONLY when no noise value is known. Estimate = base level of the nearest major road, plus/minus a speed correction, minus a drop with distance. The result is always marked 'estimated'. These are starting values: replace them with your own measurements when you have them. Needs major roads in the data; without them noise stays 'no data'.",
+    "roadBaseDb": { "trunk": 75, "primary": 72, "secondary": 68 },
+    "defaultSpeedKmh": 50,
+    "referenceSpeedKmh": 50,
+    "dbPer10KmhAboveReference": 2,
+    "referenceDistanceM": 10,
+    "dbDropPerDoubling": 4.5,
+    "floorDb": 45
+  },
+
+  "kerbAttachM": 10,
+
+  "classes": {
+    "_comment": "Colour classes of the final score: below 'redBelow' = red, below 'orangeBelow' = orange, otherwise green. 'none' = not enough data to score.",
+    "redBelow": 0.3,
+    "orangeBelow": 0.6,
+    "colours": { "red": "#b91c1c", "orange": "#f59e0b", "green": "#15803d", "none": "#94a3b8" }
+  },
+
+  "profiles": {
+    "_howToAddProfile": "To add a profile (elderly person, autistic person, stroller...), copy one block below, give it a new short name, and change: 'label', the 'weights' (they must add up to 1) and the 'vetoes'. A veto sets the score to 0 whenever it applies. Veto choices: stepsWithoutRamp (true/false), widthBelowM (a number of metres), kerbRaised (true/false). Leave 'vetoes' empty ({}) for none.",
+
+    "wheelchair": {
+      "label": "Wheelchair user",
+      "weights": { "physical": 0.6, "sensory": 0.1, "economic": 0.3 },
+      "vetoes": { "stepsWithoutRamp": true, "widthBelowM": 0.9, "kerbRaised": true }
+    },
+    "blind": {
+      "label": "Blind person",
+      "weights": { "physical": 0.3, "sensory": 0.5, "economic": 0.2 },
+      "vetoes": {}
+    }
+  }
+}

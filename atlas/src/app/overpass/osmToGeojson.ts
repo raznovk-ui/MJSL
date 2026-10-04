@@ -6,6 +6,8 @@ interface OsmElement {
   lat?: number;
   lon?: number;
   tags?: Record<string, string>;
+  /** Way only: ids of its nodes, aligned with `geometry`. */
+  nodes?: number[];
   geometry?: { lat: number; lon: number }[];
 }
 
@@ -48,6 +50,8 @@ export function osmToGeojson(payload: { elements?: OsmElement[] }): FeatureColle
         osm_id: `${element.type}/${element.id}`,
         label: osmLabel(tags),
         wheelchair: tags.wheelchair ?? "",
+        // Kept for ways so walkway segments can be connected at shared nodes.
+        ...(element.nodes ? { osm_nodes: element.nodes } : {}),
         ...tags,
       },
       geometry,

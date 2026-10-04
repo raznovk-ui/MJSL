@@ -1,0 +1,204 @@
+import { DIMENSION_KEYS, type Dimension } from "../dimensions.js";
+import rawConfig from "./walkway.config.json";
+
+export interface LinearIndicatorConfig {
+  dimension: Dimension;
+  noProblemAt: number;
+  totalObstacleAt: number;
+}
+
+export interface ProfileConfig {
+  label: string;
+  weights: Partial<Record<Dimension, number>>;
+  vetoes: { stepsWithoutRamp?: boolean; widthBelowM?: number; kerbRaised?: boolean };
+}
+
+export interface WalkwayConfig {
+  indicators: {
+    width: LinearIndicatorConfig;
+    noise: LinearIndicatorConfig;
+    slope: LinearIndicatorConfig;
+    rest: LinearIndicatorConfig;
+    surface: { dimension: Dimension; scores: Record<string, number> };
+    economic: { dimension: Dimension; bufferM: number };
+  };
+  noiseEstimate: {
+    roadBaseDb: Record<string, number>;
+    defaultSpeedKmh: number;
+    referenceSpeedKmh: number;
+    dbPer10KmhAboveReference: number;
+    referenceDistanceM: number;
+    dbDropPerDoubling: number;
+    floorDb: number;
+  };
+  kerbAttachM: number;
+  classes: {
+    redBelow: number;
+    orangeBelow: number;
+    colours: { red: string; orange: string; green: string; none: string };
+  };
+  profiles: Record<string, ProfileConfig>;
+}
+
+/** Thrown with every problem found, worded for a non-developer. */
+export class WalkwayConfigError extends Error {
+  constructor(public readonly problems: string[]) {
+    super(`walkway.config.json has ${problems.length} problem(s):\n- ${problems.join("\n- ")}`);
+    this.name = "WalkwayConfigError";
+  }
+}
+
+type Json = Record<string, unknown>;
+const isObject = (v: unknown): v is Json => typeof v === "object" && v !== null && !Array.isArray(v);
+const isNumber = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
+
+export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
+  const problems: string[] = [];
+  const root = isObject(raw) ? raw : {};
+  const need = (cond: boolean, message: string) => {
+    if (!cond) problems.push(message);
+  };
+  const section = (parent: Json, key: string, path: string): Json => {
+    const value = parent[key];
+    need(isObject(value), `"${path}${key}" is missing.`);
+    return isObject(value) ? value : {};
+  };
+  const dimensionOf = (block: Json, path: string): Dimension => {
+    const d = block.dimension;
+    need(
+      typeof d === "string" && (DIMENSION_KEYS as readonly string[]).includes(d),
+      `"${path}dimension" must be one of: ${DIMENSION_KEYS.join(", ")}.`,
+    );
+    return d as Dimension;
+  };
+  const linear = (parent: Json, key: string): LinearIndicatorConfig => {
+    const path = `indicators.${key}.`;
+    const block = section(parent, key, "indicators.");
+    need(isNumber(block.noProblemAt), `"${path}noProblemAt" must be a number.`);
+    need(isNumber(block.totalObstacleAt), `"${path}totalObstacleAt" must be a number.`);
+    need(
+      block.noProblemAt !== block.totalObstacleAt,
+      `"${path}noProblemAt" and "totalObstacleAt" must be different numbers.`,
+    );
+    return {
+      dimension: dimensionOf(block, path),
+      noProblemAt: block.noProblemAt as number,
+      totalObstacleAt: block.totalObstacleAt as number,
+    };
+  };
+
+  const indicators = section(root, "indicators", "");
+  const surface = section(indicators, "surface", "indicators.");
+  const scores = isObject(surface.scores) ? surface.scores : {};
+  need(isObject(surface.scores), `"indicators.surface.scores" is missing.`);
+  for (const [name, value] of Object.entries(scores)) {
+    if (name.startsWith("_")) continue;
+    need(isNumber(value) && value >= 0 && value <= 1, `Surface "${name}" must be a number between 0 and 1.`);
+  }
+  const economic = section(indicators, "economic", "indicators.");
+  need(isNumber(economic.bufferM) && (economic.bufferM as number) > 0, `"indicators.economic.bufferM" must be a number above 0.`);
+
+  const noise = section(root, "noiseEstimate", "");
+  for (const key of ["defaultSpeedKmh", "referenceSpeedKmh", "dbPer10KmhAboveReference", "referenceDistanceM", "dbDropPerDoubling", "floorDb"]) {
+    need(isNumber(noise[key]), `"noiseEstimate.${key}" must be a number.`);
+  }
+  const roadBase = isObject(noise.roadBaseDb) ? noise.roadBaseDb : {};
+  need(Object.keys(roadBase).some((k) => !k.startsWith("_")), `"noiseEstimate.roadBaseDb" needs at least one road type.`);
+
+  need(isNumber(root.kerbAttachM), `"kerbAttachM" must be a number.`);
+
+  const classes = section(root, "classes", "");
+  need(isNumber(classes.redBelow) && isNumber(classes.orangeBelow), `"classes.redBelow" and "classes.orangeBelow" must be numbers.`);
+  need(
+    !isNumber(classes.redBelow) || !isNumber(classes.orangeBelow) || classes.redBelow < classes.orangeBelow,
+    `"classes.redBelow" must be smaller than "classes.orangeBelow".`,
+  );
+  const colours = isObject(classes.colours) ? classes.colours : {};
+  for (const key of ["red", "orange", "green", "none"]) {
+    need(typeof colours[key] === "string" && /^#[0-9a-fA-F]{6}$/.test(colours[key] as string), `"classes.colours.${key}" must look like #b91c1c.`);
+  }
+
+  const profilesRaw = section(root, "profiles", "");
+  const profiles: Record<string, ProfileConfig> = {};
+  for (const [id, value] of Object.entries(profilesRaw)) {
+    if (id.startsWith("_")) continue;
+    const path = `profiles.${id}.`;
+    need(isObject(value), `Profile "${id}" must be a block with label, weights and vetoes.`);
+    const block = isObject(value) ? value : {};
+    need(typeof block.label === "string" && block.label.length > 0, `"${path}label" is missing.`);
+    const weightsRaw = isObject(block.weights) ? block.weights : {};
+    need(isObject(block.weights), `"${path}weights" is missing.`);
+    const weights: Partial<Record<Dimension, number>> = {};
+    let sum = 0;
+    for (const [dim, w] of Object.entries(weightsRaw)) {
+      if (dim.startsWith("_")) continue;
+      need((DIMENSION_KEYS as readonly string[]).includes(dim), `"${path}weights" has an unknown dimension "${dim}". Use: ${DIMENSION_KEYS.join(", ")}.`);
+      need(isNumber(w) && w >= 0, `"${path}weights.${dim}" must be a number, 0 or more.`);
+      if (isNumber(w)) {
+        weights[dim as Dimension] = w;
+        sum += w;
+      }
+    }
+    need(Math.abs(sum - 1) < 1e-6, `Profile "${id}": the weights add up to ${Math.round(sum * 1000) / 1000}, they must add up to 1.`);
+    const vetoesRaw = isObject(block.vetoes) ? block.vetoes : {};
+    need(isObject(block.vetoes), `"${path}vetoes" is missing (use {} for none).`);
+    const vetoes: ProfileConfig["vetoes"] = {};
+    for (const [rule, v] of Object.entries(vetoesRaw)) {
+      if (rule.startsWith("_")) continue;
+      if (rule === "stepsWithoutRamp" || rule === "kerbRaised") {
+        need(typeof v === "boolean", `"${path}vetoes.${rule}" must be true or false.`);
+        vetoes[rule] = v === true;
+      } else if (rule === "widthBelowM") {
+        need(isNumber(v), `"${path}vetoes.widthBelowM" must be a number of metres.`);
+        vetoes.widthBelowM = v as number;
+      } else {
+        problems.push(`"${path}vetoes" has an unknown rule "${rule}". Use: stepsWithoutRamp, widthBelowM, kerbRaised.`);
+      }
+    }
+    profiles[id] = { label: String(block.label ?? id), weights, vetoes };
+  }
+  need(Object.keys(profiles).length > 0, `"profiles" needs at least one profile.`);
+
+  // Checked before the throw below: these were previously validated only while
+  // building the result, so a bad width/noise/slope/rest threshold slipped through.
+  const width = linear(indicators, "width");
+  const noiseIndicator = linear(indicators, "noise");
+  const slope = linear(indicators, "slope");
+  const rest = linear(indicators, "rest");
+
+  if (problems.length > 0) throw new WalkwayConfigError(problems);
+
+  return {
+    indicators: {
+      width,
+      noise: noiseIndicator,
+      slope,
+      rest,
+      surface: { dimension: surface.dimension as Dimension, scores: stripNotes(scores) as Record<string, number> },
+      economic: { dimension: economic.dimension as Dimension, bufferM: economic.bufferM as number },
+    },
+    noiseEstimate: {
+      roadBaseDb: stripNotes(roadBase) as Record<string, number>,
+      defaultSpeedKmh: noise.defaultSpeedKmh as number,
+      referenceSpeedKmh: noise.referenceSpeedKmh as number,
+      dbPer10KmhAboveReference: noise.dbPer10KmhAboveReference as number,
+      referenceDistanceM: noise.referenceDistanceM as number,
+      dbDropPerDoubling: noise.dbDropPerDoubling as number,
+      floorDb: noise.floorDb as number,
+    },
+    kerbAttachM: root.kerbAttachM as number,
+    classes: {
+      redBelow: classes.redBelow as number,
+      orangeBelow: classes.orangeBelow as number,
+      colours: colours as WalkwayConfig["classes"]["colours"],
+    },
+    profiles,
+  };
+}
+
+function stripNotes(block: Json): Json {
+  return Object.fromEntries(Object.entries(block).filter(([k]) => !k.startsWith("_")));
+}
+
+/** The settings shipped in walkway.config.json, validated once at load. */
+export const WALKWAY_CONFIG: WalkwayConfig = validateWalkwayConfig(rawConfig);

@@ -4,6 +4,8 @@ import { DIMENSIONS, dimension as dimensionMeta } from "../../domain/dimensions.
 import { useAppStore } from "../state.js";
 import { BarChart, Histogram, StatTile } from "./charts.js";
 import { IconDownload } from "./icons.js";
+import { WALKWAY_CONFIG, segmentsToGeojson } from "../../domain/walkway/index.js";
+import { useWalkwayStore } from "../walkway/walkwayStore.js";
 import { buildArchive, downloadBlob, downloadText } from "../export/download.js";
 import { observationsCsv, redZonesGeojson, toGeojson } from "../export/project.js";
 
@@ -79,6 +81,13 @@ export function Dashboard() {
         ruptures,
         redZones,
         photos,
+        // Scored walkway segments, with each value's source, when they are loaded.
+        extraFiles: (() => {
+          const { segments } = useWalkwayStore.getState();
+          return segments.length
+            ? { "troncons_scores.geojson": JSON.stringify(segmentsToGeojson(segments, WALKWAY_CONFIG), null, 2) }
+            : undefined;
+        })(),
       });
       downloadBlob(blob, `atlas-mjsl-${new Date().toISOString().slice(0, 10)}.zip`);
       setStatus("Archive exportee.");
