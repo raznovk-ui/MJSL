@@ -45,6 +45,7 @@ export function MapView() {
   const activeLayer = useAppStore((s) => s.activeLayer);
   const globalMode = useAppStore((s) => s.globalMode);
   const showCells = useAppStore((s) => s.showCells);
+  const showEvidence = useAppStore((s) => s.showEvidence);
   const cellOpacity = useAppStore((s) => s.cellOpacity);
   // Computed by useScoring() at the app level, not here: the dashboard and the
   // Analyse tab need these numbers whether or not the map has ever finished
@@ -191,6 +192,16 @@ export function MapView() {
     if (!instance || !styleReady) return;
     syncPresetLayers(instance);
   }, [presets, styleReady]);
+
+  // Declared after the effect that creates the layers, so it also re-applies after a
+  // basemap swap re-creates them.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    for (const id of ["observations-line", "observations-point", "ruptures-halo", "ruptures-label"]) {
+      if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", showEvidence ? "visible" : "none");
+    }
+  }, [showEvidence, styleReady, observations, ruptures]);
 
   return (
     <div

@@ -159,3 +159,7 @@ labels every value with its source (`measured` / `osm` / `official` / `estimated
 
 A value you measure yourself always wins over all of these. Refresh the noise file with
 `npm run data:noise`. All of these settings are in `walkway.config.json` under `autoData`.
+
+### Map overlays on/off
+
+The "Calques" box on the map switches each overlay on or off (zones and red zones, walkway segments, observations and ruptures, OSM clues), and "Carte seule" hides them all to compare with the bare basemap. The checkboxes in the side panels control the same settings.

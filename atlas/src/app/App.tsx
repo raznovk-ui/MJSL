@@ -17,6 +17,7 @@ import { CellInspector } from "./components/CellInspector.js";
 import { useScoring } from "./analysis/useScoring.js";
 import { Dashboard } from "./components/Dashboard.js";
 import { WalkwayPanel } from "./walkway/WalkwayPanel.js";
+import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
 import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
 import { STUDY_AREA } from "./studyArea.js";
@@ -146,8 +147,9 @@ export function App() {
           </nav>
 
           {/* The map stays mounted so MapLibre keeps its WebGL context. */}
-          <div className={`min-h-0 min-w-0 flex-1 ${view === "map" ? "" : "hidden"}`}>
+          <div className={`relative min-h-0 min-w-0 flex-1 ${view === "map" ? "" : "hidden"}`}>
             <MapView />
+            <MapOverlayToggles />
           </div>
           <div className={`min-h-0 min-w-0 flex-1 overflow-y-auto ${view === "table" ? "" : "hidden"}`}>
             <DataTable />

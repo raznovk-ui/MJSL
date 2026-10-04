@@ -88,6 +88,9 @@ interface AppState {
   setGlobalMode: (mode: GlobalMode) => void;
   showCells: boolean;
   toggleCells: () => void;
+  /** Observations and ruptures drawn on the map. */
+  showEvidence: boolean;
+  toggleEvidence: () => void;
   cellOpacity: number;
   setCellOpacity: (value: number) => void;
   selectedCell: string | null;
@@ -356,6 +359,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   setGlobalMode: (globalMode) => set({ globalMode }),
   showCells: true,
   toggleCells: () => set((s) => ({ showCells: !s.showCells })),
+  showEvidence: true,
+  toggleEvidence: () => set((s) => ({ showEvidence: !s.showEvidence })),
   cellOpacity: 0.65,
   setCellOpacity: (cellOpacity) => set({ cellOpacity }),
   selectedCell: null,
