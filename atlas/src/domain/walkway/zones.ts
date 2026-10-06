@@ -1,3 +1,4 @@
+import { dimensionScores, type DimensionScores } from "./dimensionScores.js";
 import { distanceM } from "./geo.js";
 import type { WalkwayConfig } from "./loadConfig.js";
 import type { IndicatorKey, LngLat, Segment, SegmentScore, ValueSource } from "./types.js";
@@ -27,6 +28,8 @@ export interface Zone {
   vetoReasons: string[];
   drivers: ZoneDriver[];
   basis: ZoneBasis;
+  /** Score per dimension over the zone (0 = total obstacle, 1 = none). */
+  dimensions: DimensionScores;
   /** Street names from OSM, longest stretch first (at most 3). */
   streets: string[];
   bbox: [number, number, number, number];
@@ -214,6 +217,7 @@ export function detectZones(
       vetoReasons: [...vetoReasons].slice(0, 3),
       drivers,
       basis: shares,
+      dimensions: dimensionScores(members, scores),
       streets: [...streetLength.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name),
       bbox: [minX, minY, maxX, maxY],
       lines: members.map((s) => s.geometry!),

@@ -1,4 +1,5 @@
 import { WALKWAY_CONFIG } from "../../domain/walkway/index.js";
+import { DimensionBars } from "./DimensionBars.js";
 import { useWalkwayStore } from "./walkwayStore.js";
 
 const TOP = 15;
@@ -41,6 +42,12 @@ export function ZoneList() {
                     {places[zone.id] && ` — ${places[zone.id]}`}
                   </span>
                   <span className="block text-xs font-normal">{zone.summary}</span>
+                  {selected === zone.id && (
+                    <span className="mt-2 block w-full font-normal">
+                      <span className="mb-1 block text-xs font-semibold">Score par dimension (0 = obstacle total, 1 = aucun ; entre parentheses : part des donnees)</span>
+                      <DimensionBars scores={zone.dimensions} />
+                    </span>
+                  )}
                 </button>
               </li>
             ))}

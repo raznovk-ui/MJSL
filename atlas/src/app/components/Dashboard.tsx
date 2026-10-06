@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { WALKWAY_CONFIG, segmentsToGeojson, type ScoreClass } from "../../domain/walkway/index.js";
+import { WALKWAY_CONFIG, dimensionScores, segmentsToGeojson, type ScoreClass } from "../../domain/walkway/index.js";
 import { useAppStore } from "../state.js";
 import { useWalkwayStore } from "../walkway/walkwayStore.js";
+import { DimensionBars } from "../walkway/DimensionBars.js";
 import { zonesGeojson } from "../walkway/walkwayLayers.js";
 import { BarChart, StatTile } from "./charts.js";
 import { IconDownload } from "./icons.js";
@@ -38,6 +39,8 @@ export function Dashboard() {
     return { length, total, vetoed, zoneLength: zones.reduce((sum, z) => sum + z.lengthM, 0) };
   }, [segments, scores, profileId, zones]);
 
+  const dims = useMemo(() => dimensionScores(segments, scores[profileId] ?? {}), [segments, scores, profileId]);
+
   const km = (m: number) => `${(m / 1000).toFixed(1)} km`;
   const pct = (m: number) => (stats.total ? `${Math.round((m / stats.total) * 100)} %` : "—");
 
@@ -72,6 +75,16 @@ export function Dashboard() {
           <StatTile label="Part en rouge" value={pct(stats.length.red)} note={km(stats.length.red)} />
           <StatTile label="Blocages eliminatoires" value={String(stats.vetoed)} note="troncons" />
         </div>
+      </section>
+
+      <section aria-labelledby="dims" className="card">
+        <h2 id="dims" className="card-title">Score par dimension — toute la ville</h2>
+        <p className="mb-2 text-xs text-slate-600">
+          De 0 (obstacle total) a 1 (aucun obstacle), moyenne ponderee par la longueur des troncons. Entre
+          parentheses : la part du reseau pour laquelle les donnees ouvertes donnent une reponse. Ces cinq
+          scores ne dependent pas du profil : le profil decide seulement du poids de chacun dans le score final.
+        </p>
+        <DimensionBars scores={dims} />
       </section>
 
       <section aria-labelledby="classes" className="card">

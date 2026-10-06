@@ -1,5 +1,6 @@
 import { DIMENSIONS } from "../../domain/dimensions.js";
-import { WALKWAY_CONFIG, type IndicatorKey, type Segment, type ValueSource } from "../../domain/walkway/index.js";
+import { DimensionBars } from "./DimensionBars.js";
+import { WALKWAY_CONFIG, dimensionScores, type IndicatorKey, type Segment, type ValueSource } from "../../domain/walkway/index.js";
 import { useWalkwayStore } from "./walkwayStore.js";
 
 const LABEL: Record<IndicatorKey, string> = {
@@ -70,6 +71,11 @@ export function SegmentInspector() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div>
+            <p className="pb-1 text-xs text-slate-600">Score de ce troncon par dimension (0 = obstacle total, 1 = aucun)</p>
+            <DimensionBars scores={dimensionScores([segment], { [segment.id]: score })} />
           </div>
 
           <div className="overflow-x-auto">
