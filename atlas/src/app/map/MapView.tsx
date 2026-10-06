@@ -194,11 +194,11 @@ function syncPresetLayers(instance: MapLibreMap) {
         filter: ["==", ["geometry-type"], "Point"],
         layout: { visibility },
         paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 5, 14, 7, 17, 10],
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 1.5, 14, 4, 17, 7],
           "circle-color": "#9e2f2f",
           // Shape and outline carry meaning too, never colour alone.
           "circle-stroke-color": "#ffffff",
-          "circle-stroke-width": 1.5,
+          "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11, 0, 14, 1, 17, 1.5],
         },
       });
     }

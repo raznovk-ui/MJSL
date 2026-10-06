@@ -122,18 +122,24 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
   if (!instance.getLayer("walkway-line")) {
     instance.addLayer({
       id: "walkway-line", type: "line", source: WALKWAY_SOURCE,
-      filter: ["!=", ["get", "cls"], "red"],
+      filter: ["all", ["!=", ["get", "cls"], "red"], ["!=", ["get", "cls"], "none"]],
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": ["get", "colour"],
-        "line-width": [
-          "interpolate", ["linear"], ["zoom"],
-          11, ["case", ["==", ["get", "cls"], "none"], 1.5, 3],
-          14, ["case", ["==", ["get", "cls"], "none"], 2.5, 5],
-          17, ["case", ["==", ["get", "cls"], "none"], 4, 8],
-        ],
+        "line-width": byZoom(3, 5, 8),
         "line-opacity": 0.95,
       },
+    }, before);
+  }
+  // Segments with too little data to score: thin grey, a separate layer so the main
+  // layer's width is a plain zoom curve (nested data expressions in a zoom curve are
+  // fragile across browsers).
+  if (!instance.getLayer("walkway-line-none")) {
+    instance.addLayer({
+      id: "walkway-line-none", type: "line", source: WALKWAY_SOURCE,
+      filter: ["==", ["get", "cls"], "none"],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: { "line-color": ["get", "colour"], "line-width": byZoom(1.5, 2.5, 4), "line-opacity": 0.9 },
     }, before);
   }
   // Red is dashed as well as red: a separate layer, since line-dasharray cannot
@@ -184,7 +190,7 @@ export function syncWalkwayLayers(instance: MapLibreMap, view: WalkwayView, conf
   const zoneVisibility = view.zonesVisible ? "visible" : "none";
   for (const id of ZONE_LAYERS) if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", zoneVisibility);
   const visibility = view.visible ? "visible" : "none";
-  for (const id of ["walkway-route-direct", "walkway-route-detour", "walkway-line", "walkway-line-red", "walkway-route-points"]) {
+  for (const id of ["walkway-route-direct", "walkway-route-detour", "walkway-line", "walkway-line-none", "walkway-line-red", "walkway-route-points"]) {
     if (instance.getLayer(id)) instance.setLayoutProperty(id, "visibility", visibility);
   }
 }
