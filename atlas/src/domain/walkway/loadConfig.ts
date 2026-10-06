@@ -36,7 +36,7 @@ export interface WalkwayConfig {
     floorDb: number;
   };
   kerbAttachM: number;
-  zones: { scoreBelow: number; mergeGapM: number; minLengthM: number; maxLengthM: number; splitCellM: number };
+  zones: { scoreBelow: number; mergeGapM: number; minLengthM: number; maxLengthM: number; maxSegmentM: number; splitCellM: number };
   autoData: {
     noiseMap: { bandMidpointOffsetDb: number; belowThresholdDb: number; sampleSpacingM: number; gapFallbackRoadM: number };
     slope: { minBaselineM: number };
@@ -167,6 +167,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const civicAmenities = list("civicAmenities");
 
   need(isNumber(zones.maxLengthM) && (zones.maxLengthM as number) > 0, `"zones.maxLengthM" must be a number of metres above 0.`);
+  need(isNumber(zones.maxSegmentM) && (zones.maxSegmentM as number) > 0, `"zones.maxSegmentM" must be a number of metres above 0.`);
   need(isNumber(zones.splitCellM) && (zones.splitCellM as number) > 0, `"zones.splitCellM" must be a number of metres above 0.`);
   const trails = section(auto, "excludeTrails", "autoData.");
   const trailList = (key: string): string[] => {
@@ -267,6 +268,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       mergeGapM: zones.mergeGapM as number,
       minLengthM: zones.minLengthM as number,
       maxLengthM: zones.maxLengthM as number,
+      maxSegmentM: zones.maxSegmentM as number,
       splitCellM: zones.splitCellM as number,
     },
     autoData: {

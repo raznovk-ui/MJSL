@@ -95,10 +95,11 @@ export function detectZones(
   profileId: string,
   config: WalkwayConfig,
 ): Zone[] {
-  const { scoreBelow, mergeGapM, minLengthM, maxLengthM, splitCellM } = config.zones;
+  const { scoreBelow, mergeGapM, minLengthM, maxLengthM, maxSegmentM, splitCellM } = config.zones;
   const candidates = segments.filter((segment) => {
     const s = scores[segment.id];
-    return !!s && s.score !== null && (s.vetoed || s.score < scoreBelow) && !!segment.geometry && segment.geometry.length >= 2;
+    return !!s && s.score !== null && (s.vetoed || s.score < scoreBelow) && !!segment.geometry && segment.geometry.length >= 2
+      && (segment.lengthM ?? 0) <= maxSegmentM;
   });
   if (candidates.length === 0) return [];
 

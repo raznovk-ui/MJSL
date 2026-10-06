@@ -180,3 +180,14 @@ describe("zone size cap", () => {
     expect(run(chain)).toHaveLength(1);
   });
 });
+
+describe("very long single segments", () => {
+  it("are scored but never listed as a zone", () => {
+    // About 8 km of one bad segment, and a normal bad one beside it.
+    const longOne = seg("long", "a1", "a2", 5.30, 5.40, BAD);
+    const normal = seg("short", "b1", "b2", 5.45, 5.4515, BAD);
+    expect(longOne.lengthM).toBeGreaterThan(1000);
+    const zones = run([longOne, normal]);
+    expect(zones.flatMap((z) => z.segmentIds)).toEqual(["short"]);
+  });
+});
