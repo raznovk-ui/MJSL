@@ -81,6 +81,11 @@ export function WalkwayPanel() {
       row("Reperes (commerces, arrets)", "landmarks", (s) => s.values.landmarkCount !== undefined),
       row("Lieux d'activites", "activities", (s) => s.values.activityDistanceM !== undefined),
       row("Lieux de decision / civiques", "civic", (s) => s.values.civicDistanceM !== undefined),
+      row("Espaces prives / publics", "publicPrivate", (s) => s.values.privateShare !== undefined),
+      row("Marches a l'entree des lieux", "thresholds", (s) => s.values.thresholdSteps !== undefined),
+      row("Cameras, portails", "surveillance", (s) => s.values.controlDevices !== undefined),
+      row("Largeur reelle (marcher a deux)", "width", (s) => s.values.widthM !== undefined && s.sources?.width !== "estimated"),
+      row("Abris, seuils habitables", "shelter", (s) => s.values.shelterCount !== undefined),
     ];
   }, [segments]);
 
