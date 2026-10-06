@@ -5,6 +5,16 @@ import { SCORED_DIMENSIONS } from "../../domain/walkway/index.js";
 import { dimension as meta } from "../../domain/dimensions.js";
 import { GRADIENT } from "../walkway/walkwayLayers.js";
 
+/** The person each dimension is read through, as the client defined them. */
+const PERSONA: Record<string, string> = {
+  physical: "mobilite reduite",
+  sensory: "malvoyant.e / neurodivergent.e",
+  cognitive: "allophone",
+  economic: "faibles revenus",
+  socio_cultural: "co-presence",
+  political: "co-participation",
+};
+
 /**
  * On/off switches for every overlay, on the map itself, so any layer can be hidden
  * to compare against the bare basemap. "Carte seule" hides them all at once.
@@ -44,7 +54,7 @@ export function MapOverlayToggles() {
       </p>
       <div role="radiogroup" aria-label="Couche affichee" className="mb-2 space-y-1 border-b pb-2" style={{ borderColor: "var(--line)" }}>
         <p className="text-xs font-semibold text-slate-700">Couche affichee</p>
-        {([["combined", "Score combine (profil choisi)"], ...SCORED_DIMENSIONS.map((d) => [d, `${meta(d).mjslCode} ${meta(d).label}`] as const)] as const).map(([key, label]) => (
+        {([["combined", "Score combine (profil choisi)"], ...SCORED_DIMENSIONS.map((d) => [d, `${meta(d).mjslCode} ${meta(d).label} — ${PERSONA[d]}`] as const)] as const).map(([key, label]) => (
           <label key={key} className={row}>
             <input type="radio" name="map-layer" checked={layer === key} onChange={() => setLayer(key)} className="mt-0.5" />
             <span>{label}</span>

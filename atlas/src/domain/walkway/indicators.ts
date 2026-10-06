@@ -32,6 +32,8 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
   const surfaceKey = values.surface?.trim().toLowerCase();
   const surfaceScore = surfaceKey === undefined ? undefined : indicators.surface.scores[surfaceKey];
 
+  const glareScore = surfaceKey === undefined ? undefined : indicators.glare.scores[surfaceKey];
+
   return [
     result("width", indicators.width.dimension, isNum(values.widthM)
       ? linearBarrier(values.widthM, indicators.width.noProblemAt, indicators.width.totalObstacleAt)
@@ -48,6 +50,29 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
       : null),
     result("economic", indicators.economic.dimension, isNum(values.privatizedShare)
       ? clamp01(values.privatizedShare)
+      : null),
+    result("transit", indicators.transit.dimension, isNum(values.transitModes)
+      ? linearBarrier(values.transitModes, indicators.transit.noProblemAt, indicators.transit.totalObstacleAt)
+      : null),
+    result("crossings", indicators.crossings.dimension, isNum(values.crossingBarrier) ? clamp01(values.crossingBarrier) : null),
+    result("glare", indicators.glare.dimension, isNum(glareScore) ? clamp01(glareScore) : null),
+    result("signage", indicators.signage.dimension, isNum(values.signageCount)
+      ? linearBarrier(values.signageCount, indicators.signage.noProblemAt, indicators.signage.totalObstacleAt)
+      : null),
+    result("freeServices", indicators.freeServices.dimension, isNum(values.freeServiceDistanceM)
+      ? linearBarrier(values.freeServiceDistanceM, indicators.freeServices.noProblemAt, indicators.freeServices.totalObstacleAt)
+      : null),
+    result("legibility", indicators.legibility.dimension, isNum(values.sinuosity)
+      ? linearBarrier(values.sinuosity, indicators.legibility.noProblemAt, indicators.legibility.totalObstacleAt)
+      : null),
+    result("infoCentres", indicators.infoCentres.dimension, isNum(values.infoDistanceM)
+      ? linearBarrier(values.infoDistanceM, indicators.infoCentres.noProblemAt, indicators.infoCentres.totalObstacleAt)
+      : null),
+    result("poverty", indicators.poverty.dimension, isNum(values.areaPovertyPct)
+      ? linearBarrier(values.areaPovertyPct, indicators.poverty.noProblemAt, indicators.poverty.totalObstacleAt)
+      : null),
+    result("participation", indicators.participation.dimension, typeof values.inParticipationArea === "boolean"
+      ? (values.inParticipationArea ? indicators.participation.inside : indicators.participation.outside)
       : null),
     result("thresholds", indicators.thresholds.dimension, isNum(values.thresholdSteps)
       ? linearBarrier(values.thresholdSteps, indicators.thresholds.noProblemAt, indicators.thresholds.totalObstacleAt)

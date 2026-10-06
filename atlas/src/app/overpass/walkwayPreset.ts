@@ -54,13 +54,15 @@ export const WALKWAY_TILES: OverpassPreset[] = cityTiles().map(walkwayPresetFor)
 export function socialPresetFor(tile: Tile): OverpassPreset {
   const b = tile.bbox;
   return {
-    id: `social_mjsl_${tile.id}`,
+    id: `social_mjsl2_${tile.id}`,
     label: `Controle, abris et seuils (OSM) ${tile.id}`,
     description: "Cameras, portails, abris et passages couverts pour la dimension sociale.",
     dimensions: ["socio_cultural"],
     query: `[out:json][timeout:90];
 (
   node["man_made"="surveillance"](${b});
+  node["highway"="crossing"](${b});
+  node["tourism"="information"](${b});
   node["barrier"~"^(gate|lift_gate|turnstile)$"](${b});
   node["highway"="bus_stop"]["shelter"="yes"](${b});
   node["shelter"="yes"](${b});

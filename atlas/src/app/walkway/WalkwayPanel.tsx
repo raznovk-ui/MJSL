@@ -86,6 +86,15 @@ export function WalkwayPanel() {
       row("Cameras, portails", "surveillance", (s) => s.values.controlDevices !== undefined),
       row("Largeur reelle (marcher a deux)", "width", (s) => s.values.widthM !== undefined && s.sources?.width !== "estimated"),
       row("Abris, seuils habitables", "shelter", (s) => s.values.shelterCount !== undefined),
+      row("Transports en commun (modes)", "transit", (s) => s.values.transitModes !== undefined),
+      row("Passages pietons proches", "crossings", (s) => s.values.crossingBarrier !== undefined),
+      row("Eblouissement (materiau)", "surface", (s) => s.values.surface !== undefined),
+      row("Signaletique", "signage", (s) => s.values.signageCount !== undefined),
+      row("Services gratuits", "freeServices", (s) => s.values.freeServiceDistanceM !== undefined),
+      row("Lisibilite du trace", "legibility", (s) => s.values.sinuosity !== undefined),
+      row("Centres d'information", "infoCentres", (s) => s.values.infoDistanceM !== undefined),
+      row("Pauvrete du quartier (IRIS)", "poverty", (s) => s.values.areaPovertyPct !== undefined),
+      row("Dispositif de co-participation", "participation", (s) => s.values.inParticipationArea !== undefined),
     ];
   }, [segments]);
 

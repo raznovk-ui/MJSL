@@ -49,6 +49,63 @@
       "bufferM": 15
     },
 
+    "transit": {
+      "_comment": "PHYSICAL (person with reduced mobility): public transport within autoData.places.transitRadiusM metres, counted by MODE (bus, tram, metro). Two or more modes is fine (as the client asked), one mode is half an obstacle, none is a total obstacle.",
+      "dimension": "physical",
+      "noProblemAt": 2,
+      "totalObstacleAt": 0
+    },
+    "crossings": {
+      "_comment": "SENSORY (visually impaired or neurodivergent person): quality of the nearest pedestrian crossing within autoData.places.crossingRadiusM metres. Equipped (traffic lights or tactile paving) = 0, plain marked crossing = 'marked', unmarked = 'unmarked'. No crossing nearby is 'no data' (a street without crossings is not a bad crossing).",
+      "dimension": "sensory",
+      "marked": 0.4,
+      "unmarked": 0.8
+    },
+    "glare": {
+      "_comment": "SENSORY (glare): barrier per floor material, from 0 (matt) to 1 (very reflective). STARTING GUESSES, to be replaced by measurements. A surface not listed is 'no data'.",
+      "dimension": "sensory",
+      "scores": {
+        "asphalt": 0.1, "paved": 0.3, "paving_stones": 0.4, "concrete": 0.5, "concrete:plates": 0.5,
+        "sett": 0.3, "cobblestone": 0.2, "gravel": 0.2, "fine_gravel": 0.2, "sand": 0.4,
+        "grass": 0, "wood": 0.3, "tiles": 0.8, "metal": 0.8, "marble": 0.9
+      }
+    },
+    "signage": {
+      "_comment": "SENSORY (signage): guideposts, information boards and maps within autoData.places.signageRadiusM metres. 2 or more is fine, none is a total obstacle.",
+      "dimension": "sensory",
+      "noProblemAt": 2,
+      "totalObstacleAt": 0
+    },
+    "freeServices": {
+      "_comment": "ECONOMIC (low-income person, free services): distance in metres to the nearest FREE service (drinking water, free toilets, library, community or youth centre, see autoData.places.freeServiceAmenities). 150 m or less is fine, 800 m or more is a total obstacle.",
+      "dimension": "economic",
+      "noProblemAt": 150,
+      "totalObstacleAt": 800
+    },
+    "legibility": {
+      "_comment": "COGNITIVE (allophone person, legibility of the route): sinuosity = length of the segment divided by the straight distance between its ends. 1.10 or less is a clear line, 1.60 or more is a winding, hard-to-follow one.",
+      "dimension": "cognitive",
+      "noProblemAt": 1.1,
+      "totalObstacleAt": 1.6
+    },
+    "infoCentres": {
+      "_comment": "COGNITIVE (allophone person, information centres): distance in metres to the nearest tourist or information office (open-data tourist offices and OSM tourism=information offices). 300 m or less is fine, 1500 m or more is a total obstacle.",
+      "dimension": "cognitive",
+      "noProblemAt": 300,
+      "totalObstacleAt": 1500
+    },
+    "poverty": {
+      "_comment": "SOCIAL (co-presence, social class of households): poverty rate of the neighbourhood (IRIS, % of households under the poverty line, 2014 open data). It describes the AREA, not the street itself: a street in a poor area is not worse built, it is where public investment and mixing are most at stake. 15 % or less is fine, 45 % or more is a total obstacle.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 15,
+      "totalObstacleAt": 45
+    },
+    "participation": {
+      "_comment": "POLITICAL (representation, co-participation, projects): is there a formal co-participation device where the segment lies, i.e. inside a priority neighbourhood (QPV, with its citizens' council) or the perimeter of an urban project (ZAC, projet urbain partenarial, NPRU, with legal consultation). Inside = 'inside'; outside = 'outside', which means 'no device identified', not 'no participation'.",
+      "dimension": "political",
+      "inside": 0,
+      "outside": 0.5
+    },
     "thresholds": {
       "_comment": "SOCIAL (memoire dimension 5, 'seuils filtrants': two, three, five steps without a ramp at the entrance of a place are a silent filter). Counts the flights of steps with no ramp that lie within autoData.places.stepsNearPlaceM metres of the segment AND next to a shop, cafe or other place. 0 is fine, 2 or more is a total obstacle.",
       "dimension": "socio_cultural",
@@ -148,6 +205,11 @@
       "_comment": "Which OpenStreetMap places count for the cognitive and social indicators, and what 'near' means (metres).",
       "landmarkRadiusM": 50,
       "lampRadiusM": 25,
+      "transitRadiusM": 400,
+      "crossingRadiusM": 40,
+      "signageRadiusM": 50,
+      "freeServiceAmenities": ["drinking_water", "toilets", "library", "community_centre", "social_centre", "youth_centre"],
+      "signageInformation": ["guidepost", "board", "map"],
       "stepsNearPlaceM": 25,
       "cameraRadiusM": 30,
       "shelterRadiusM": 50,
@@ -184,13 +246,23 @@
     "_howToAddProfile": "To add a profile (elderly person, autistic person, stroller...), copy one block below, give it a new short name, and change: 'label', the 'weights' (they must add up to 1) and the 'vetoes'. A veto sets the score to 0 whenever it applies. Veto choices: stepsWithoutRamp (true/false), widthBelowM (a number of metres), kerbRaised (true/false). Leave 'vetoes' empty ({}) for none.",
 
     "wheelchair": {
-      "label": "Wheelchair user",
+      "label": "Personne a mobilite reduite",
       "weights": { "physical": 0.35, "sensory": 0.1, "cognitive": 0.1, "economic": 0.15, "socio_cultural": 0.15, "political": 0.15 },
       "vetoes": { "stepsWithoutRamp": true, "widthBelowM": 0.9, "kerbRaised": true }
     },
     "blind": {
-      "label": "Blind person",
+      "label": "Personne malvoyante ou neurodivergente",
       "weights": { "physical": 0.15, "sensory": 0.3, "cognitive": 0.2, "economic": 0.1, "socio_cultural": 0.1, "political": 0.15 },
+      "vetoes": {}
+    },
+    "allophone": {
+      "label": "Personne allophone",
+      "weights": { "physical": 0.1, "sensory": 0.15, "cognitive": 0.4, "economic": 0.1, "socio_cultural": 0.15, "political": 0.1 },
+      "vetoes": {}
+    },
+    "low_income": {
+      "label": "Personne a faibles revenus",
+      "weights": { "physical": 0.15, "sensory": 0.05, "cognitive": 0.1, "economic": 0.4, "socio_cultural": 0.2, "political": 0.1 },
       "vetoes": {}
     }
   }

@@ -12,6 +12,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "data:noise": "node scripts/fetchNoise.mjs",
+    "data:amp": "node scripts/fetchAmp.mjs",
     "data:osm": "vite-node scripts/fetchOsm.ts"
   },
   "dependencies": {

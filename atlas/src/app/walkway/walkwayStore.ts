@@ -15,6 +15,9 @@ import {
   type RouteResult,
   type Segment,
   type SegmentScore,
+  buildAmpIndex,
+  type AmpData,
+  type AmpIndex,
   type ScoredDimension,
   type Zone,
 } from "../../domain/walkway/index.js";
@@ -172,6 +175,32 @@ async function loadNoiseIndex(): Promise<NoiseIndex | null> {
   }
 }
 
+/**
+ * Open data of the Metropole portal (npm run data:amp): public transport, tourist
+ * offices, household poverty, priority neighbourhoods and project perimeters.
+ * Each file is optional: a missing one leaves the indicators built on it at "no data".
+ */
+async function loadAmp(): Promise<AmpIndex | undefined> {
+  const base = `${import.meta.env.BASE_URL}data/amp/`;
+  const get = async <T,>(file: string): Promise<T | undefined> => {
+    try {
+      const response = await fetch(base + file);
+      return response.ok ? ((await response.json()) as T) : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  const [transit, tourism, iris, qpv, projects] = await Promise.all([
+    get<AmpData["transit"]>("transit.json"),
+    get<AmpData["tourism"]>("tourism.json"),
+    get<AmpData["iris"]>("iris.geojson"),
+    get<AmpData["qpv"]>("qpv.geojson"),
+    get<AmpData["projects"]>("projects.geojson"),
+  ]);
+  if (!transit && !tourism && !iris && !qpv && !projects) return undefined;
+  return buildAmpIndex({ transit, tourism, iris, qpv, projects });
+}
+
 const IDLE_AUTO: AutoDataStatus = { noise: "none", slope: "idle", slopeProgress: null, slopeError: null };
 
 export const useWalkwayStore = create<WalkwayState>((set, get) => ({
@@ -202,8 +231,8 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
     set({ loadState: "loading", error: null, auto: IDLE_AUTO, zones: [], selectedZoneId: null });
     say("Chargement des troncons pietons (OSM) et de la carte de bruit officielle...");
     try {
-      const [result, noiseIndex] = await Promise.all([loadCity(forceRefresh, (done, total) => say(`Chargement de la ville : zone ${Math.min(done + 1, total)} sur ${total}...`)), loadNoiseIndex()]);
-      const segments = buildSegments(result.geojson, WALKWAY_CONFIG, noiseIndex ? { noiseIndex } : {});
+      const [result, noiseIndex, amp] = await Promise.all([loadCity(forceRefresh, (done, total) => say(`Chargement de la ville : zone ${Math.min(done + 1, total)} sur ${total}...`)), loadNoiseIndex(), loadAmp()]);
+      const segments = buildSegments(result.geojson, WALKWAY_CONFIG, { ...(noiseIndex ? { noiseIndex } : {}), ...(amp ? { amp } : {}) });
       const hasRoads = segments.some((s) => s.sources?.noise === "estimated");
       const scores = scoreEverything(segments);
       set({

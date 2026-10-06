@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { FeatureCollection } from "geojson";
 import { WALKWAY_CONFIG as config } from "../loadConfig.js";
 import { buildSegments } from "../fromOsm.js";
+import { buildAmpIndex } from "../ampData.js";
 import { scoreSegment } from "../score.js";
 import { DIMENSION_KEYS } from "../../dimensions.js";
 
@@ -181,5 +182,88 @@ describe("social dimension (memoire D5): thresholds, control, co-presence, shelt
     const [alone] = buildSegments(fc([way("w1", {}, road), far]), config);
     expect(alone!.values.shelterCount).toBe(0);
     expect(scoreSegment(alone!, "blind", config).barriers.find((x) => x.indicator === "shelter")!.barrier).toBe(1);
+  });
+});
+
+describe("indicators of the client's six personas", () => {
+  const box = (x0: number, y0: number, x1: number, y1: number, properties: Record<string, unknown>) => ({
+    type: "Feature" as const,
+    properties,
+    geometry: { type: "Polygon" as const, coordinates: [[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]] },
+  });
+  const amp = buildAmpIndex({
+    transit: [
+      { lon: 5.3505, lat: LAT + 0.0002, mode: "bus" },
+      { lon: 5.3510, lat: LAT + 0.0002, mode: "bus" },
+      { lon: 5.3515, lat: LAT + 0.0002, mode: "tram" },
+      { lon: 5.40, lat: LAT, mode: "metro" }, // too far
+    ],
+    tourism: [{ lon: 5.351, lat: LAT + 0.003 }], // about 330 m away
+    iris: { type: "FeatureCollection", features: [box(5.34, 43.27, 5.36, 43.29, { poverty: 30 })] } as FeatureCollection,
+    qpv: { type: "FeatureCollection", features: [box(5.349, 43.279, 5.353, 43.281, { kind: "qpv" })] } as FeatureCollection,
+  });
+  const [seg] = buildSegments(fc([way("w1", {}, road)]), config, { amp });
+  const barrier = (key: string, s = seg!) => scoreSegment(s, "blind", config).barriers.find((b) => b.indicator === key)!;
+
+  it("physical: counts transport MODES within walking distance, two or more is good", () => {
+    expect(seg!.values.transitModes).toBe(2); // bus and tram; the metro is too far
+    expect(barrier("transit").barrier).toBe(0);
+    expect(barrier("transit").source).toBe("official");
+    const [bare] = buildSegments(fc([way("w1", {}, road)]), config, { amp: buildAmpIndex({ transit: [{ lon: 5.3505, lat: LAT + 0.0002, mode: "bus" }] }) });
+    expect(barrier("transit", bare!).barrier).toBe(0.5); // one mode: half an obstacle
+  });
+
+  it("cognitive: distance to the nearest information office, and how winding the trace is", () => {
+    expect(seg!.values.infoDistanceM).toBeGreaterThan(300);
+    expect(seg!.values.infoDistanceM).toBeLessThan(400);
+    expect(seg!.values.sinuosity).toBeCloseTo(1, 6); // a straight line
+    const bend = buildSegments(fc([way("w2", {}, [[5.350, LAT], [5.3505, LAT + 0.0006], [5.351, LAT]])]), config)[0]!;
+    expect(bend.values.sinuosity).toBeGreaterThan(1.5);
+    expect(barrier("legibility", bend).barrier).toBeGreaterThan(0.5);
+  });
+
+  it("social: the poverty rate of the neighbourhood, from the IRIS the segment lies in", () => {
+    expect(seg!.values.areaPovertyPct).toBe(30);
+    expect(barrier("poverty").barrier).toBeCloseTo(0.5, 6); // (30 - 15) / (45 - 15)
+    const outside = buildSegments(fc([way("w3", {}, [[5.50, LAT], [5.502, LAT]])]), config, { amp })[0]!;
+    expect(outside.values.areaPovertyPct).toBeUndefined();
+  });
+
+  it("political: inside a priority neighbourhood or project perimeter is a co-participation device", () => {
+    expect(seg!.values.inParticipationArea).toBe(true);
+    expect(barrier("participation").barrier).toBe(0);
+    const outside = buildSegments(fc([way("w3", {}, [[5.50, LAT], [5.502, LAT]])]), config, { amp })[0]!;
+    expect(outside.values.inParticipationArea).toBe(false);
+    expect(barrier("participation", outside).barrier).toBe(0.5);
+  });
+
+  it("sensory: crossings (equipped or not), signs and glare", () => {
+    const places = [
+      node(5.3510, LAT + 0.0001, { highway: "crossing", crossing: "traffic_signals" }),
+      node(5.3512, LAT + 0.0001, { tourism: "information", information: "guidepost" }),
+      node(5.3513, LAT + 0.0001, { tourism: "information", information: "board" }),
+    ];
+    const [s1] = buildSegments(fc([way("w1", { surface: "marble" }, road), ...places]), config);
+    expect(barrier("crossings", s1!).barrier).toBe(0);
+    expect(s1!.values.signageCount).toBe(2);
+    expect(barrier("signage", s1!).barrier).toBe(0);
+    expect(barrier("glare", s1!).barrier).toBe(0.9);
+    const [plain] = buildSegments(fc([way("w1", {}, road), node(5.351, LAT + 0.0001, { highway: "crossing" })]), config);
+    expect(barrier("crossings", plain!).barrier).toBe(0.4); // marked, not equipped
+  });
+
+  it("economic: distance to the nearest FREE service; a paying toilet does not count", () => {
+    const [free] = buildSegments(fc([way("w1", {}, road), node(5.351, LAT + 0.0003, { amenity: "drinking_water" })]), config);
+    expect(free!.values.freeServiceDistanceM).toBeLessThan(50);
+    const [paying] = buildSegments(fc([way("w1", {}, road), node(5.351, LAT + 0.0003, { amenity: "toilets", fee: "yes" })]), config);
+    expect(paying!.values.freeServiceDistanceM).toBeUndefined();
+  });
+
+  it("there are four personas, each weighting its own dimension most", () => {
+    const top = (id: string) => Object.entries(config.profiles[id]!.weights).sort((a, b) => b[1]! - a[1]!)[0]![0];
+    expect(top("allophone")).toBe("cognitive");
+    expect(top("low_income")).toBe("economic");
+    expect(top("blind")).toBe("sensory");
+    expect(top("wheelchair")).toBe("physical");
   });
 });

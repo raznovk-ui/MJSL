@@ -5,7 +5,10 @@ import { useWalkwayStore } from "./walkwayStore.js";
 
 const LABEL: Record<IndicatorKey, string> = {
   width: "Largeur", noise: "Bruit", slope: "Pente", surface: "Revetement", rest: "Distance a un banc", economic: "Privatisation",
-  lighting: "Eclairage", publicPrivate: "Espaces prives / publics", thresholds: "Marches a l'entree", surveillance: "Controle (cameras, portails)", coPresence: "Marcher a deux", shelter: "Abris, seuils habitables", landmarks: "Reperes", activities: "Lieux d'activites", civic: "Lieux de decision",
+  lighting: "Eclairage", publicPrivate: "Espaces prives / publics", thresholds: "Marches a l'entree",
+  transit: "Transports en commun", crossings: "Passages pietons", glare: "Eblouissement", signage: "Signaletique",
+  freeServices: "Services gratuits", legibility: "Lisibilite du trace", infoCentres: "Centres d'information",
+  poverty: "Pauvrete du quartier", participation: "Co-participation", surveillance: "Controle (cameras, portails)", coPresence: "Marcher a deux", shelter: "Abris, seuils habitables", landmarks: "Reperes", activities: "Lieux d'activites", civic: "Lieux de decision",
 };
 const SOURCE: Record<ValueSource, string> = { measured: "mesure", osm: "OSM", official: "officiel", estimated: "estime" };
 
@@ -17,6 +20,15 @@ function rawValue(segment: Segment, key: IndicatorKey): string {
     case "slope": return v.inclinePct === undefined ? "—" : `${v.inclinePct.toFixed(1)} %`;
     case "surface": return v.surface ?? "—";
     case "rest": return v.restDistanceM === undefined ? "—" : `${Math.round(v.restDistanceM)} m`;
+    case "transit": return v.transitModes === undefined ? "—" : `${v.transitModes} mode(s)`;
+    case "crossings": return v.crossingBarrier === undefined ? "—" : v.crossingBarrier === 0 ? "equipe" : v.crossingBarrier < 0.6 ? "marque" : "non marque";
+    case "glare": return v.surface ?? "—";
+    case "signage": return v.signageCount === undefined ? "—" : `${v.signageCount} panneau(x)`;
+    case "freeServices": return v.freeServiceDistanceM === undefined ? "—" : `${Math.round(v.freeServiceDistanceM)} m`;
+    case "legibility": return v.sinuosity === undefined ? "—" : `sinuosite ${v.sinuosity.toFixed(2)}`;
+    case "infoCentres": return v.infoDistanceM === undefined ? "—" : `${Math.round(v.infoDistanceM)} m`;
+    case "poverty": return v.areaPovertyPct === undefined ? "—" : `${v.areaPovertyPct.toFixed(0)} %`;
+    case "participation": return v.inParticipationArea === undefined ? "—" : v.inParticipationArea ? "dispositif present" : "aucun repere";
     case "thresholds": return v.thresholdSteps === undefined ? "—" : `${v.thresholdSteps} volee(s) sans rampe`;
     case "surveillance": return v.controlDevices === undefined ? "—" : `${v.controlDevices} dispositif(s)`;
     case "coPresence": return v.widthM === undefined ? "—" : `${v.widthM.toFixed(2)} m`;
@@ -32,7 +44,9 @@ function rawValue(segment: Segment, key: IndicatorKey): string {
 
 function rule(key: IndicatorKey): string {
   const i = WALKWAY_CONFIG.indicators[key];
-  if ("scores" in i) return "table de revetements";
+  if ("scores" in i) return key === "glare" ? "table d'eblouissement par materiau" : "table de revetements";
+  if ("inside" in i) return "dans un QPV ou un projet : 0, sinon " + i.outside;
+  if ("marked" in i) return "equipe 0, marque " + i.marked + ", non marque " + i.unmarked;
   if (!("noProblemAt" in i)) return key === "lighting" ? "part non eclairee (0 a 1)" : key === "publicPrivate" ? "part de lieux prives (0 a 1)" : "part privatisee (0 a 1)";
   return `0 a ${i.noProblemAt}, 1 a ${i.totalObstacleAt}`;
 }

@@ -10,7 +10,8 @@ export type ValueSource = "measured" | "osm" | "official" | "estimated";
 
 export type IndicatorKey = "width" | "noise" | "slope" | "surface" | "rest" | "economic"
   | "lighting" | "landmarks" | "activities" | "civic" | "publicPrivate"
-  | "thresholds" | "surveillance" | "coPresence" | "shelter";
+  | "thresholds" | "surveillance" | "coPresence" | "shelter"
+  | "transit" | "crossings" | "glare" | "signage" | "freeServices" | "legibility" | "infoCentres" | "poverty" | "participation";
 
 /**
  * Raw facts about one walkway segment. Anything left undefined is "no data":
@@ -27,6 +28,22 @@ export interface SegmentValues {
   privatizedShare?: number;
   /** Share of the segment with no street lighting nearby, 0..1. */
   unlitShare?: number;
+  /** Number of public transport modes (bus, tram, metro) within walking distance. */
+  transitModes?: number;
+  /** Barrier of the nearest pedestrian crossing: 0 equipped, higher is worse. */
+  crossingBarrier?: number;
+  /** Guideposts, information boards and maps nearby. */
+  signageCount?: number;
+  /** Distance to the nearest free service, metres. */
+  freeServiceDistanceM?: number;
+  /** Length of the segment divided by the straight distance between its ends. */
+  sinuosity?: number;
+  /** Distance to the nearest information office, metres. */
+  infoDistanceM?: number;
+  /** Poverty rate of the neighbourhood, percent. */
+  areaPovertyPct?: number;
+  /** Inside a priority neighbourhood or an urban-project perimeter. */
+  inParticipationArea?: boolean;
   /** Flights of steps with no ramp next to a place, close to the segment. */
   thresholdSteps?: number;
   /** Cameras and gates close to the segment. */

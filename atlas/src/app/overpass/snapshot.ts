@@ -12,7 +12,7 @@ const KEEP_TAGS = new Set([
   "lit", "amenity", "shop", "tourism", "historic", "leisure", "office", "outdoor_seating",
   "kerb", "maxspeed", "foot", "access", "tactile_paving", "wheelchair",
   "sac_scale", "trail_visibility", "mtb:scale",
-  "man_made", "barrier", "entrance", "shelter", "covered", "step_count", "fee", "building:part",
+  "man_made", "barrier", "entrance", "shelter", "covered", "step_count", "fee", "building:part", "crossing", "information", "traffic_signals", "traffic_signals:sound",
   "osm_id", "osm_nodes", "label",
 ]);
 

@@ -1,4 +1,5 @@
 import { SpatialGrid } from "./spatial.js";
+import type { AmpIndex } from "./ampData.js";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import { estimateNoiseDb } from "./indicators.js";
 import { coordKey, distanceM, pointAlong, pointToPolylineM, polylineLengthM } from "./geo.js";
@@ -97,7 +98,7 @@ interface WayPart {
 export function buildSegments(
   collection: FeatureCollection,
   config: WalkwayConfig,
-  options: { noiseIndex?: NoiseIndex } = {},
+  options: { noiseIndex?: NoiseIndex; amp?: AmpIndex } = {},
 ): Segment[] {
   const features = collection.features as Feature[];
   const walkways: WayPart[] = [];
@@ -113,6 +114,10 @@ export function buildSegments(
   const privatePlaces: LngLat[] = [];
   const controls: LngLat[] = [];
   const shelters: LngLat[] = [];
+  const crossings: { p: LngLat; barrier: number }[] = [];
+  const signs: LngLat[] = [];
+  const infoOffices: LngLat[] = [];
+  const freeServices: LngLat[] = [];
   const stepsNoRamp: LngLat[] = []; // middle of each flight of steps with no ramp
   const { activityAmenities, activityLeisure, civicAmenities, freeAmenities, freeLeisure, privateAmenities } = config.autoData.places;
 
@@ -148,6 +153,19 @@ export function buildSegments(
     if ((amenity && activityAmenities.includes(amenity)) || (str(tags.leisure) && activityLeisure.includes(str(tags.leisure)!))) {
       activityPlaces.push(...pointsOf(geometry));
     }
+    // Persona indicators: crossings, signs, information offices, free services.
+    if (geometry?.type === "Point" && highway === "crossing") {
+      const kind = str(tags.crossing);
+      const equipped = kind === "traffic_signals" || str(tags.tactile_paving) === "yes" || str(tags.traffic_signals) !== undefined;
+      crossings.push({ p: geometry.coordinates as LngLat, barrier: equipped ? 0 : kind === "unmarked" ? config.indicators.crossings.unmarked : config.indicators.crossings.marked });
+    }
+    if (geometry?.type === "Point" && str(tags.tourism) === "information") {
+      const info = str(tags.information);
+      if (info && config.autoData.places.signageInformation.includes(info)) signs.push(geometry.coordinates as LngLat);
+      if (info === "office") infoOffices.push(geometry.coordinates as LngLat);
+    }
+    if (amenity && config.autoData.places.freeServiceAmenities.includes(amenity) && str(tags.fee) !== "yes") freeServices.push(...pointsOf(geometry).slice(0, 1));
+
     // Memoire dimension 5: control devices, sheltered places, steps at entrances.
     if (str(tags.man_made) === "surveillance" || ["gate", "lift_gate", "turnstile"].includes(str(tags.barrier) ?? "")) controls.push(...pointsOf(geometry).slice(0, 1));
     if (amenity === "shelter" || str(tags.covered) === "yes" || str(tags.shelter) === "yes" || str(tags["building:part"]) === "arcade") {
@@ -183,6 +201,14 @@ export function buildSegments(
     hasFreeOrPrivate: freePlaces.length + privatePlaces.length > 0,
     controls: new SpatialGrid<LngLat>(),
     shelters: new SpatialGrid<LngLat>(),
+    crossings: new SpatialGrid<{ p: LngLat; barrier: number }>(),
+    signs: new SpatialGrid<LngLat>(),
+    info: new SpatialGrid<LngLat>(500),
+    freeServices: new SpatialGrid<LngLat>(500),
+    hasCrossings: crossings.length > 0,
+    hasSigns: signs.length > 0,
+    hasInfo: infoOffices.length > 0,
+    hasFreeServices: freeServices.length > 0,
     hasControls: controls.length > 0,
     hasShelters: shelters.length > 0,
     // Steps count as a threshold only when a place (shop, cafe...) is right beside them.
@@ -192,6 +218,10 @@ export function buildSegments(
   for (const l of landmarks) index.landmarks.addPoint(l, l);
   for (const a of activityPlaces) index.activities.addPoint(a, a);
   for (const c of civicPlaces) index.civic.addPoint(c, c);
+  for (const c of crossings) index.crossings.addPoint(c.p, c);
+  for (const sg of signs) index.signs.addPoint(sg, sg);
+  for (const o of infoOffices) index.info.addPoint(o, o);
+  for (const f of freeServices) index.freeServices.addPoint(f, f);
   for (const c of controls) index.controls.addPoint(c, c);
   for (const sh of shelters) index.shelters.addPoint(sh, sh);
   for (const st of stepsNoRamp) {
@@ -225,7 +255,7 @@ export function buildSegments(
       const coords = way.coords.slice(start, end + 1);
       if (coords.length < 2) continue;
       const id = cuts.length > 2 ? `${way.osmId}#${k + 1}` : way.osmId;
-      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { ...index, noiseIndex: options.noiseIndex }, config));
+      segments.push(describeSegment(id, way, coords, way.nodeIds[start]!, way.nodeIds[end]!, { ...index, noiseIndex: options.noiseIndex, amp: options.amp }, config));
     }
   }
   return segments;
@@ -259,7 +289,16 @@ interface Context {
   thresholds: SpatialGrid<LngLat>;
   hasControls: boolean;
   hasShelters: boolean;
+  crossings: SpatialGrid<{ p: LngLat; barrier: number }>;
+  signs: SpatialGrid<LngLat>;
+  info: SpatialGrid<LngLat>;
+  freeServices: SpatialGrid<LngLat>;
+  hasCrossings: boolean;
+  hasSigns: boolean;
+  hasInfo: boolean;
+  hasFreeServices: boolean;
   noiseIndex?: NoiseIndex;
+  amp?: AmpIndex;
 }
 
 function describeSegment(
@@ -394,6 +433,47 @@ function describeSegment(
   };
   if (ctx.hasActivities) { values.activityDistanceM = nearest(ctx.activities); sources.activities = "osm"; }
   if (ctx.hasCivic) { values.civicDistanceM = nearest(ctx.civic); sources.civic = "osm"; }
+
+  // Indicators of the six personas (client's list), from OSM and the open data portal.
+  if (ctx.hasFreeServices) { values.freeServiceDistanceM = nearest(ctx.freeServices); sources.freeServices = "osm"; }
+  if (ctx.hasSigns) {
+    values.signageCount = ctx.signs
+      .near(middle, reach(places.signageRadiusM))
+      .filter((q) => pointToPolylineM(q, coords) <= places.signageRadiusM).length;
+    sources.signage = "osm";
+  }
+  if (ctx.hasCrossings) {
+    let best: { d: number; barrier: number } | null = null;
+    for (const c of ctx.crossings.near(middle, reach(places.crossingRadiusM))) {
+      const d = pointToPolylineM(c.p, coords);
+      if (d <= places.crossingRadiusM && (!best || d < best.d)) best = { d, barrier: c.barrier };
+    }
+    if (best) { values.crossingBarrier = best.barrier; sources.crossings = "osm"; }
+  }
+  const straight = distanceM(coords[0]!, coords[coords.length - 1]!);
+  if (straight >= 10) { values.sinuosity = lengthM / straight; sources.legibility = "osm"; }
+
+  const amp = ctx.amp;
+  if (amp?.hasTransit) {
+    const modes = new Set<string>();
+    for (const stop of amp.transit.near(middle, reach(places.transitRadiusM))) {
+      if (pointToPolylineM(stop.p, coords) <= places.transitRadiusM) modes.add(stop.mode);
+    }
+    values.transitModes = modes.size;
+    sources.transit = "official";
+  }
+  if (amp?.hasTourism || ctx.hasInfo) {
+    let d = Infinity;
+    if (ctx.hasInfo) d = Math.min(d, nearest(ctx.info));
+    if (amp?.hasTourism) d = Math.min(d, nearest(amp.tourism));
+    values.infoDistanceM = d;
+    sources.infoCentres = amp?.hasTourism ? "official" : "osm";
+  }
+  if (amp) {
+    const poverty = amp.iris.at(middle).map((p) => p.poverty).find((v): v is number => typeof v === "number");
+    if (poverty !== undefined) { values.areaPovertyPct = poverty; sources.poverty = "official"; }
+    if (amp.hasParticipation) { values.inParticipationArea = amp.participation.at(middle).length > 0; sources.participation = "official"; }
+  }
 
   // Noise: the official map wins. Its gaps are the exception: a segment the map says
   // nothing about, but that lies next to a major road, gets the road-distance

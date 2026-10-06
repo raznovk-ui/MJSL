@@ -11,3 +11,4 @@ export * from "./elevation.js";
 export { coordKey } from "./geo.js";
 export * from "./zones.js";
 export * from "./dimensionScores.js";
+export * from "./ampData.js";

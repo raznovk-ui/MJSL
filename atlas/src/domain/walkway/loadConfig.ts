@@ -23,6 +23,15 @@ export interface WalkwayConfig {
     economic: { dimension: Dimension; bufferM: number };
     lighting: { dimension: Dimension };
     publicPrivate: { dimension: Dimension };
+    transit: LinearIndicatorConfig;
+    crossings: { dimension: Dimension; marked: number; unmarked: number };
+    glare: { dimension: Dimension; scores: Record<string, number> };
+    signage: LinearIndicatorConfig;
+    freeServices: LinearIndicatorConfig;
+    legibility: LinearIndicatorConfig;
+    infoCentres: LinearIndicatorConfig;
+    poverty: LinearIndicatorConfig;
+    participation: { dimension: Dimension; inside: number; outside: number };
     thresholds: LinearIndicatorConfig;
     surveillance: LinearIndicatorConfig;
     coPresence: LinearIndicatorConfig;
@@ -51,6 +60,11 @@ export interface WalkwayConfig {
     /** Which OpenStreetMap places count, and how close "near" is. */
     places: {
       landmarkRadiusM: number;
+      transitRadiusM: number;
+      crossingRadiusM: number;
+      signageRadiusM: number;
+      freeServiceAmenities: string[];
+      signageInformation: string[];
       stepsNearPlaceM: number;
       cameraRadiusM: number;
       shelterRadiusM: number;
@@ -134,6 +148,30 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const lightingDimension = dimensionOf(lightingBlock, "indicators.lighting.");
   const publicPrivateBlock = section(indicators, "publicPrivate", "indicators.");
   const publicPrivateDimension = dimensionOf(publicPrivateBlock, "indicators.publicPrivate.");
+  const transit = linear(indicators, "transit");
+  const signage = linear(indicators, "signage");
+  const freeServices = linear(indicators, "freeServices");
+  const legibility = linear(indicators, "legibility");
+  const infoCentres = linear(indicators, "infoCentres");
+  const poverty = linear(indicators, "poverty");
+  const crossingsBlock = section(indicators, "crossings", "indicators.");
+  const crossingsDimension = dimensionOf(crossingsBlock, "indicators.crossings.");
+  for (const key of ["marked", "unmarked"]) {
+    need(isNumber(crossingsBlock[key]) && (crossingsBlock[key] as number) >= 0 && (crossingsBlock[key] as number) <= 1, `"indicators.crossings.${key}" must be a number between 0 and 1.`);
+  }
+  const glareBlock = section(indicators, "glare", "indicators.");
+  const glareDimension = dimensionOf(glareBlock, "indicators.glare.");
+  const glareScores = isObject(glareBlock.scores) ? glareBlock.scores : {};
+  need(isObject(glareBlock.scores), `"indicators.glare.scores" is missing.`);
+  for (const [name, value] of Object.entries(glareScores)) {
+    if (name.startsWith("_")) continue;
+    need(isNumber(value) && value >= 0 && value <= 1, `Glare of surface "${name}" must be a number between 0 and 1.`);
+  }
+  const participationBlock = section(indicators, "participation", "indicators.");
+  const participationDimension = dimensionOf(participationBlock, "indicators.participation.");
+  for (const key of ["inside", "outside"]) {
+    need(isNumber(participationBlock[key]) && (participationBlock[key] as number) >= 0 && (participationBlock[key] as number) <= 1, `"indicators.participation.${key}" must be a number between 0 and 1.`);
+  }
   const thresholds = linear(indicators, "thresholds");
   const surveillance = linear(indicators, "surveillance");
   const coPresence = linear(indicators, "coPresence");
@@ -172,7 +210,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   }
 
   const places = section(auto, "places", "autoData.");
-  for (const key of ["landmarkRadiusM", "lampRadiusM", "publicPrivateRadiusM", "stepsNearPlaceM", "cameraRadiusM", "shelterRadiusM"]) {
+  for (const key of ["landmarkRadiusM", "lampRadiusM", "publicPrivateRadiusM", "stepsNearPlaceM", "cameraRadiusM", "shelterRadiusM", "transitRadiusM", "crossingRadiusM", "signageRadiusM"]) {
     need(isNumber(places[key]) && (places[key] as number) > 0, `"autoData.places.${key}" must be a number of metres above 0.`);
   }
   const list = (key: string): string[] => {
@@ -184,6 +222,8 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const activityLeisure = list("activityLeisure");
   const civicAmenities = list("civicAmenities");
   const freeAmenities = list("freeAmenities");
+  const freeServiceAmenities = list("freeServiceAmenities");
+  const signageInformation = list("signageInformation");
   const freeLeisure = list("freeLeisure");
   const privateAmenities = list("privateAmenities");
 
@@ -271,6 +311,15 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       economic: { dimension: economic.dimension as Dimension, bufferM: economic.bufferM as number },
       lighting: { dimension: lightingDimension },
       publicPrivate: { dimension: publicPrivateDimension },
+      transit,
+      crossings: { dimension: crossingsDimension, marked: crossingsBlock.marked as number, unmarked: crossingsBlock.unmarked as number },
+      glare: { dimension: glareDimension, scores: stripNotes(glareScores) as Record<string, number> },
+      signage,
+      freeServices,
+      legibility,
+      infoCentres,
+      poverty,
+      participation: { dimension: participationDimension, inside: participationBlock.inside as number, outside: participationBlock.outside as number },
       thresholds,
       surveillance,
       coPresence,
@@ -310,6 +359,11 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       places: {
         landmarkRadiusM: places.landmarkRadiusM as number,
         lampRadiusM: places.lampRadiusM as number,
+        transitRadiusM: places.transitRadiusM as number,
+        crossingRadiusM: places.crossingRadiusM as number,
+        signageRadiusM: places.signageRadiusM as number,
+        freeServiceAmenities,
+        signageInformation,
         stepsNearPlaceM: places.stepsNearPlaceM as number,
         cameraRadiusM: places.cameraRadiusM as number,
         shelterRadiusM: places.shelterRadiusM as number,
