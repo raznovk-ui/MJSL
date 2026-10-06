@@ -49,9 +49,14 @@
       "bufferM": 15
     },
 
+    "publicPrivate": {
+      "_comment": "ECONOMIC (memoire dimension 4: rest, shade and views that are free versus conditional on buying something): around the segment (autoData.places.publicPrivateRadiusM metres), the share of the PRIVATE places (terraces, cafes, restaurants, bars) among all places that are either free and public (benches, drinking water, free toilets, shelters, parks, gardens, playgrounds) or private. 0 = only free public places, 1 = only private ones. Without any such place nearby it stays 'no data'.",
+      "dimension": "economic"
+    },
+
     "lighting": {
-      "_comment": "COGNITIVE: can you see where you are going after dark. The barrier is the share (0 to 1) of the segment with no street lighting. Taken from the OSM tag lit (yes = 0, no = 1); without it, from the street lamps mapped within autoData.places.lampRadiusM metres (then labelled 'estimated'). Without any lighting data it stays 'no data'.",
-      "dimension": "cognitive"
+      "_comment": "SENSORY (light is one of the memoire ambiances: luminous gradients, dark or over-exposed zones): can you see where you are going after dark. The barrier is the share (0 to 1) of the segment with no street lighting. Taken from the OSM tag lit (yes = 0, no = 1); without it, from the street lamps mapped within autoData.places.lampRadiusM metres (then labelled 'estimated'). Without any lighting data it stays 'no data'.",
+      "dimension": "sensory"
     },
     "landmarks": {
       "_comment": "COGNITIVE: reference points for finding your way = shops, services, stops and monuments within autoData.places.landmarkRadiusM metres. 3 or more is fine, none is a total obstacle (a featureless street is hard to find your way in).",
@@ -66,8 +71,8 @@
       "totalObstacleAt": 800
     },
     "civic": {
-      "_comment": "SOCIAL (decision making): distance in metres to the nearest place of local democracy and public service (town hall, community centre, social centre, courthouse, government office). 400 m or less is fine, 2000 m or more is a total obstacle. A proxy: OpenStreetMap cannot say who is actually heard.",
-      "dimension": "socio_cultural",
+      "_comment": "POLITICAL (memoire dimension 6, participation: accessible places for consultation, such as district town halls and project houses): distance in metres to the nearest place of local democracy and public service (town hall, community centre, social centre, courthouse, government office). 400 m or less is fine, 2000 m or more is a total obstacle. A proxy: OpenStreetMap cannot say who is actually heard.",
+      "dimension": "political",
       "noProblemAt": 400,
       "totalObstacleAt": 2000
     }
@@ -119,6 +124,10 @@
       "_comment": "Which OpenStreetMap places count for the cognitive and social indicators, and what 'near' means (metres).",
       "landmarkRadiusM": 50,
       "lampRadiusM": 25,
+      "publicPrivateRadiusM": 100,
+      "freeAmenities": ["bench", "drinking_water", "toilets", "shelter", "fountain"],
+      "freeLeisure": ["park", "garden", "playground"],
+      "privateAmenities": ["cafe", "restaurant", "bar", "pub", "fast_food", "ice_cream", "biergarten"],
       "activityAmenities": ["cafe", "restaurant", "bar", "pub", "library", "community_centre", "social_centre", "arts_centre", "theatre", "cinema", "marketplace", "place_of_worship"],
       "activityLeisure": ["park", "playground", "garden", "sports_centre"],
       "civicAmenities": ["townhall", "community_centre", "social_centre", "social_facility", "courthouse"]
@@ -149,12 +158,12 @@
 
     "wheelchair": {
       "label": "Wheelchair user",
-      "weights": { "physical": 0.4, "sensory": 0.1, "cognitive": 0.1, "economic": 0.2, "socio_cultural": 0.2 },
+      "weights": { "physical": 0.35, "sensory": 0.1, "cognitive": 0.1, "economic": 0.15, "socio_cultural": 0.15, "political": 0.15 },
       "vetoes": { "stepsWithoutRamp": true, "widthBelowM": 0.9, "kerbRaised": true }
     },
     "blind": {
       "label": "Blind person",
-      "weights": { "physical": 0.15, "sensory": 0.3, "cognitive": 0.25, "economic": 0.1, "socio_cultural": 0.2 },
+      "weights": { "physical": 0.15, "sensory": 0.3, "cognitive": 0.2, "economic": 0.1, "socio_cultural": 0.1, "political": 0.15 },
       "vetoes": {}
     }
   }

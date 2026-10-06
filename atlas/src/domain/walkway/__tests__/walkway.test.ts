@@ -67,7 +67,7 @@ describe("missing data is never counted as 0", () => {
     // so after rescaling, physical carries the full weight: (1 - 2/3)^1.
     const s = scoreSegment({ id: "x", values: { widthM: 1.2 } }, "blind", config);
     expect(s.score).toBeCloseTo(1 / 3, 3);
-    expect(s.dimensionsMissing.sort()).toEqual(["cognitive", "economic", "sensory", "socio_cultural"]);
+    expect(s.dimensionsMissing.sort()).toEqual(["cognitive", "economic", "political", "sensory", "socio_cultural"]);
   });
 
   it("a missing tag never triggers a veto", () => {

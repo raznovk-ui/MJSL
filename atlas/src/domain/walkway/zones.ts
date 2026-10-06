@@ -45,6 +45,7 @@ const INDICATOR_LABEL: Record<IndicatorKey, string> = {
   rest: "absence de banc",
   economic: "privatisation (terrasses, parkings)",
   lighting: "eclairage",
+  publicPrivate: "espaces prives plutot que publics gratuits",
   landmarks: "manque de reperes",
   activities: "eloignement des lieux d'activites",
   civic: "eloignement des lieux de decision",

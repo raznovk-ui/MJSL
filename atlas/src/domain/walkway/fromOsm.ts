@@ -109,7 +109,9 @@ export function buildSegments(
   const landmarks: LngLat[] = [];
   const activityPlaces: LngLat[] = [];
   const civicPlaces: LngLat[] = [];
-  const { activityAmenities, activityLeisure, civicAmenities } = config.autoData.places;
+  const freePlaces: LngLat[] = [];
+  const privatePlaces: LngLat[] = [];
+  const { activityAmenities, activityLeisure, civicAmenities, freeAmenities, freeLeisure, privateAmenities } = config.autoData.places;
 
   for (const feature of features) {
     const tags = (feature.properties ?? {}) as Tags;
@@ -142,6 +144,12 @@ export function buildSegments(
     if ((amenity && activityAmenities.includes(amenity)) || (str(tags.leisure) && activityLeisure.includes(str(tags.leisure)!))) {
       activityPlaces.push(...pointsOf(geometry));
     }
+    // Free public places versus private ones (memoire, dimension 4).
+    const leisure = str(tags.leisure);
+    if ((amenity && freeAmenities.includes(amenity)) || (leisure && freeLeisure.includes(leisure))) {
+      if (str(tags.fee) !== "yes") freePlaces.push(...pointsOf(geometry));
+    }
+    if ((amenity && privateAmenities.includes(amenity)) || str(tags.outdoor_seating) === "yes") privatePlaces.push(...pointsOf(geometry));
     if ((amenity && civicAmenities.includes(amenity)) || str(tags.office) === "government") civicPlaces.push(...pointsOf(geometry));
   }
 
@@ -161,11 +169,16 @@ export function buildSegments(
     hasLandmarks: landmarks.length > 0,
     hasActivities: activityPlaces.length > 0,
     hasCivic: civicPlaces.length > 0,
+    free: new SpatialGrid<LngLat>(),
+    private: new SpatialGrid<LngLat>(),
+    hasFreeOrPrivate: freePlaces.length + privatePlaces.length > 0,
   };
   for (const l of lamps) index.lamps.addPoint(l, l);
   for (const l of landmarks) index.landmarks.addPoint(l, l);
   for (const a of activityPlaces) index.activities.addPoint(a, a);
   for (const c of civicPlaces) index.civic.addPoint(c, c);
+  for (const f of freePlaces) index.free.addPoint(f, f);
+  for (const q of privatePlaces) index.private.addPoint(q, q);
   for (const b of benches) index.benches.addPoint(b, b);
   for (const k of raisedKerbs) index.raisedKerbs.addPoint(k, k);
   for (const q of privatizers) index.privatizers.addPoint(q, q);
@@ -217,6 +230,9 @@ interface Context {
   hasLandmarks: boolean;
   hasActivities: boolean;
   hasCivic: boolean;
+  free: SpatialGrid<LngLat>;
+  private: SpatialGrid<LngLat>;
+  hasFreeOrPrivate: boolean;
   noiseIndex?: NoiseIndex;
 }
 
@@ -303,6 +319,17 @@ function describeSegment(
     }
     values.unlitShare = 1 - lit / (steps + 1);
     sources.lighting = "estimated";
+  }
+
+  if (ctx.hasFreeOrPrivate) {
+    const r = places.publicPrivateRadiusM;
+    const within = (grid: SpatialGrid<LngLat>) => grid.near(middle, reach(r)).filter((q) => pointToPolylineM(q, coords) <= r).length;
+    const free = within(ctx.free);
+    const priv = within(ctx.private);
+    if (free + priv > 0) {
+      values.privateShare = priv / (free + priv);
+      sources.publicPrivate = "osm";
+    }
   }
 
   if (ctx.hasLandmarks) {

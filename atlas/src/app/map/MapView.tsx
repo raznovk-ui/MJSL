@@ -30,6 +30,7 @@ export function MapView() {
   const walkScores = useWalkwayStore((s) => s.scores);
   const walkProfile = useWalkwayStore((s) => s.profileId);
   const walkVisible = useWalkwayStore((s) => s.visible);
+  const layer = useWalkwayStore((s) => s.layer);
   const walkRoutes = useWalkwayStore((s) => s.routes);
   const walkFrom = useWalkwayStore((s) => s.routeFrom);
   const walkTo = useWalkwayStore((s) => s.routeTo);
@@ -122,8 +123,9 @@ export function MapView() {
       zones,
       zonesVisible,
       selectedZoneId,
+      layer,
     }, WALKWAY_CONFIG);
-  }, [styleReady, walkSegments, walkScores, walkProfile, walkVisible, walkRoutes, walkFrom, walkTo, zones, zonesVisible, selectedZoneId]);
+  }, [styleReady, walkSegments, walkScores, walkProfile, walkVisible, walkRoutes, walkFrom, walkTo, zones, zonesVisible, selectedZoneId, layer]);
 
   // Choosing a zone in the list frames it on the map.
   useEffect(() => {

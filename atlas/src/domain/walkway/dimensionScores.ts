@@ -1,9 +1,9 @@
 import type { Dimension } from "../dimensions.js";
 import type { Segment, SegmentScore } from "./types.js";
 
-/** The five dimensions the scoring covers (the sixth, participation, has no indicator). */
-export const FIVE_DIMENSIONS = ["physical", "sensory", "cognitive", "economic", "socio_cultural"] as const satisfies readonly Dimension[];
-export type FiveDimension = (typeof FIVE_DIMENSIONS)[number];
+/** The six dimensions of the MJSL, in the order of the memoire (D1 to D6). */
+export const SCORED_DIMENSIONS = ["physical", "sensory", "cognitive", "economic", "socio_cultural", "political"] as const satisfies readonly Dimension[];
+export type ScoredDimension = (typeof SCORED_DIMENSIONS)[number];
 
 export interface DimensionScore {
   /** 0 = total obstacle, 1 = no obstacle; null when no segment has data for it. */
@@ -12,7 +12,7 @@ export interface DimensionScore {
   coverage: number;
 }
 
-export type DimensionScores = Record<FiveDimension, DimensionScore>;
+export type DimensionScores = Record<ScoredDimension, DimensionScore>;
 
 /** Score of one segment for one dimension: 1 minus its average obstacle. */
 export const dimensionScoreOf = (score: SegmentScore | undefined, dimension: Dimension): number | null => {
@@ -29,7 +29,7 @@ export const dimensionScoreOf = (score: SegmentScore | undefined, dimension: Dim
 export function dimensionScores(segments: Segment[], scores: Record<string, SegmentScore>): DimensionScores {
   const out = {} as DimensionScores;
   const totalLength = segments.reduce((sum, s) => sum + (s.lengthM ?? 0), 0);
-  for (const dimension of FIVE_DIMENSIONS) {
+  for (const dimension of SCORED_DIMENSIONS) {
     let weighted = 0;
     let known = 0;
     for (const segment of segments) {

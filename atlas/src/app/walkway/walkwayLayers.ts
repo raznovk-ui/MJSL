@@ -1,7 +1,7 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import type { Feature, FeatureCollection } from "geojson";
-import type { RouteResult, Segment, SegmentScore, WalkwayConfig, Zone } from "../../domain/walkway/index.js";
-import type { RoutePoint } from "./walkwayStore.js";
+import { dimensionScoreOf, type RouteResult, type Segment, type SegmentScore, type WalkwayConfig, type Zone } from "../../domain/walkway/index.js";
+import type { MapLayer, RoutePoint } from "./walkwayStore.js";
 
 export const WALKWAY_SOURCE = "walkway-segments";
 export const WALKWAY_ROUTE_SOURCE = "walkway-route";
@@ -15,16 +15,54 @@ const byZoom = (z11: number, z14: number, z17: number) =>
 
 const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
+/**
+ * One green-to-red scale for every layer: 0 = total obstacle (red), 1 = none (green).
+ * The same scale is used for the combined score and for each dimension, so colours
+ * mean the same thing everywhere.
+ */
+export const GRADIENT: [number, string][] = [
+  [0, "#b91c1c"],
+  [0.3, "#e8590c"],
+  [0.6, "#eab308"],
+  [1, "#15803d"],
+];
+
+const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+
+export function gradientColour(value: number): string {
+  const v = Math.min(1, Math.max(0, value));
+  for (let i = 1; i < GRADIENT.length; i += 1) {
+    const [x1, c1] = GRADIENT[i]!;
+    if (v <= x1) {
+      const [x0, c0] = GRADIENT[i - 1]!;
+      const t = (v - x0) / (x1 - x0);
+      const a = hex(c0);
+      const b = hex(c1);
+      return "#" + a.map((n, k) => Math.round(n + (b[k]! - n) * t).toString(16).padStart(2, "0")).join("");
+    }
+  }
+  return GRADIENT[GRADIENT.length - 1]![1];
+}
+
+/** The value drawn for a segment on a layer: its combined score, or its score for one dimension. */
+export function layerValue(score: SegmentScore | undefined, layer: MapLayer): number | null {
+  if (!score) return null;
+  return layer === "combined" ? score.score : dimensionScoreOf(score, layer);
+}
+
 export function segmentsGeojson(
   segments: Segment[],
   scores: Record<string, SegmentScore> | undefined,
   config: WalkwayConfig,
+  layer: MapLayer = "combined",
 ): FeatureCollection {
   const features: Feature[] = [];
   for (const segment of segments) {
     if (!segment.geometry || segment.geometry.length < 2) continue;
     const score = scores?.[segment.id];
-    const cls = score?.cls ?? "none";
+    const value = layerValue(score, layer);
+    // Combined keeps the profile's hard blocks; a dimension layer has none.
+    const cls = value === null ? "none" : value < config.classes.redBelow ? "red" : value < config.classes.orangeBelow ? "orange" : "green";
     features.push({
       type: "Feature",
       id: segment.id,
@@ -32,8 +70,8 @@ export function segmentsGeojson(
         id: segment.id,
         name: segment.name ?? "",
         cls,
-        colour: config.classes.colours[cls],
-        score: score?.score ?? null,
+        colour: value === null ? config.classes.colours.none : gradientColour(value),
+        score: value,
         vetoed: score?.vetoed ?? false,
       },
       geometry: { type: "LineString", coordinates: segment.geometry },
@@ -149,7 +187,7 @@ export function ensureWalkwayLayers(instance: MapLibreMap, config: WalkwayConfig
       id: "walkway-line-red", type: "line", source: WALKWAY_SOURCE,
       filter: ["==", ["get", "cls"], "red"],
       layout: { "line-join": "round" },
-      paint: { "line-color": config.classes.colours.red, "line-width": byZoom(3, 5, 8), "line-dasharray": [2, 1.5] },
+      paint: { "line-color": ["get", "colour"], "line-width": byZoom(3, 5, 8), "line-dasharray": [2, 1.5] },
     }, before);
   }
   if (!instance.getLayer("walkway-route-points")) {
@@ -175,12 +213,13 @@ export interface WalkwayView {
   zones: Zone[];
   zonesVisible: boolean;
   selectedZoneId: string | null;
+  layer: MapLayer;
 }
 
 export function syncWalkwayLayers(instance: MapLibreMap, view: WalkwayView, config: WalkwayConfig) {
   ensureWalkwayLayers(instance, config);
   const set = (id: string, data: FeatureCollection) => (instance.getSource(id) as GeoJSONSource).setData(data);
-  set(WALKWAY_SOURCE, segmentsGeojson(view.segments, view.scores, config));
+  set(WALKWAY_SOURCE, segmentsGeojson(view.segments, view.scores, config, view.layer));
   set(WALKWAY_ROUTE_SOURCE, routeGeojson(view.segments, view.route));
   set(WALKWAY_POINTS_SOURCE, pointsGeojson(view.from, view.to));
   set(ZONE_SOURCE, zonesGeojson(view.zones));

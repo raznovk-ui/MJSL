@@ -22,6 +22,7 @@ export interface WalkwayConfig {
     surface: { dimension: Dimension; scores: Record<string, number> };
     economic: { dimension: Dimension; bufferM: number };
     lighting: { dimension: Dimension };
+    publicPrivate: { dimension: Dimension };
     landmarks: LinearIndicatorConfig;
     activities: LinearIndicatorConfig;
     civic: LinearIndicatorConfig;
@@ -46,6 +47,10 @@ export interface WalkwayConfig {
     /** Which OpenStreetMap places count, and how close "near" is. */
     places: {
       landmarkRadiusM: number;
+      publicPrivateRadiusM: number;
+      freeAmenities: string[];
+      freeLeisure: string[];
+      privateAmenities: string[];
       lampRadiusM: number;
       activityAmenities: string[];
       activityLeisure: string[];
@@ -120,6 +125,8 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
 
   const lightingBlock = section(indicators, "lighting", "indicators.");
   const lightingDimension = dimensionOf(lightingBlock, "indicators.lighting.");
+  const publicPrivateBlock = section(indicators, "publicPrivate", "indicators.");
+  const publicPrivateDimension = dimensionOf(publicPrivateBlock, "indicators.publicPrivate.");
   const landmarks = linear(indicators, "landmarks");
   const activities = linear(indicators, "activities");
   const civic = linear(indicators, "civic");
@@ -154,7 +161,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   }
 
   const places = section(auto, "places", "autoData.");
-  for (const key of ["landmarkRadiusM", "lampRadiusM"]) {
+  for (const key of ["landmarkRadiusM", "lampRadiusM", "publicPrivateRadiusM"]) {
     need(isNumber(places[key]) && (places[key] as number) > 0, `"autoData.places.${key}" must be a number of metres above 0.`);
   }
   const list = (key: string): string[] => {
@@ -165,6 +172,9 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const activityAmenities = list("activityAmenities");
   const activityLeisure = list("activityLeisure");
   const civicAmenities = list("civicAmenities");
+  const freeAmenities = list("freeAmenities");
+  const freeLeisure = list("freeLeisure");
+  const privateAmenities = list("privateAmenities");
 
   need(isNumber(zones.maxLengthM) && (zones.maxLengthM as number) > 0, `"zones.maxLengthM" must be a number of metres above 0.`);
   need(isNumber(zones.maxSegmentM) && (zones.maxSegmentM as number) > 0, `"zones.maxSegmentM" must be a number of metres above 0.`);
@@ -249,6 +259,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       surface: { dimension: surface.dimension as Dimension, scores: stripNotes(scores) as Record<string, number> },
       economic: { dimension: economic.dimension as Dimension, bufferM: economic.bufferM as number },
       lighting: { dimension: lightingDimension },
+      publicPrivate: { dimension: publicPrivateDimension },
       landmarks,
       activities,
       civic,
@@ -284,6 +295,10 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       places: {
         landmarkRadiusM: places.landmarkRadiusM as number,
         lampRadiusM: places.lampRadiusM as number,
+        publicPrivateRadiusM: places.publicPrivateRadiusM as number,
+        freeAmenities,
+        freeLeisure,
+        privateAmenities,
         activityAmenities,
         activityLeisure,
         civicAmenities,

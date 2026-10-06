@@ -49,6 +49,7 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
     result("economic", indicators.economic.dimension, isNum(values.privatizedShare)
       ? clamp01(values.privatizedShare)
       : null),
+    result("publicPrivate", indicators.publicPrivate.dimension, isNum(values.privateShare) ? clamp01(values.privateShare) : null),
     result("lighting", indicators.lighting.dimension, isNum(values.unlitShare) ? clamp01(values.unlitShare) : null),
     result("landmarks", indicators.landmarks.dimension, isNum(values.landmarkCount)
       ? linearBarrier(values.landmarkCount, indicators.landmarks.noProblemAt, indicators.landmarks.totalObstacleAt)

@@ -1,4 +1,4 @@
-import { FIVE_DIMENSIONS, type DimensionScores } from "../../domain/walkway/index.js";
+import { SCORED_DIMENSIONS, type DimensionScores } from "../../domain/walkway/index.js";
 import { dimension as meta } from "../../domain/dimensions.js";
 
 /**
@@ -9,7 +9,7 @@ import { dimension as meta } from "../../domain/dimensions.js";
 export function DimensionBars({ scores }: { scores: DimensionScores }) {
   return (
     <ul className="space-y-1 text-xs">
-      {FIVE_DIMENSIONS.map((key) => {
+      {SCORED_DIMENSIONS.map((key) => {
         const { score, coverage } = scores[key];
         return (
           <li key={key} className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-2">

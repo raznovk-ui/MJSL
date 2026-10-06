@@ -92,3 +92,43 @@ describe("hiking trails are not pavements", () => {
     expect(kept({ highway: "footway", surface: "dirt" })).toBe(1); // an unpaved surface alone condemns only plain paths
   });
 });
+
+describe("the six dimensions of the memoire, each with its own indicator", () => {
+  it("economic: share of private places among free public and private ones nearby", () => {
+    const near = (lng: number, tags: Record<string, string>) => node(lng, LAT + 0.0002, tags);
+    // 1 bench + 1 park (free) against 1 cafe + 1 terrace (private): half private.
+    const places = [
+      near(5.3505, { amenity: "bench" }),
+      near(5.3510, { leisure: "park" }),
+      near(5.3515, { amenity: "cafe" }),
+      near(5.3518, { outdoor_seating: "yes" }),
+    ];
+    const [segment] = buildSegments(fc([way("w1", {}, road), ...places]), config);
+    expect(segment!.values.privateShare).toBeCloseTo(0.5, 6);
+    expect(segment!.sources?.publicPrivate).toBe("osm");
+    expect(scoreSegment(segment!, "blind", config).barriers.find((b) => b.indicator === "publicPrivate")!.dimension).toBe("economic");
+  });
+
+  it("a paying toilet is not a free public place", () => {
+    const places = [node(5.351, LAT + 0.0002, { amenity: "toilets", fee: "yes" }), node(5.351, LAT + 0.0002, { amenity: "cafe" })];
+    const [segment] = buildSegments(fc([way("w1", {}, road), ...places]), config);
+    expect(segment!.values.privateShare).toBe(1);
+  });
+
+  it("lighting belongs to sensory and the consultation places to political, as in the memoire", () => {
+    const dims = Object.fromEntries(
+      scoreSegment({ id: "x", values: { unlitShare: 0.5, privateShare: 0.5, civicDistanceM: 1200 }, sources: {} }, "blind", config).barriers.map((b) => [b.indicator, b.dimension]),
+    );
+    expect(dims.lighting).toBe("sensory");
+    expect(dims.civic).toBe("political");
+    expect(dims.landmarks).toBe("cognitive");
+    expect(dims.activities).toBe("socio_cultural");
+    expect(dims.publicPrivate).toBe("economic");
+  });
+
+  it("every dimension carries weight in both profiles, and the weights add up to 1", () => {
+    for (const profile of Object.values(config.profiles)) {
+      for (const d of DIMENSION_KEYS) expect(profile.weights[d] ?? 0).toBeGreaterThan(0);
+    }
+  });
+});

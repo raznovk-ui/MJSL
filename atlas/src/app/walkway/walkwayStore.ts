@@ -15,6 +15,7 @@ import {
   type RouteResult,
   type Segment,
   type SegmentScore,
+  type ScoredDimension,
   type Zone,
 } from "../../domain/walkway/index.js";
 import { loadPreset } from "../overpass/client.js";
@@ -22,6 +23,8 @@ import { WALKWAY_TILES } from "../overpass/walkwayPreset.js";
 import type { FeatureCollection } from "geojson";
 import { useAppStore } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
+
+export type MapLayer = "combined" | ScoredDimension;
 
 /** A clicked point, snapped to the nearest junction of the walkway graph. */
 export interface RoutePoint {
@@ -51,6 +54,9 @@ interface WalkwayState {
   scores: Record<string, Record<string, SegmentScore>>;
   profileId: string;
   visible: boolean;
+  /** What the walkway lines show: the profile's combined score, or one dimension. */
+  layer: MapLayer;
+  setLayer: (layer: MapLayer) => void;
   auto: AutoDataStatus;
 
   /** Priority zones for the selected profile, found automatically. */
@@ -166,6 +172,8 @@ export const useWalkwayStore = create<WalkwayState>((set, get) => ({
   scores: {},
   profileId: Object.keys(WALKWAY_CONFIG.profiles)[0]!,
   visible: true,
+  layer: "combined",
+  setLayer: (layer) => set({ layer }),
   auto: IDLE_AUTO,
 
   zones: [],
