@@ -95,7 +95,7 @@ export function detectZones(
   profileId: string,
   config: WalkwayConfig,
 ): Zone[] {
-  const { scoreBelow, mergeGapM, minLengthM } = config.zones;
+  const { scoreBelow, mergeGapM, minLengthM, maxLengthM, splitCellM } = config.zones;
   const candidates = segments.filter((segment) => {
     const s = scores[segment.id];
     return !!s && s.score !== null && (s.vetoed || s.score < scoreBelow) && !!segment.geometry && segment.geometry.length >= 2;
@@ -150,8 +150,31 @@ export function detectZones(
     else groups.set(root, [segment]);
   });
 
+  // A chain or a whole district of bad streets can run for tens of kilometres: anything
+  // over maxLengthM is cut along a grid of splitCellM squares, and a square that is still
+  // too long (a dense centre) is cut again into smaller ones, down to 50 m.
+  const kx = 111_320 * Math.cos((43.28 * Math.PI) / 180);
+  const ky = 110_540;
+  const lengthOf = (list: Segment[]) => list.reduce((sum, m) => sum + (m.lengthM ?? 0), 0);
+  const split = (members: Segment[], cellM: number): Segment[][] => {
+    if (lengthOf(members) <= maxLengthM || cellM < 50) return [members];
+    const byCell = new Map<string, Segment[]>();
+    for (const segment of members) {
+      const g = segment.geometry!;
+      const a = g[0]!;
+      const b = g[g.length - 1]!;
+      const key = `${Math.floor((((a[0] + b[0]) / 2) * kx) / cellM)},${Math.floor((((a[1] + b[1]) / 2) * ky) / cellM)}`;
+      const list = byCell.get(key);
+      if (list) list.push(segment);
+      else byCell.set(key, [segment]);
+    }
+    if (byCell.size === 1) return split(members, cellM / 2); // all in one square: a finer grid
+    return [...byCell.values()].flatMap((cell) => split(cell, cellM / 2));
+  };
+  const pieces = [...groups.values()].flatMap((members) => split(members, splitCellM));
+
   const zones: Omit<Zone, "id" | "rank">[] = [];
-  for (const members of groups.values()) {
+  for (const members of pieces) {
     let lengthM = 0;
     let weightedScore = 0;
     let severity = 0;

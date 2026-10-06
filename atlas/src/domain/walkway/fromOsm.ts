@@ -11,6 +11,18 @@ type Tags = Record<string, unknown>;
 const WALKWAY_HIGHWAYS = new Set(["footway", "path", "pedestrian", "steps", "residential", "living_street", "tertiary", "unclassified"]);
 /** Amenities that are street furniture or services of no use as a landmark. */
 const NOT_LANDMARKS = new Set(["bench", "parking", "parking_space", "bicycle_parking", "motorcycle_parking", "waste_basket", "recycling", "post_box", "vending_machine", "bicycle_rental", "charging_station", "fountain", "drinking_water"]);
+/** A hiking trail rather than a pavement: see excludeTrails in the config. */
+export function isTrail(tags: Tags, config: WalkwayConfig): boolean {
+  const highway = str(tags.highway);
+  if (highway !== "path" && highway !== "footway" && highway !== "steps") return false;
+  const rule = config.autoData.excludeTrails;
+  if (rule.tags.some((key) => str(tags[key]) !== undefined)) return true;
+  const name = str(tags.name)?.toLowerCase();
+  if (name && rule.nameStartsWith.some((p) => name.startsWith(p.toLowerCase()))) return true;
+  const surface = str(tags.surface)?.toLowerCase();
+  return highway === "path" && surface !== undefined && rule.unpavedSurfaces.includes(surface);
+}
+
 const MAJOR_ROADS = new Set(["trunk", "primary", "secondary"]);
 
 const str = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
@@ -104,7 +116,7 @@ export function buildSegments(
     const geometry = feature.geometry;
     const highway = str(tags.highway);
 
-    if (geometry?.type === "LineString" && highway && WALKWAY_HIGHWAYS.has(highway)) {
+    if (geometry?.type === "LineString" && highway && WALKWAY_HIGHWAYS.has(highway) && !isTrail(tags, config)) {
       const coords = coordsOf(geometry)!;
       const ids = Array.isArray(tags.osm_nodes) && tags.osm_nodes.length === coords.length
         ? (tags.osm_nodes as unknown[]).map(String)

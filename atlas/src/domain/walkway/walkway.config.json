@@ -109,6 +109,12 @@
       "tertiary": 1.5,
       "unclassified": 1.5
     },
+    "excludeTrails": {
+      "_comment": "Hiking trails are not pavements, so they are left out of the scoring. A walkway (path, footway or steps) is a trail when it carries any of the 'tags' (OSM hiking/mountain-bike tags), or its name starts with one of 'nameStartsWith', or it is a plain 'path' on one of the 'unpavedSurfaces'. Set the lists to [] to keep everything.",
+      "tags": ["sac_scale", "trail_visibility", "mtb:scale"],
+      "nameStartsWith": ["Sentier", "Sentiers"],
+      "unpavedSurfaces": ["ground", "dirt", "earth", "rock", "grass", "mud", "sand", "pebblestone", "unpaved", "compacted"]
+    },
     "places": {
       "_comment": "Which OpenStreetMap places count for the cognitive and social indicators, and what 'near' means (metres).",
       "landmarkRadiusM": 50,
@@ -120,10 +126,12 @@
   },
 
   "zones": {
-    "_comment": "How the program draws priority zones by itself, with no one marking anything. A segment is a candidate when its score for the chosen profile is below 'scoreBelow' (or it is vetoed). Candidates that touch, or lie within 'mergeGapM' metres of each other, join into one zone. A zone shorter than 'minLengthM' metres in total is dropped as noise, EXCEPT a zone containing a vetoed segment: a hard block is always kept. Zones are ranked by severity = sum over their segments of length x (1 - score).",
+    "_comment": "How the program draws priority zones by itself, with no one marking anything. A segment is a candidate when its score for the chosen profile is below 'scoreBelow' (or it is vetoed). Candidates that touch, or lie within 'mergeGapM' metres of each other, join into one zone. A zone shorter than 'minLengthM' metres in total is dropped as noise, EXCEPT a zone containing a vetoed segment: a hard block is always kept. A zone longer than 'maxLengthM' metres is split into pieces along a grid of 'splitCellM'-metre squares, so one chain of bad streets does not become a single zone of tens of kilometres. Zones are ranked by severity = sum over their segments of length x (1 - score).",
     "scoreBelow": 0.3,
     "mergeGapM": 25,
-    "minLengthM": 50
+    "minLengthM": 50,
+    "maxLengthM": 1500,
+    "splitCellM": 400
   },
 
   "kerbAttachM": 10,

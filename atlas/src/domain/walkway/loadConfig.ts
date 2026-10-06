@@ -36,12 +36,13 @@ export interface WalkwayConfig {
     floorDb: number;
   };
   kerbAttachM: number;
-  zones: { scoreBelow: number; mergeGapM: number; minLengthM: number };
+  zones: { scoreBelow: number; mergeGapM: number; minLengthM: number; maxLengthM: number; splitCellM: number };
   autoData: {
     noiseMap: { bandMidpointOffsetDb: number; belowThresholdDb: number; sampleSpacingM: number; gapFallbackRoadM: number };
     slope: { minBaselineM: number };
     /** OSM highway value -> typical width in metres. */
     widthDefaults: Record<string, number>;
+    excludeTrails: { tags: string[]; nameStartsWith: string[]; unpavedSurfaces: string[] };
     /** Which OpenStreetMap places count, and how close "near" is. */
     places: {
       landmarkRadiusM: number;
@@ -165,6 +166,18 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
   const activityLeisure = list("activityLeisure");
   const civicAmenities = list("civicAmenities");
 
+  need(isNumber(zones.maxLengthM) && (zones.maxLengthM as number) > 0, `"zones.maxLengthM" must be a number of metres above 0.`);
+  need(isNumber(zones.splitCellM) && (zones.splitCellM as number) > 0, `"zones.splitCellM" must be a number of metres above 0.`);
+  const trails = section(auto, "excludeTrails", "autoData.");
+  const trailList = (key: string): string[] => {
+    const v = trails[key];
+    need(Array.isArray(v) && v.every((x) => typeof x === "string"), `"autoData.excludeTrails.${key}" must be a list of words in quotes (it can be empty).`);
+    return Array.isArray(v) ? (v as string[]) : [];
+  };
+  const trailTags = trailList("tags");
+  const trailNames = trailList("nameStartsWith");
+  const trailSurfaces = trailList("unpavedSurfaces");
+
   const classes = section(root, "classes", "");
   need(isNumber(classes.redBelow) && isNumber(classes.orangeBelow), `"classes.redBelow" and "classes.orangeBelow" must be numbers.`);
   need(
@@ -253,6 +266,8 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       scoreBelow: zones.scoreBelow as number,
       mergeGapM: zones.mergeGapM as number,
       minLengthM: zones.minLengthM as number,
+      maxLengthM: zones.maxLengthM as number,
+      splitCellM: zones.splitCellM as number,
     },
     autoData: {
       noiseMap: {
@@ -263,6 +278,7 @@ export function validateWalkwayConfig(raw: unknown): WalkwayConfig {
       },
       slope: { minBaselineM: slopeAuto.minBaselineM as number },
       widthDefaults: stripNotes(widthDefaults) as Record<string, number>,
+      excludeTrails: { tags: trailTags, nameStartsWith: trailNames, unpavedSurfaces: trailSurfaces },
       places: {
         landmarkRadiusM: places.landmarkRadiusM as number,
         lampRadiusM: places.lampRadiusM as number,

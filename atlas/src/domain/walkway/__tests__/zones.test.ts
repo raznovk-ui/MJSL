@@ -160,3 +160,23 @@ describe("zone street names", () => {
     expect(zone!.streets).toEqual(["Rue Longue", "Rue Courte"]);
   });
 });
+
+describe("zone size cap", () => {
+  it("splits a very long chain into pieces instead of one giant zone", () => {
+    const loose = JSON.parse(JSON.stringify(rawConfig));
+    loose.zones.maxLengthM = 600;
+    loose.zones.splitCellM = 300;
+    const cfg = validateWalkwayConfig(loose);
+    // 40 connected bad segments of about 80 m each: a 3 km chain.
+    const chain = Array.from({ length: 40 }, (_, i) => seg(`s${i}`, `n${i}`, `n${i + 1}`, 5.35 + i * 0.001, 5.35 + (i + 1) * 0.001, BAD));
+    const zones = run(chain, "blind", cfg);
+    expect(zones.length).toBeGreaterThan(4);
+    expect(zones.every((z) => z.lengthM <= 600 + 300)).toBe(true);
+    expect(zones.reduce((n, z) => n + z.segmentCount, 0)).toBe(40);
+  });
+
+  it("leaves a zone under the cap in one piece", () => {
+    const chain = Array.from({ length: 5 }, (_, i) => seg(`s${i}`, `n${i}`, `n${i + 1}`, 5.35 + i * 0.001, 5.35 + (i + 1) * 0.001, BAD));
+    expect(run(chain)).toHaveLength(1);
+  });
+});

@@ -11,6 +11,7 @@ const KEEP_TAGS = new Set([
   "highway", "name", "width", "sidewalk:width", "incline", "surface", "ramp", "ramp:wheelchair",
   "lit", "amenity", "shop", "tourism", "historic", "leisure", "office", "outdoor_seating",
   "kerb", "maxspeed", "foot", "access", "tactile_paving", "wheelchair",
+  "sac_scale", "trail_visibility", "mtb:scale",
   "osm_id", "osm_nodes", "label",
 ]);
 

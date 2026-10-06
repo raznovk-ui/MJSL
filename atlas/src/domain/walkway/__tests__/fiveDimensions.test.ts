@@ -73,3 +73,22 @@ describe("the five dimensions are filled in from OpenStreetMap places, with no i
     expect(segment!.values.civicDistanceM).toBeUndefined();
   });
 });
+
+describe("hiking trails are not pavements", () => {
+  const trail = (tags: Record<string, string>) => way("t", tags, road);
+  const kept = (tags: Record<string, string>) => buildSegments(fc([trail(tags)]), config).length;
+
+  it("drops paths with hiking tags, a trail name or an unpaved surface", () => {
+    expect(kept({ highway: "path", sac_scale: "hiking" })).toBe(0);
+    expect(kept({ highway: "path", trail_visibility: "good" })).toBe(0);
+    expect(kept({ highway: "path", name: "Sentier des Douaniers" })).toBe(0);
+    expect(kept({ highway: "path", surface: "dirt" })).toBe(0);
+  });
+
+  it("keeps ordinary urban walkways, including a paved path and a plain footway", () => {
+    expect(kept({ highway: "footway" })).toBe(1);
+    expect(kept({ highway: "path", surface: "asphalt" })).toBe(1);
+    expect(kept({ highway: "pedestrian", name: "Sentier fleuri" })).toBe(1); // only paths, footways and steps are tested
+    expect(kept({ highway: "footway", surface: "dirt" })).toBe(1); // an unpaved surface alone condemns only plain paths
+  });
+});
