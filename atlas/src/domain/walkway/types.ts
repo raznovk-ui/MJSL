@@ -9,7 +9,8 @@ export type LngLat = [number, number];
 export type ValueSource = "measured" | "osm" | "official" | "estimated";
 
 export type IndicatorKey = "width" | "noise" | "slope" | "surface" | "rest" | "economic"
-  | "lighting" | "landmarks" | "activities" | "civic" | "publicPrivate";
+  | "lighting" | "landmarks" | "activities" | "civic" | "publicPrivate"
+  | "thresholds" | "surveillance" | "coPresence" | "shelter";
 
 /**
  * Raw facts about one walkway segment. Anything left undefined is "no data":
@@ -26,6 +27,12 @@ export interface SegmentValues {
   privatizedShare?: number;
   /** Share of the segment with no street lighting nearby, 0..1. */
   unlitShare?: number;
+  /** Flights of steps with no ramp next to a place, close to the segment. */
+  thresholdSteps?: number;
+  /** Cameras and gates close to the segment. */
+  controlDevices?: number;
+  /** Sheltered places close to the segment. */
+  shelterCount?: number;
   /** Share of private places (terraces, cafes) among free public and private places nearby, 0..1. */
   privateShare?: number;
   /** Shops, services and stops within reach: reference points for finding one's way. */

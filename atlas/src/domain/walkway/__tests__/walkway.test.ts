@@ -63,10 +63,10 @@ describe("missing data is never counted as 0", () => {
   });
 
   it("a dimension with no data is left out and the other weights are rescaled", () => {
-    // Only width (physical) is known. The blind profile weights physical 0.3,
-    // so after rescaling, physical carries the full weight: (1 - 2/3)^1.
-    const s = scoreSegment({ id: "x", values: { widthM: 1.2 } }, "blind", config);
-    expect(s.score).toBeCloseTo(1 / 3, 3);
+    // Only the slope (physical) is known: 8 % is halfway between 4 % and 12 %.
+    // After rescaling, physical carries the full weight: (1 - 0.5)^1.
+    const s = scoreSegment({ id: "x", values: { inclinePct: 8 } }, "blind", config);
+    expect(s.score).toBeCloseTo(0.5, 3);
     expect(s.dimensionsMissing.sort()).toEqual(["cognitive", "economic", "political", "sensory", "socio_cultural"]);
   });
 

@@ -132,3 +132,54 @@ describe("the six dimensions of the memoire, each with its own indicator", () =>
     }
   });
 });
+
+describe("social dimension (memoire D5): thresholds, control, co-presence, shelter", () => {
+  const steps = (tags: Record<string, string> = {}) =>
+    ({ ...way("st", { highway: "steps", ...tags }, [[5.3510, LAT + 0.0001], [5.3511, LAT + 0.0001]]) });
+  const shop = node(5.35105, LAT + 0.0002, { shop: "bakery" });
+
+  it("counts steps with no ramp that lie beside a place", () => {
+    const [flat, stairs] = buildSegments(fc([way("w1", {}, road), steps(), shop]), config);
+    // The footway passes the steps (and the shop beside them): one threshold.
+    expect(flat!.values.thresholdSteps).toBe(1);
+    expect(stairs!.values.thresholdSteps).toBe(1);
+    expect(flat!.sources?.thresholds).toBe("osm");
+  });
+
+  it("ignores steps with a ramp, and steps with no place beside them", () => {
+    expect(buildSegments(fc([way("w1", {}, road), steps({ ramp: "yes" }), shop]), config)[0]!.values.thresholdSteps).toBe(0);
+    expect(buildSegments(fc([way("w1", {}, road), steps()]), config)[0]!.values.thresholdSteps).toBe(0);
+  });
+
+  it("counts cameras and gates, but only where the data has any", () => {
+    const none = buildSegments(fc([way("w1", {}, road)]), config)[0]!;
+    expect(none.values.controlDevices).toBeUndefined();
+    const cam = node(5.351, LAT + 0.0001, { man_made: "surveillance" });
+    const gate = node(5.3512, LAT + 0.0001, { barrier: "gate" });
+    const far = node(5.40, LAT, { man_made: "surveillance" });
+    const [seg] = buildSegments(fc([way("w1", {}, road), cam, gate, far]), config);
+    expect(seg!.values.controlDevices).toBe(2);
+    expect(seg!.sources?.surveillance).toBe("osm");
+  });
+
+  it("co-presence reads a tagged width, never the estimated default", () => {
+    const tagged = buildSegments(fc([way("w1", { width: "1.2" }, road)]), config)[0]!;
+    const b = scoreSegment(tagged, "blind", config).barriers.find((x) => x.indicator === "coPresence")!;
+    expect(b.barrier).toBeCloseTo(0.6, 6); // (1.2 - 1.5) / (1.0 - 1.5)
+    expect(b.source).toBe("osm");
+    const guessed = buildSegments(fc([way("w1", {}, road)]), config)[0]!; // width defaulted to 1.5, estimated
+    expect(guessed.sources?.width).toBe("estimated");
+    expect(scoreSegment(guessed, "blind", config).barriers.find((x) => x.indicator === "coPresence")!.barrier).toBeNull();
+  });
+
+  it("shelters: covered ways, bus shelters and shelters count; none nearby is an obstacle", () => {
+    const shelter = node(5.351, LAT + 0.0002, { amenity: "shelter" });
+    const covered = way("c1", { covered: "yes" }, [[5.3511, LAT + 0.0003], [5.3512, LAT + 0.0003]]);
+    const [seg] = buildSegments(fc([way("w1", {}, road), shelter, covered]), config);
+    expect(seg!.values.shelterCount).toBeGreaterThanOrEqual(2);
+    const far = node(5.40, LAT, { amenity: "shelter" });
+    const [alone] = buildSegments(fc([way("w1", {}, road), far]), config);
+    expect(alone!.values.shelterCount).toBe(0);
+    expect(scoreSegment(alone!, "blind", config).barriers.find((x) => x.indicator === "shelter")!.barrier).toBe(1);
+  });
+});

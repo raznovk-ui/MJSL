@@ -111,6 +111,9 @@ export function buildSegments(
   const civicPlaces: LngLat[] = [];
   const freePlaces: LngLat[] = [];
   const privatePlaces: LngLat[] = [];
+  const controls: LngLat[] = [];
+  const shelters: LngLat[] = [];
+  const stepsNoRamp: LngLat[] = []; // middle of each flight of steps with no ramp
   const { activityAmenities, activityLeisure, civicAmenities, freeAmenities, freeLeisure, privateAmenities } = config.autoData.places;
 
   for (const feature of features) {
@@ -123,6 +126,7 @@ export function buildSegments(
       const ids = Array.isArray(tags.osm_nodes) && tags.osm_nodes.length === coords.length
         ? (tags.osm_nodes as unknown[]).map(String)
         : coords.map(coordKey); // No node ids: connect by identical coordinates.
+      if (highway === "steps" && str(tags.ramp) !== "yes" && str(tags["ramp:wheelchair"]) !== "yes") stepsNoRamp.push(pointAlong(coords, polylineLengthM(coords) / 2));
       walkways.push({ osmId: String(tags.osm_id ?? feature.id ?? `way${walkways.length}`), name: str(tags.name), tags, coords, nodeIds: ids });
     }
     if (geometry?.type === "Point" && str(tags.amenity) === "bench") benches.push(geometry.coordinates as LngLat);
@@ -143,6 +147,11 @@ export function buildSegments(
     }
     if ((amenity && activityAmenities.includes(amenity)) || (str(tags.leisure) && activityLeisure.includes(str(tags.leisure)!))) {
       activityPlaces.push(...pointsOf(geometry));
+    }
+    // Memoire dimension 5: control devices, sheltered places, steps at entrances.
+    if (str(tags.man_made) === "surveillance" || ["gate", "lift_gate", "turnstile"].includes(str(tags.barrier) ?? "")) controls.push(...pointsOf(geometry).slice(0, 1));
+    if (amenity === "shelter" || str(tags.covered) === "yes" || str(tags.shelter) === "yes" || str(tags["building:part"]) === "arcade") {
+      shelters.push(...pointsOf(geometry).slice(0, 1));
     }
     // Free public places versus private ones (memoire, dimension 4).
     const leisure = str(tags.leisure);
@@ -172,11 +181,23 @@ export function buildSegments(
     free: new SpatialGrid<LngLat>(),
     private: new SpatialGrid<LngLat>(),
     hasFreeOrPrivate: freePlaces.length + privatePlaces.length > 0,
+    controls: new SpatialGrid<LngLat>(),
+    shelters: new SpatialGrid<LngLat>(),
+    hasControls: controls.length > 0,
+    hasShelters: shelters.length > 0,
+    // Steps count as a threshold only when a place (shop, cafe...) is right beside them.
+    thresholds: new SpatialGrid<LngLat>(),
   };
   for (const l of lamps) index.lamps.addPoint(l, l);
   for (const l of landmarks) index.landmarks.addPoint(l, l);
   for (const a of activityPlaces) index.activities.addPoint(a, a);
   for (const c of civicPlaces) index.civic.addPoint(c, c);
+  for (const c of controls) index.controls.addPoint(c, c);
+  for (const sh of shelters) index.shelters.addPoint(sh, sh);
+  for (const st of stepsNoRamp) {
+    const near = index.landmarks.near(st, config.autoData.places.stepsNearPlaceM);
+    if (near.some((l) => distanceM(st, l) <= config.autoData.places.stepsNearPlaceM)) index.thresholds.addPoint(st, st);
+  }
   for (const f of freePlaces) index.free.addPoint(f, f);
   for (const q of privatePlaces) index.private.addPoint(q, q);
   for (const b of benches) index.benches.addPoint(b, b);
@@ -233,6 +254,11 @@ interface Context {
   free: SpatialGrid<LngLat>;
   private: SpatialGrid<LngLat>;
   hasFreeOrPrivate: boolean;
+  controls: SpatialGrid<LngLat>;
+  shelters: SpatialGrid<LngLat>;
+  thresholds: SpatialGrid<LngLat>;
+  hasControls: boolean;
+  hasShelters: boolean;
   noiseIndex?: NoiseIndex;
 }
 
@@ -319,6 +345,26 @@ function describeSegment(
     }
     values.unlitShare = 1 - lit / (steps + 1);
     sources.lighting = "estimated";
+  }
+
+  // Steps with no ramp next to a place (always known once walkways are loaded: no steps means 0).
+  values.thresholdSteps = ctx.thresholds
+    .near(middle, reach(places.stepsNearPlaceM))
+    .filter((st) => pointToPolylineM(st, coords) <= places.stepsNearPlaceM).length;
+  sources.thresholds = "osm";
+
+  if (ctx.hasControls) {
+    values.controlDevices = ctx.controls
+      .near(middle, reach(places.cameraRadiusM))
+      .filter((q) => pointToPolylineM(q, coords) <= places.cameraRadiusM).length;
+    sources.surveillance = "osm";
+  }
+
+  if (ctx.hasShelters) {
+    values.shelterCount = ctx.shelters
+      .near(middle, reach(places.shelterRadiusM))
+      .filter((q) => pointToPolylineM(q, coords) <= places.shelterRadiusM).length;
+    sources.shelter = "osm";
   }
 
   if (ctx.hasFreeOrPrivate) {

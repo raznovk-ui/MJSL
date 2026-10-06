@@ -5,7 +5,7 @@ import { useWalkwayStore } from "./walkwayStore.js";
 
 const LABEL: Record<IndicatorKey, string> = {
   width: "Largeur", noise: "Bruit", slope: "Pente", surface: "Revetement", rest: "Distance a un banc", economic: "Privatisation",
-  lighting: "Eclairage", publicPrivate: "Espaces prives / publics", landmarks: "Reperes", activities: "Lieux d'activites", civic: "Lieux de decision",
+  lighting: "Eclairage", publicPrivate: "Espaces prives / publics", thresholds: "Marches a l'entree", surveillance: "Controle (cameras, portails)", coPresence: "Marcher a deux", shelter: "Abris, seuils habitables", landmarks: "Reperes", activities: "Lieux d'activites", civic: "Lieux de decision",
 };
 const SOURCE: Record<ValueSource, string> = { measured: "mesure", osm: "OSM", official: "officiel", estimated: "estime" };
 
@@ -17,6 +17,10 @@ function rawValue(segment: Segment, key: IndicatorKey): string {
     case "slope": return v.inclinePct === undefined ? "—" : `${v.inclinePct.toFixed(1)} %`;
     case "surface": return v.surface ?? "—";
     case "rest": return v.restDistanceM === undefined ? "—" : `${Math.round(v.restDistanceM)} m`;
+    case "thresholds": return v.thresholdSteps === undefined ? "—" : `${v.thresholdSteps} volee(s) sans rampe`;
+    case "surveillance": return v.controlDevices === undefined ? "—" : `${v.controlDevices} dispositif(s)`;
+    case "coPresence": return v.widthM === undefined ? "—" : `${v.widthM.toFixed(2)} m`;
+    case "shelter": return v.shelterCount === undefined ? "—" : `${v.shelterCount} abri(s)`;
     case "publicPrivate": return v.privateShare === undefined ? "—" : `${Math.round(v.privateShare * 100)} % prives`;
     case "lighting": return v.unlitShare === undefined ? "—" : `${Math.round(v.unlitShare * 100)} % sans lumiere`;
     case "landmarks": return v.landmarkCount === undefined ? "—" : `${v.landmarkCount} a proximite`;

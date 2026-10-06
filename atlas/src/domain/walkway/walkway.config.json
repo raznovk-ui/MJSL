@@ -49,6 +49,30 @@
       "bufferM": 15
     },
 
+    "thresholds": {
+      "_comment": "SOCIAL (memoire dimension 5, 'seuils filtrants': two, three, five steps without a ramp at the entrance of a place are a silent filter). Counts the flights of steps with no ramp that lie within autoData.places.stepsNearPlaceM metres of the segment AND next to a shop, cafe or other place. 0 is fine, 2 or more is a total obstacle.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 0,
+      "totalObstacleAt": 2
+    },
+    "surveillance": {
+      "_comment": "SOCIAL (memoire dimension 5, hyper-visibility and control devices: cameras pointed at the access, gates): number of cameras and gates within autoData.places.cameraRadiusM metres. None is fine, 3 or more is a total obstacle. OpenStreetMap lists only part of the cameras, so a low value does not prove there are none.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 0,
+      "totalObstacleAt": 3
+    },
+    "coPresence": {
+      "_comment": "SOCIAL (memoire dimension 5, co-presence: a pavement wide enough to walk side by side). Width in metres taken ONLY from an OSM width tag or a measurement, never from the estimated default. 1.50 m or more is fine, 1.00 m or less is a total obstacle.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 1.5,
+      "totalObstacleAt": 1.0
+    },
+    "shelter": {
+      "_comment": "SOCIAL (memoire dimension 5, small habitable thresholds: porches, awnings, sheltered benches where you can stop without being in the flow): number of sheltered places (bus shelters, shelters, covered ways, arcades) within autoData.places.shelterRadiusM metres. 1 or more is fine, none is a total obstacle.",
+      "dimension": "socio_cultural",
+      "noProblemAt": 1,
+      "totalObstacleAt": 0
+    },
     "publicPrivate": {
       "_comment": "ECONOMIC (memoire dimension 4: rest, shade and views that are free versus conditional on buying something): around the segment (autoData.places.publicPrivateRadiusM metres), the share of the PRIVATE places (terraces, cafes, restaurants, bars) among all places that are either free and public (benches, drinking water, free toilets, shelters, parks, gardens, playgrounds) or private. 0 = only free public places, 1 = only private ones. Without any such place nearby it stays 'no data'.",
       "dimension": "economic"
@@ -124,6 +148,9 @@
       "_comment": "Which OpenStreetMap places count for the cognitive and social indicators, and what 'near' means (metres).",
       "landmarkRadiusM": 50,
       "lampRadiusM": 25,
+      "stepsNearPlaceM": 25,
+      "cameraRadiusM": 30,
+      "shelterRadiusM": 50,
       "publicPrivateRadiusM": 100,
       "freeAmenities": ["bench", "drinking_water", "toilets", "shelter", "fountain"],
       "freeLeisure": ["park", "garden", "playground"],

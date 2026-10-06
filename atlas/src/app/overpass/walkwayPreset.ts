@@ -44,3 +44,32 @@ out body geom;`,
 }
 
 export const WALKWAY_TILES: OverpassPreset[] = cityTiles().map(walkwayPresetFor);
+
+/**
+ * The few things only the social dimension needs (cameras, gates, shelters, covered
+ * ways, entrances). Kept apart from the main query: these are small, so they use
+ * bigger tiles, and they are optional: if they cannot be loaded the social indicators
+ * built on them simply stay "no data".
+ */
+export function socialPresetFor(tile: Tile): OverpassPreset {
+  const b = tile.bbox;
+  return {
+    id: `social_mjsl_${tile.id}`,
+    label: `Controle, abris et seuils (OSM) ${tile.id}`,
+    description: "Cameras, portails, abris et passages couverts pour la dimension sociale.",
+    dimensions: ["socio_cultural"],
+    query: `[out:json][timeout:90];
+(
+  node["man_made"="surveillance"](${b});
+  node["barrier"~"^(gate|lift_gate|turnstile)$"](${b});
+  node["highway"="bus_stop"]["shelter"="yes"](${b});
+  node["shelter"="yes"](${b});
+  way["amenity"="shelter"](${b});
+  way["covered"="yes"]["highway"](${b});
+  way["building:part"="arcade"](${b});
+);
+out body geom;`,
+  };
+}
+
+export const SOCIAL_TILES: OverpassPreset[] = cityTiles(3, 4).map(socialPresetFor);

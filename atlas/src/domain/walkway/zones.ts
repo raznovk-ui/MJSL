@@ -45,6 +45,10 @@ const INDICATOR_LABEL: Record<IndicatorKey, string> = {
   rest: "absence de banc",
   economic: "privatisation (terrasses, parkings)",
   lighting: "eclairage",
+  thresholds: "marches a l'entree des lieux",
+  surveillance: "dispositifs de controle",
+  coPresence: "trottoir trop etroit pour marcher a deux",
+  shelter: "absence d'abri ou de seuil habitable",
   publicPrivate: "espaces prives plutot que publics gratuits",
   landmarks: "manque de reperes",
   activities: "eloignement des lieux d'activites",
@@ -201,6 +205,7 @@ export function detectZones(
       }
       for (const b of score.barriers) {
         if (b.barrier === null || b.source === null) continue;
+        if (b.indicator === "coPresence") continue; // read from the width: counting it twice would skew the basis
         const totals = barrierTotals.get(b.indicator) ?? { sum: 0, length: 0 };
         totals.sum += length * b.barrier;
         totals.length += length;

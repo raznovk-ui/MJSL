@@ -30,7 +30,7 @@ describe("score per dimension", () => {
     const a = seg("a", 100, { widthM: 1.8 });
     const d = dimensionScores([a], scoresOf([a]));
     expect(d.cognitive.score).toBeNull();
-    expect(d.socio_cultural.score).toBeNull();
+    expect(d.political.score).toBeNull();
     expect(d.cognitive.coverage).toBe(0);
   });
 });

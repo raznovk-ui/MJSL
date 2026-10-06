@@ -27,7 +27,7 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
     indicator: IndicatorKey,
     dimension: BarrierResult["dimension"],
     barrier: number | null,
-  ): BarrierResult => ({ indicator, dimension, barrier, source: barrier === null ? null : source(indicator) });
+  ): BarrierResult => ({ indicator, dimension, barrier, source: barrier === null ? null : source(indicator === "coPresence" ? "width" : indicator) });
 
   const surfaceKey = values.surface?.trim().toLowerCase();
   const surfaceScore = surfaceKey === undefined ? undefined : indicators.surface.scores[surfaceKey];
@@ -48,6 +48,20 @@ export function computeBarriers(segment: Segment, config: WalkwayConfig): Barrie
       : null),
     result("economic", indicators.economic.dimension, isNum(values.privatizedShare)
       ? clamp01(values.privatizedShare)
+      : null),
+    result("thresholds", indicators.thresholds.dimension, isNum(values.thresholdSteps)
+      ? linearBarrier(values.thresholdSteps, indicators.thresholds.noProblemAt, indicators.thresholds.totalObstacleAt)
+      : null),
+    result("surveillance", indicators.surveillance.dimension, isNum(values.controlDevices)
+      ? linearBarrier(values.controlDevices, indicators.surveillance.noProblemAt, indicators.surveillance.totalObstacleAt)
+      : null),
+    // Co-presence reads the width, but never the estimated default: a guess about
+    // how wide pavements usually are cannot say whether two people fit side by side.
+    result("coPresence", indicators.coPresence.dimension, isNum(values.widthM) && sources?.width !== "estimated"
+      ? linearBarrier(values.widthM, indicators.coPresence.noProblemAt, indicators.coPresence.totalObstacleAt)
+      : null),
+    result("shelter", indicators.shelter.dimension, isNum(values.shelterCount)
+      ? linearBarrier(values.shelterCount, indicators.shelter.noProblemAt, indicators.shelter.totalObstacleAt)
       : null),
     result("publicPrivate", indicators.publicPrivate.dimension, isNum(values.privateShare) ? clamp01(values.privateShare) : null),
     result("lighting", indicators.lighting.dimension, isNum(values.unlitShare) ? clamp01(values.unlitShare) : null),

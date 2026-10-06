@@ -19,7 +19,7 @@ import {
   type Zone,
 } from "../../domain/walkway/index.js";
 import { loadPreset } from "../overpass/client.js";
-import { WALKWAY_TILES } from "../overpass/walkwayPreset.js";
+import { SOCIAL_TILES, WALKWAY_TILES } from "../overpass/walkwayPreset.js";
 import type { FeatureCollection } from "geojson";
 import { useAppStore } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
@@ -138,6 +138,15 @@ async function loadCity(
     pending = next;
   }
   failed = pending.length;
+
+  // Optional extras for the social dimension: one try each, never worth failing the load.
+  for (const tile of SOCIAL_TILES) {
+    try {
+      take((await loadPreset(tile, { forceRefresh })).geojson);
+    } catch {
+      /* the indicators built on these stay "no data" */
+    }
+  }
   if (failed === WALKWAY_TILES.length) throw lastError;
   onProgress(WALKWAY_TILES.length, WALKWAY_TILES.length);
   return { geojson: { type: "FeatureCollection", features }, fromCache, failed };
