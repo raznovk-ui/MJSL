@@ -42,7 +42,7 @@ npm run build && npm run preview
 ## Donnees (a preparer une fois)
 
 ```bash
-npm run data:amp       # zones, transports, offices de tourisme, QPV, projets (Metropole)
+npm run data:zones     # zones (taillees a la cote), transports, offices de tourisme, QPV, projets
 npm run data:reports   # signalements des habitants -> public/data/reports.json
 npm run data:noise     # carte de bruit officielle
 npm run data:osm       # OpenStreetMap, copie locale (10 a 30 min, reprenable)
