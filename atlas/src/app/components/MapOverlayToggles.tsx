@@ -1,9 +1,10 @@
 import { useAppStore } from "../state.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 import { IconLayers } from "./icons.js";
-import { SCORED_DIMENSIONS } from "../../domain/zone/index.js";
+import { SCORED_DIMENSIONS, ZONE_CONFIG, reportKind } from "../../domain/zone/index.js";
 import { dimension as meta } from "../../domain/dimensions.js";
 import { GRADIENT } from "../zone/zoneLayers.js";
+import { REPORT_KINDS, REPORT_STYLE, SHAPE_PATH } from "../zone/reportStyle.js";
 
 /** The person each dimension is read through, as the client defined them. */
 const PERSONA: Record<string, string> = {
@@ -25,6 +26,8 @@ export function MapOverlayToggles() {
   const reportsVisible = useZoneStore((s) => s.reportsVisible);
   const zoneCount = useZoneStore((s) => s.zones.length);
   const layer = useZoneStore((s) => s.layer);
+  const reportKinds = useZoneStore((s) => s.reportKinds);
+  const reports = useZoneStore((s) => s.reports);
   const setLayer = useZoneStore((s) => s.setLayer);
 
   const osmVisible = Object.values(presets).some((p) => p.visible);
@@ -90,6 +93,27 @@ export function MapOverlayToggles() {
           <input type="checkbox" checked={reportsVisible} onChange={() => useZoneStore.getState().toggleReports()} className="mt-0.5" />
           <span>Signalements des habitants</span>
         </label>
+        {reportsVisible && (
+          <fieldset className="ml-5 space-y-1 border-l pl-2" style={{ borderColor: "var(--line)" }}>
+            <legend className="sr-only">Types de signalements affiches</legend>
+            {REPORT_KINDS.map((kind) => {
+              const st = REPORT_STYLE[kind];
+              const n = reports.filter((r) => reportKind(r.type, ZONE_CONFIG) === kind).length;
+              return (
+                <label key={kind} className={row}>
+                  <input type="checkbox" checked={reportKinds[kind]} onChange={() => useZoneStore.getState().toggleReportKind(kind)} className="mt-0.5" />
+                  <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="mt-px shrink-0">
+                    <path d={SHAPE_PATH[st.shape]} fill={st.colour} stroke="#111827" strokeWidth="1" strokeLinejoin="round" />
+                  </svg>
+                  <span>
+                    {st.label} ({n})
+                    {st.feeds && <span className="block text-slate-500">alimente {st.feeds}</span>}
+                  </span>
+                </label>
+              );
+            })}
+          </fieldset>
+        )}
         <label className={row}>
           <input type="checkbox" checked={osmVisible} onChange={(e) => setOsm(e.target.checked)} className="mt-0.5" />
           <span>Indices OSM</span>

@@ -1,6 +1,7 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import type { Feature, FeatureCollection } from "geojson";
-import { dimensionScoreOf, type Report, type Zone, type ZoneConfig, type ZoneScore } from "../../domain/zone/index.js";
+import { ZONE_CONFIG, dimensionScoreOf, reportKind, type Report, type ReportKind, type Zone, type ZoneConfig, type ZoneScore } from "../../domain/zone/index.js";
+import { REPORT_KINDS, reportIcon } from "./reportStyle.js";
 import type { MapLayer } from "./zoneStore.js";
 
 export const ZONE_SOURCE = "zones";
@@ -69,7 +70,7 @@ const EMPTY: FeatureCollection = { type: "FeatureCollection", features: [] };
 function reportsGeojson(reports: Report[]): FeatureCollection {
   return {
     type: "FeatureCollection",
-    features: reports.map((r) => ({ type: "Feature", properties: { type: r.type }, geometry: { type: "Point", coordinates: [r.lon, r.lat] } })),
+    features: reports.map((r) => ({ type: "Feature", properties: { type: r.type, kind: reportKind(r.type, ZONE_CONFIG) }, geometry: { type: "Point", coordinates: [r.lon, r.lat] } })),
   };
 }
 
@@ -100,14 +101,18 @@ export function ensureZoneLayers(instance: MapLayerHost) {
       paint: { "line-color": "#111827", "line-width": 4 },
     });
   }
+  // One icon per kind of report, drawn once (and again after a basemap change, which drops them).
+  for (const kind of REPORT_KINDS) {
+    if (!instance.hasImage(`report-${kind}`)) instance.addImage(`report-${kind}`, reportIcon(kind), { pixelRatio: 2 });
+  }
   if (!instance.getLayer("report-points")) {
     instance.addLayer({
-      id: "report-points", type: "circle", source: REPORT_SOURCE,
-      paint: {
-        "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 2, 14, 4, 17, 7],
-        "circle-color": "#1d4ed8",
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 1,
+      id: "report-points", type: "symbol", source: REPORT_SOURCE,
+      layout: {
+        "icon-image": ["concat", "report-", ["get", "kind"]],
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.45, 14, 0.7, 17, 1],
+        "icon-allow-overlap": true,
+        "icon-ignore-placement": true,
       },
     });
   }
@@ -121,6 +126,7 @@ export interface ZoneView {
   selectedZoneId: string | null;
   reports: Report[];
   reportsVisible: boolean;
+  reportKinds: Record<ReportKind, boolean>;
 }
 
 type MapLayerHost = MapLibreMap;
@@ -130,6 +136,7 @@ export function syncZoneLayers(instance: MapLibreMap, view: ZoneView, config: Zo
   const set = (id: string, data: FeatureCollection) => (instance.getSource(id) as GeoJSONSource).setData(data);
   set(ZONE_SOURCE, zonesGeojson(view.zones, view.scores, config, view.layer));
   set(REPORT_SOURCE, view.reportsVisible ? reportsGeojson(view.reports) : EMPTY);
+  instance.setFilter("report-points", ["in", ["get", "kind"], ["literal", REPORT_KINDS.filter((k) => view.reportKinds[k])]]);
   instance.setFilter("zone-selected", ["==", ["get", "id"], view.selectedZoneId ?? ""]);
   const visibility = view.visible ? "visible" : "none";
   for (const id of ["zone-fill", "zone-outline", "zone-outline-red", "zone-selected"]) {

@@ -14,6 +14,7 @@ import {
   type NoiseIndex,
   type RankedZone,
   type Report,
+  type ReportKind,
   type ScoredDimension,
   type Zone,
   type ZoneScore,
@@ -54,6 +55,8 @@ interface ZoneState {
   layer: MapLayer;
   visible: boolean;
   reportsVisible: boolean;
+  /** Which kinds of report are drawn (the legend doubles as the filter). */
+  reportKinds: Record<ReportKind, boolean>;
   selectedZoneId: string | null;
   auto: AutoDataStatus;
 
@@ -62,6 +65,7 @@ interface ZoneState {
   setLayer: (layer: MapLayer) => void;
   toggleVisible: () => void;
   toggleReports: () => void;
+  toggleReportKind: (kind: ReportKind) => void;
   selectZone: (id: string | null) => void;
 }
 
@@ -181,6 +185,7 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   layer: "combined",
   visible: true,
   reportsVisible: false,
+  reportKinds: { parking: true, narrow: true, works: true, furniture: true, other: true },
   selectedZoneId: null,
   auto: IDLE_AUTO,
 
@@ -219,6 +224,7 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   setLayer: (layer) => set({ layer }),
   toggleVisible: () => set((s) => ({ visible: !s.visible })),
   toggleReports: () => set((s) => ({ reportsVisible: !s.reportsVisible })),
+  toggleReportKind: (kind) => set((s) => ({ reportKinds: { ...s.reportKinds, [kind]: !s.reportKinds[kind] } })),
   selectZone: (selectedZoneId) => set({ selectedZoneId }),
 }));
 

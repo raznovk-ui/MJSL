@@ -33,6 +33,7 @@ export function MapView() {
   const selectedZoneId = useZoneStore((s) => s.selectedZoneId);
   const reports = useZoneStore((s) => s.reports);
   const reportsVisible = useZoneStore((s) => s.reportsVisible);
+  const reportKinds = useZoneStore((s) => s.reportKinds);
 
   useEffect(() => {
     if (!container.current || map.current) return;
@@ -96,8 +97,8 @@ export function MapView() {
   useEffect(() => {
     const instance = map.current;
     if (!instance || !styleReady) return;
-    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible }, ZONE_CONFIG);
-  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible]);
+    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible, reportKinds }, ZONE_CONFIG);
+  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible, reportKinds]);
 
   // Choosing a zone in the list frames it on the map.
   useEffect(() => {
