@@ -1,22 +1,34 @@
 # Atlas MJSL
 
-Carte d'accessibilite du littoral marseillais. **Aucune saisie** : tout est calcule
+Carte d'accessibilite de Marseille, **par zone**. Aucune saisie : tout est calcule
 automatiquement a partir de donnees ouvertes, au demarrage.
 
 ## Ce que fait l'application
 
-1. Charge les cheminements pietons (OpenStreetMap via Overpass, cache 7 jours).
-2. Remplit seule les indicateurs : bruit (carte officielle Metropole AMP, estimation
-   a defaut), pente (altitudes IGN RGE ALTI), largeur (valeur par defaut estimee).
-   Chaque valeur garde sa source : mesure, OSM, officiel ou estime.
-3. Note chaque troncon pour deux profils (fauteuil roulant, deficience visuelle) :
-   obstacles → dimensions → score, avec blocages eliminatoires.
-4. Detecte les **zones prioritaires** (troncons rouges ou bloques, regroupes),
-   classees par gravite, avec leur cause et la part de valeurs estimees.
-5. Permet de choisir un profil, de tracer un itineraire entre deux points
-   (avec detour si bloque) et d'exporter (GeoJSON, zip).
+1. **Les zones** : les 336 IRIS de Marseille (plus petite unite statistique officielle,
+   environ 2000 habitants), donnees ouvertes de la Metropole Aix-Marseille-Provence.
+2. **Chaque zone recoit ses indicateurs**, comptes automatiquement a partir de :
+   - OpenStreetMap (rues, bancs, escaliers, passages pietons, abris, commerces...),
+   - les **signalements des habitants** (« Galere pietons », 1393 points : stationnement
+     genant, trottoir etroit ou absent, chantiers, encombrants, terrasses),
+   - la carte de bruit officielle, les altitudes IGN (pente), les transports en commun,
+     les offices de tourisme, la pauvrete des menages (IRIS), les quartiers prioritaires
+     et les perimetres de projets urbains.
+   Chaque valeur garde sa source (OSM, officiel, signalements). Une donnee absente est
+   ignoree, jamais comptee comme 0. Les densites sont par km de rue.
+3. **Six dimensions** (celles du memoire) : physique, sensorielle, cognitive, economique,
+   sociale, politique. Chaque indicateur devient un obstacle de 0 a 1 ; chaque dimension
+   en fait la moyenne ; le score d'une zone pour un profil est le produit des
+   (1 − obstacle) ponderes. Quatre profils : mobilite reduite, malvoyant·e ou
+   neurodivergent·e, allophone, faibles revenus.
+4. **La carte** montre une couche par dimension, plus le score combine, sur une meme
+   echelle vert → rouge. Les zones rouges ont un contour pointille (la couleur n'est
+   jamais le seul indice). Un clic sur une zone detaille chaque etape du calcul.
+5. **Zones prioritaires** : les zones au score le plus bas pour le profil choisi, avec
+   leur cause principale. L'onglet Tableau liste toutes les zones, l'onglet Analyse
+   donne la synthese de la ville et l'export (GeoJSON, zip).
 
-Tous les seuils et poids sont dans `src/domain/walkway/walkway.config.json`.
+Tous les seuils et poids sont dans `src/domain/zone/zone.config.json`.
 
 ## Lancer
 
@@ -24,31 +36,33 @@ Tous les seuils et poids sont dans `src/domain/walkway/walkway.config.json`.
 npm install
 npm run dev      # http://localhost:5173
 npm test
-npm run build
-npm run data:noise   # re-telecharge la carte de bruit
-npm run data:osm     # prepare les donnees OpenStreetMap (voir ci-dessous)
+npm run build && npm run preview
 ```
 
-L'ancien outil de saisie (observations, photos, ruptures, cellules H3) a ete retire ;
-il reste dans l'historique git.
-
-## Presentation devant un jury : fonctionner sans Overpass
-
-Overpass (le serveur public d'OpenStreetMap) est parfois indisponible. Pour ne pas
-en dependre le jour J, prepare une copie des donnees **une fois**, quand il repond :
+## Donnees (a preparer une fois)
 
 ```bash
-npm run data:osm        # 10 a 30 min ; peut etre relance, il reprend ou il s'est arrete
-git add public/data     # la copie fait partie du projet
-npm run build && npm run preview   # lancer l'app sans serveur de dev
+npm run data:amp       # zones, transports, offices de tourisme, QPV, projets (Metropole)
+npm run data:reports   # signalements des habitants -> public/data/reports.json
+npm run data:noise     # carte de bruit officielle
+npm run data:osm       # OpenStreetMap, copie locale (10 a 30 min, reprenable)
 ```
 
-L'application lit d'abord `public/data/osm/*.geojson.gz` ; elle ne contacte Overpass que
-si ces fichiers manquent, ou si on clique « Rafraichir depuis Overpass ». Les altitudes IGN
-sont, elles, mises en cache dans le navigateur apres le premier chargement : ouvre l'app
-une fois en ligne avant la presentation.
+L'application lit d'abord ces fichiers dans `public/data/` ; elle ne contacte Overpass que
+si la copie OSM manque, ou si on clique « Rafraichir depuis Overpass ». Pour une
+presentation, lance `npm run build && npm run preview` et ouvre l'app une fois en ligne
+avant (les altitudes IGN sont mises en cache dans le navigateur).
+
+## Limites
+
+- Les seuils sont des valeurs de depart, calibrees sur la repartition des zones de
+  Marseille : les couleurs disent « pire que la plupart de la ville », pas « inutilisable ».
+- La pauvrete decrit la zone, pas ses rues. Les indicateurs cognitifs, sociaux et
+  politiques sont des approximations tirees de donnees ouvertes.
+- Les signalements sont un echantillon de signalements d'habitants, pas un recensement.
 
 ## Sources
 
-OpenStreetMap (ODbL) via Overpass · Carte de bruit routier, Metropole Aix-Marseille-Provence
-(Licence Ouverte 2.0) · IGN RGE ALTI.
+OpenStreetMap (ODbL) via Overpass · Metropole Aix-Marseille-Provence, Licence Ouverte 2.0
+(zones et revenus IRIS, bruit, transports, QPV, projets, offices de tourisme) · IGN RGE ALTI ·
+« Galere pietons » (Marsactu), licence de reutilisation a verifier.

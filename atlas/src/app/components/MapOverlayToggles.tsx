@@ -1,9 +1,9 @@
 import { useAppStore } from "../state.js";
-import { useWalkwayStore } from "../walkway/walkwayStore.js";
+import { useZoneStore } from "../zone/zoneStore.js";
 import { IconLayers } from "./icons.js";
-import { SCORED_DIMENSIONS } from "../../domain/walkway/index.js";
+import { SCORED_DIMENSIONS } from "../../domain/zone/index.js";
 import { dimension as meta } from "../../domain/dimensions.js";
-import { GRADIENT } from "../walkway/walkwayLayers.js";
+import { GRADIENT } from "../zone/zoneLayers.js";
 
 /** The person each dimension is read through, as the client defined them. */
 const PERSONA: Record<string, string> = {
@@ -21,14 +21,14 @@ const PERSONA: Record<string, string> = {
  */
 export function MapOverlayToggles() {
   const presets = useAppStore((s) => s.presets);
-  const walkVisible = useWalkwayStore((s) => s.visible);
-  const zonesVisible = useWalkwayStore((s) => s.zonesVisible);
-  const walkSegments = useWalkwayStore((s) => s.segments.length);
-  const layer = useWalkwayStore((s) => s.layer);
-  const setLayer = useWalkwayStore((s) => s.setLayer);
+  const visible = useZoneStore((s) => s.visible);
+  const reportsVisible = useZoneStore((s) => s.reportsVisible);
+  const zoneCount = useZoneStore((s) => s.zones.length);
+  const layer = useZoneStore((s) => s.layer);
+  const setLayer = useZoneStore((s) => s.setLayer);
 
   const osmVisible = Object.values(presets).some((p) => p.visible);
-  const allHidden = !zonesVisible && !osmVisible && !(walkVisible && walkSegments > 0);
+  const allHidden = !visible && !osmVisible && !reportsVisible;
 
   const setOsm = (visible: boolean) =>
     useAppStore.setState((s) => ({
@@ -37,7 +37,7 @@ export function MapOverlayToggles() {
 
   const setAll = (visible: boolean) => {
     setOsm(visible);
-    useWalkwayStore.setState({ visible, zonesVisible: visible });
+    useZoneStore.setState({ visible, reportsVisible: visible && reportsVisible });
   };
 
   const row = "flex items-start gap-2 text-xs";
@@ -67,28 +67,28 @@ export function MapOverlayToggles() {
             style={{ background: `linear-gradient(to right, ${GRADIENT.map(([x, c]) => `${c} ${x * 100}%`).join(", ")})` }}
           />
           <p className="mt-0.5 flex justify-between text-[11px] text-slate-600">
-            <span>0 : obstacle total (pointille)</span>
-            <span>1 : aucun</span>
+            <span>bas : obstacles (pointille)</span>
+            <span>haut : peu d'obstacles</span>
           </p>
         </div>
       </div>
       <div className="space-y-1.5">
         <label className={row}>
-          <input type="checkbox" checked={zonesVisible} onChange={() => useWalkwayStore.getState().toggleZones()} className="mt-0.5" />
-          <span>Zones prioritaires</span>
-        </label>
-        <label className={row}>
           <input
             type="checkbox"
-            checked={walkVisible && walkSegments > 0}
-            disabled={walkSegments === 0}
-            onChange={() => useWalkwayStore.getState().toggleVisible()}
+            checked={visible && zoneCount > 0}
+            disabled={zoneCount === 0}
+            onChange={() => useZoneStore.getState().toggleVisible()}
             className="mt-0.5"
           />
           <span>
-            Troncons pietons
-            {walkSegments === 0 && <span className="block text-slate-500">calcul en cours</span>}
+            Zones
+            {zoneCount === 0 && <span className="block text-slate-500">calcul en cours</span>}
           </span>
+        </label>
+        <label className={row}>
+          <input type="checkbox" checked={reportsVisible} onChange={() => useZoneStore.getState().toggleReports()} className="mt-0.5" />
+          <span>Signalements des habitants</span>
         </label>
         <label className={row}>
           <input type="checkbox" checked={osmVisible} onChange={(e) => setOsm(e.target.checked)} className="mt-0.5" />

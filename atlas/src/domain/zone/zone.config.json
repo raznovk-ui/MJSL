@@ -1,0 +1,122 @@
+{
+  "_comment": "MJSL zone scoring settings. This is the ONLY file you need to edit to change numbers. Change numbers only: keep the quotes, commas and brackets. Lines starting with _comment are notes and are ignored. If something is wrong the app tells you what, in plain words, when it starts.",
+
+  "indicators": {
+    "_comment": "Each indicator turns a number measured over a ZONE into a barrier from 0 (no problem) to 1 (total obstacle). kind 'linear': 'noProblemAt' is the value that gives barrier 0, 'totalObstacleAt' the value that gives barrier 1, a straight line in between (it works whichever is larger). kind 'share': the number is already a barrier between 0 and 1. 'dimension' is the dimension of the memoire the indicator belongs to: physical, sensory, cognitive, economic, socio_cultural or political. 'per km' means per kilometre of street in the zone, so a large zone is not penalised for being large. Most thresholds are STARTING VALUES, set from how the 336 zones of Marseille are spread out in the October 2026 data (a density's 'no problem' point is about the 90th percentile of the city): they say 'compared with the rest of Marseille', and are to be calibrated with the field work.",
+
+    "parkingReports": { "label": "Stationnement genant signale", "unit": "signalements / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 4, "_comment": "Citizens' reports of cars, scooters or bikes parked on the pavement (clandestine parking)." },
+    "narrowReports": { "label": "Trottoir etroit ou absent signale", "unit": "signalements / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 3 },
+    "worksReports": { "label": "Chantiers, peril, encombrants signales", "unit": "signalements / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 1.5 },
+    "steps": { "label": "Escaliers sans rampe", "unit": "escaliers / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 6, "_comment": "Flights of steps in OSM with no ramp tag (stairs with no detour)." },
+    "transit": { "label": "Transports en commun", "unit": "modes dans la zone", "dimension": "physical", "kind": "linear", "noProblemAt": 2, "totalObstacleAt": 0, "_comment": "Number of public transport modes (bus, tram, metro) with a stop in the zone. Two or more is fine, as the client asked." },
+    "slope": { "label": "Pente moyenne", "unit": "%", "dimension": "physical", "kind": "linear", "noProblemAt": 4, "totalObstacleAt": 12, "_comment": "Mean slope between neighbouring points of a 200 m grid of IGN altitudes." },
+    "surface": { "label": "Revetements difficiles", "unit": "part (0 a 1)", "dimension": "physical", "kind": "share", "_comment": "Mean roughness of the surfaces tagged in OSM, weighted by length (table 'surfaceRoughness' below)." },
+    "rest": { "label": "Bancs", "unit": "bancs / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 3, "totalObstacleAt": 0 },
+
+    "noise": { "label": "Bruit", "unit": "dB", "dimension": "sensory", "kind": "linear", "noProblemAt": 55, "totalObstacleAt": 85, "_comment": "Mean of the official Lden noise map over the zone." },
+    "crossings": { "label": "Passages pietons non equipes", "unit": "part (0 a 1)", "dimension": "sensory", "kind": "share", "_comment": "Share of the pedestrian crossings in the zone with neither traffic lights nor tactile paving." },
+    "glare": { "label": "Eblouissement des sols", "unit": "part (0 a 1)", "dimension": "sensory", "kind": "share", "_comment": "Mean glare of the tagged floor materials (table 'surfaceGlare' below), STARTING GUESSES." },
+    "signage": { "label": "Signaletique", "unit": "panneaux / km de rue", "dimension": "sensory", "kind": "linear", "noProblemAt": 0.3, "totalObstacleAt": 0 },
+    "lighting": { "label": "Rues sans eclairage", "unit": "part (0 a 1)", "dimension": "sensory", "kind": "share", "_comment": "Share of the street length tagged lit=no, among the length that carries a lit tag at all." },
+
+    "legibility": { "label": "Trace sinueux", "unit": "sinuosite", "dimension": "cognitive", "kind": "linear", "noProblemAt": 1.1, "totalObstacleAt": 1.6, "_comment": "Mean length of the ways divided by the straight distance between their ends." },
+    "landmarks": { "label": "Reperes (commerces, arrets)", "unit": "reperes / km de rue", "dimension": "cognitive", "kind": "linear", "noProblemAt": 15, "totalObstacleAt": 0 },
+    "infoCentres": { "label": "Centres d'information", "unit": "m depuis le centre de la zone", "dimension": "cognitive", "kind": "linear", "noProblemAt": 500, "totalObstacleAt": 4000 },
+
+    "publicPrivate": { "label": "Espaces prives plutot que publics", "unit": "part (0 a 1)", "dimension": "economic", "kind": "share", "_comment": "Private places (terraces, cafes, restaurants) as a share of all places that are either private or free and public (benches, drinking water, free toilets, parks)." },
+    "freeServices": { "label": "Services gratuits", "unit": "services / km de rue", "dimension": "economic", "kind": "linear", "noProblemAt": 0.6, "totalObstacleAt": 0 },
+    "furnitureReports": { "label": "Terrasses et mobilier signales", "unit": "signalements / km de rue", "dimension": "economic", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 1.5 },
+
+    "poverty": { "label": "Pauvrete des menages", "unit": "%", "dimension": "socio_cultural", "kind": "linear", "noProblemAt": 15, "totalObstacleAt": 45, "_comment": "Poverty rate of the households of the zone (2014 open data). It describes the area, not its streets." },
+    "shelter": { "label": "Abris et seuils habitables", "unit": "abris / km de rue", "dimension": "socio_cultural", "kind": "linear", "noProblemAt": 1, "totalObstacleAt": 0 },
+    "surveillance": { "label": "Cameras et portails", "unit": "dispositifs / km de rue", "dimension": "socio_cultural", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 5, "_comment": "OpenStreetMap lists only part of the cameras: a low value does not prove there are none." },
+    "coPresence": { "label": "Trottoirs trop etroits pour marcher a deux", "unit": "part (0 a 1)", "dimension": "socio_cultural", "kind": "share", "_comment": "Among the ways with a width tag, the share narrower than 'coPresenceWidthM'. Needs at least 'minTaggedWays' tagged ways." },
+    "activities": { "label": "Lieux d'activites", "unit": "lieux / km de rue", "dimension": "socio_cultural", "kind": "linear", "noProblemAt": 3, "totalObstacleAt": 0 },
+
+    "participation": { "label": "Dispositif de co-participation", "unit": "part (0 a 1)", "dimension": "political", "kind": "share", "_comment": "Share of the zone OUTSIDE every priority neighbourhood (QPV) and urban-project perimeter, times 'outsideBarrier'." },
+    "civic": { "label": "Lieux de concertation", "unit": "m depuis le centre de la zone", "dimension": "political", "kind": "linear", "noProblemAt": 400, "totalObstacleAt": 3000 }
+  },
+
+  "reports": {
+    "_comment": "How a citizen report is sorted into a kind, from the type the citizen chose. A report goes to the first kind with a word that appears in its type (lower case, accents removed). Reports of kind 'other' or with no type are counted but not scored.",
+    "parking": ["stationnement"],
+    "narrow": ["trottoir"],
+    "works": ["chantier", "peril", "encombrants"],
+    "furniture": ["terrasse", "mobilier"]
+  },
+
+  "autoData": {
+    "_comment": "Values the program works out BY ITSELF from open data, so nothing has to be typed by hand.",
+    "minStreetKm": 1,
+    "minTaggedWays": 5,
+    "coPresenceWidthM": 1.5,
+    "sampleGridM": 100,
+    "terrainGridM": 200,
+    "noiseMap": { "bandMidpointOffsetDb": 2.5, "belowThresholdDb": 52.5 },
+    "participation": { "outsideBarrier": 0.5 },
+    "streetHighways": ["footway", "path", "pedestrian", "steps", "residential", "living_street", "tertiary", "unclassified"],
+    "excludeTrails": {
+      "_comment": "Hiking trails are not pavements, so they are left out. A path, footway or steps is a trail when it carries any of the 'tags', or its name starts with one of 'nameStartsWith', or it is a plain 'path' on one of the 'unpavedSurfaces'.",
+      "tags": ["sac_scale", "trail_visibility", "mtb:scale"],
+      "nameStartsWith": ["Sentier", "Sentiers"],
+      "unpavedSurfaces": ["ground", "dirt", "earth", "rock", "grass", "mud", "sand", "pebblestone", "unpaved", "compacted"]
+    },
+    "surfaceRoughness": {
+      "_comment": "Barrier per surface type (OSM tag surface), from 0 to 1. A surface not in this list is left out.",
+      "asphalt": 0, "concrete": 0, "paving_stones": 0, "paved": 0, "sett": 0.5, "cobblestone": 0.5, "gravel": 0.8, "fine_gravel": 0.8, "sand": 0.8
+    },
+    "surfaceGlare": {
+      "asphalt": 0.1, "paved": 0.3, "paving_stones": 0.4, "concrete": 0.5, "sett": 0.3, "cobblestone": 0.2, "gravel": 0.2, "fine_gravel": 0.2, "sand": 0.4, "grass": 0, "wood": 0.3, "tiles": 0.8, "metal": 0.8, "marble": 0.9
+    },
+    "places": {
+      "_comment": "Which OpenStreetMap places count for which indicator.",
+      "freeAmenities": ["bench", "drinking_water", "toilets", "shelter", "fountain"],
+      "freeLeisure": ["park", "garden", "playground"],
+      "privateAmenities": ["cafe", "restaurant", "bar", "pub", "fast_food", "ice_cream", "biergarten"],
+      "freeServiceAmenities": ["drinking_water", "toilets", "library", "community_centre", "social_centre", "youth_centre"],
+      "activityAmenities": ["cafe", "restaurant", "bar", "pub", "library", "community_centre", "social_centre", "arts_centre", "theatre", "cinema", "marketplace", "place_of_worship"],
+      "activityLeisure": ["park", "playground", "garden", "sports_centre"],
+      "civicAmenities": ["townhall", "community_centre", "social_centre", "social_facility", "courthouse"],
+      "signageInformation": ["guidepost", "board", "map"],
+      "notLandmarks": ["bench", "parking", "parking_space", "bicycle_parking", "motorcycle_parking", "waste_basket", "recycling", "post_box", "vending_machine", "bicycle_rental", "charging_station", "fountain", "drinking_water"]
+    }
+  },
+
+  "scoring": {
+    "_comment": "A dimension's average barrier is capped at 'dimensionBarrierCap' before it enters the product. Without a cap, one dimension at its worst (barrier 1) would set the whole score to exactly 0 however good the other five are, which says 'this area cannot be used' when it only says 'this dimension is as bad as it gets'. 1 = no cap (the pure product).",
+    "dimensionBarrierCap": 0.9
+  },
+
+  "classes": {
+    "_comment": "Colour classes of the final score: below 'redBelow' = red, below 'orangeBelow' = orange, otherwise green. 'none' = not enough data to score. The thresholds are set so that about a tenth of the zones of Marseille are red in the October 2026 data: the colours say 'worse than most of the city', not 'unusable'.",
+    "redBelow": 0.55,
+    "orangeBelow": 0.68,
+    "colours": { "red": "#b91c1c", "orange": "#f59e0b", "green": "#15803d", "none": "#94a3b8" }
+  },
+
+  "ranking": {
+    "_comment": "Priority zones are the zones with the lowest score for the chosen profile. 'topN' is how many the list shows.",
+    "topN": 20
+  },
+
+  "profiles": {
+    "_howToAddProfile": "To add a profile, copy one block below, give it a new short name, and change 'label' and the 'weights' (they must add up to 1). A weight of 0 leaves a dimension out of the final score; it still has its own layer.",
+
+    "wheelchair": {
+      "label": "Personne a mobilite reduite",
+      "weights": { "physical": 0.35, "sensory": 0.1, "cognitive": 0.1, "economic": 0.15, "socio_cultural": 0.15, "political": 0.15 }
+    },
+    "blind": {
+      "label": "Personne malvoyante ou neurodivergente",
+      "weights": { "physical": 0.15, "sensory": 0.3, "cognitive": 0.2, "economic": 0.1, "socio_cultural": 0.1, "political": 0.15 }
+    },
+    "allophone": {
+      "label": "Personne allophone",
+      "weights": { "physical": 0.1, "sensory": 0.15, "cognitive": 0.4, "economic": 0.1, "socio_cultural": 0.15, "political": 0.1 }
+    },
+    "low_income": {
+      "label": "Personne a faibles revenus",
+      "weights": { "physical": 0.15, "sensory": 0.05, "cognitive": 0.1, "economic": 0.4, "socio_cultural": 0.2, "political": 0.1 }
+    }
+  }
+}

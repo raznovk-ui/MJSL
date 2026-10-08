@@ -6,9 +6,9 @@ import { STUDY_AREA } from "../studyArea.js";
 import { OVERPASS_PRESETS } from "../overpass/presets.js";
 import { useAppStore } from "../state.js";
 import type { FeatureCollection } from "geojson";
-import { WALKWAY_CONFIG } from "../../domain/walkway/index.js";
-import { syncWalkwayLayers } from "../walkway/walkwayLayers.js";
-import { useWalkwayStore } from "../walkway/walkwayStore.js";
+import { ZONE_CONFIG } from "../../domain/zone/index.js";
+import { syncZoneLayers } from "../zone/zoneLayers.js";
+import { useZoneStore } from "../zone/zoneStore.js";
 
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
 
@@ -25,18 +25,14 @@ export function MapView() {
   // "styledata" event that fires mid-parse leaves them registered but never
   // wired up, so nothing ever renders.
   const [styleReady, setStyleReady] = useState(false);
-  const routePicking = useWalkwayStore((s) => s.routePicking);
-  const walkSegments = useWalkwayStore((s) => s.segments);
-  const walkScores = useWalkwayStore((s) => s.scores);
-  const walkProfile = useWalkwayStore((s) => s.profileId);
-  const walkVisible = useWalkwayStore((s) => s.visible);
-  const layer = useWalkwayStore((s) => s.layer);
-  const walkRoutes = useWalkwayStore((s) => s.routes);
-  const walkFrom = useWalkwayStore((s) => s.routeFrom);
-  const walkTo = useWalkwayStore((s) => s.routeTo);
-  const zones = useWalkwayStore((s) => s.zones);
-  const zonesVisible = useWalkwayStore((s) => s.zonesVisible);
-  const selectedZoneId = useWalkwayStore((s) => s.selectedZoneId);
+  const zones = useZoneStore((s) => s.zones);
+  const scores = useZoneStore((s) => s.scores);
+  const profileId = useZoneStore((s) => s.profileId);
+  const visible = useZoneStore((s) => s.visible);
+  const layer = useZoneStore((s) => s.layer);
+  const selectedZoneId = useZoneStore((s) => s.selectedZoneId);
+  const reports = useZoneStore((s) => s.reports);
+  const reportsVisible = useZoneStore((s) => s.reportsVisible);
 
   useEffect(() => {
     if (!container.current || map.current) return;
@@ -67,16 +63,9 @@ export function MapView() {
 
     instance.on("load", () => setStyleReady(true));
     instance.on("click", (event) => {
-      // The only interaction left is choosing the two ends of a route.
-      if (useWalkwayStore.getState().routePicking) {
-        useWalkwayStore.getState().pickPoint(event.lngLat.lng, event.lngLat.lat);
-        return;
-      }
-      // Otherwise a click on a walkway shows how its score was calculated.
-      const hit = instance.queryRenderedFeatures(event.point, {
-        layers: ["walkway-line", "walkway-line-red"].filter((id) => instance.getLayer(id)),
-      });
-      useWalkwayStore.getState().inspectSegment(hit.length ? String(hit[0]!.properties?.id ?? "") : null);
+      // A click on a zone shows how its score was calculated.
+      const hit = instance.queryRenderedFeatures(event.point, { layers: ["zone-fill"].filter((id) => instance.getLayer(id)) });
+      useZoneStore.getState().selectZone(hit.length ? String(hit[0]!.properties?.id ?? "") || null : null);
     });
     return () => {
       instance.remove();
@@ -103,37 +92,27 @@ export function MapView() {
     instance.once("idle", () => setStyleReady(true));
   }, [basemap]);
 
-  useEffect(() => {
-    const instance = map.current;
-    if (!instance) return;
-    instance.getCanvas().style.cursor = routePicking ? "crosshair" : "";
-  }, [routePicking]);
-
-  // Walkway segments coloured by the selected profile, plus the chosen route.
+  // The zones, coloured by the selected profile and layer.
   useEffect(() => {
     const instance = map.current;
     if (!instance || !styleReady) return;
-    syncWalkwayLayers(instance, {
-      segments: walkSegments,
-      scores: walkScores[walkProfile],
-      visible: walkVisible,
-      route: walkRoutes.find((r) => r.profileId === walkProfile),
-      from: walkFrom,
-      to: walkTo,
-      zones,
-      zonesVisible,
-      selectedZoneId,
-      layer,
-    }, WALKWAY_CONFIG);
-  }, [styleReady, walkSegments, walkScores, walkProfile, walkVisible, walkRoutes, walkFrom, walkTo, zones, zonesVisible, selectedZoneId, layer]);
+    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible }, ZONE_CONFIG);
+  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible]);
 
   // Choosing a zone in the list frames it on the map.
   useEffect(() => {
     const instance = map.current;
     const zone = zones.find((z) => z.id === selectedZoneId);
     if (!instance || !zone) return;
-    const [w, s, e, n] = zone.bbox;
-    instance.fitBounds([[w, s], [e, n]], { padding: 80, maxZoom: 17, animate: !prefersReducedMotion() });
+    let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
+    const visit = (c: unknown): void => {
+      if (Array.isArray(c) && typeof c[0] === "number") {
+        const [x, y] = c as [number, number];
+        if (x < w) w = x; if (x > e) e = x; if (y < s) s = y; if (y > n) n = y;
+      } else if (Array.isArray(c)) c.forEach(visit);
+    };
+    visit(zone.geometry.coordinates);
+    instance.fitBounds([[w, s], [e, n]], { padding: 80, maxZoom: 16, animate: !prefersReducedMotion() });
   }, [selectedZoneId, zones]);
 
   // Re-runs whenever the data changes or the style becomes ready again, so the

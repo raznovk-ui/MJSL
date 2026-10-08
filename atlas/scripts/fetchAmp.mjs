@@ -7,7 +7,7 @@
  * Sources (Licence Ouverte 2.0, https://data.ampmetropole.fr):
  *   - transit stops (RTM) and metro/tram stations ........ physical: public transport
  *   - tourist offices ..................................... cognitive: information centres
- *   - income and poverty by IRIS (2014) ................... social: household context
+ *   - the zones: IRIS of Marseille, with income and poverty (2014) ... the unit of the whole scoring
  *   - priority neighbourhoods (QPV 2024) and project
  *     perimeters (ZAC, projet urbain partenarial, NPRU) ... political: participation devices
  */
@@ -73,13 +73,21 @@ await save(
 const features = (rows, props) =>
   ({ type: "FeatureCollection", features: rows.flatMap((r) => { const geometry = shapeOf(r); return geometry ? [{ type: "Feature", properties: props(r), geometry }] : []; }) });
 
+// The zones: one per IRIS (the finest official statistical unit, about 2000 inhabitants)
+// of the commune of Marseille, with the households' poverty and income.
 await save(
-  "iris.geojson",
-  features(await records("fed-revenus-declares-pauvrete-et-niveau-de-vie-en-2014-iris", { where: `intersects(geo_shape, geom'${polygon}')` }), (r) => ({
-    name: r.libiris,
-    poverty: r.dec_tp6014 ?? null, // % of households under the poverty line (60 % of the median)
-    median: r.dec_med14 ?? null, // median disposable income per consumption unit, euros
-  })),
+  "zones.geojson",
+  features(
+    (await records("fed-revenus-declares-pauvrete-et-niveau-de-vie-en-2014-iris", { where: `intersects(geo_shape, geom'${polygon}')` })).filter((r) => /^Marseille/i.test(r.libcom ?? "")),
+    (r) => ({
+      id: String(r.iris),
+      name: r.libiris,
+      arr: r.libcom,
+      poverty: r.dec_tp6014 ?? null, // % of households under the poverty line (60 % of the median)
+      median: r.dec_med14 ?? null, // median disposable income per consumption unit, euros
+      households: Math.round(r.pop_menages_en_2014_princ ?? 0),
+    }),
+  ),
 );
 
 await save("qpv.geojson", features(await records("amest_pdv_qpv_2024_amp-", { where: `intersects(geo_shape, geom'${polygon}')` }), (r) => ({ name: r.lib_qp, kind: "qpv" })));

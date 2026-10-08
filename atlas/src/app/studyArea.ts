@@ -1,4 +1,4 @@
-/** The whole commune of Marseille. Single source of truth for the walkway scoring. */
+/** The whole commune of Marseille. Single source of truth for the zone scoring. */
 export const STUDY_AREA = {
   name: "Marseille",
   bbox: { south: 43.17, west: 5.22, north: 43.39, east: 5.54 },

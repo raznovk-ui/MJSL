@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "data:noise": "node scripts/fetchNoise.mjs",
     "data:amp": "node scripts/fetchAmp.mjs",
+    "data:reports": "node scripts/prepareReports.mjs",
     "data:osm": "vite-node scripts/fetchOsm.ts"
   },
   "dependencies": {

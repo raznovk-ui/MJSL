@@ -50,7 +50,7 @@ export function osmToGeojson(payload: { elements?: OsmElement[] }): FeatureColle
         osm_id: `${element.type}/${element.id}`,
         label: osmLabel(tags),
         wheelchair: tags.wheelchair ?? "",
-        // Kept for ways so walkway segments can be connected at shared nodes.
+        // Kept for ways: the ids of their nodes.
         ...(element.nodes ? { osm_nodes: element.nodes } : {}),
         ...tags,
       },

@@ -16,7 +16,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { osmToGeojson } from "../src/app/overpass/osmToGeojson.ts";
 import { OVERPASS_PRESETS } from "../src/app/overpass/presets.ts";
-import { SOCIAL_TILES, WALKWAY_TILES } from "../src/app/overpass/walkwayPreset.ts";
+import { SOCIAL_TILES, OSM_TILES } from "../src/app/overpass/zonePreset.ts";
 import { gzipText, trimCollection } from "../src/app/overpass/snapshot.ts";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "osm");
@@ -55,7 +55,7 @@ async function query(text: string): Promise<unknown> {
 const exists = async (path: string) => stat(path).then(() => true, () => false);
 
 await mkdir(OUT, { recursive: true });
-const jobs = [...WALKWAY_TILES, ...SOCIAL_TILES, ...OVERPASS_PRESETS];
+const jobs = [...OSM_TILES, ...SOCIAL_TILES, ...OVERPASS_PRESETS];
 const failed: string[] = [];
 let features = 0;
 

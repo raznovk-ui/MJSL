@@ -5,10 +5,10 @@ import { LayerPanel } from "./components/LayerPanel.js";
 import { DataTable } from "./components/DataTable.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { Dashboard } from "./components/Dashboard.js";
-import { WalkwayPanel } from "./walkway/WalkwayPanel.js";
-import { ZoneList } from "./walkway/ZoneList.js";
-import { SegmentInspector } from "./walkway/SegmentInspector.js";
-import { useWalkwayStore } from "./walkway/walkwayStore.js";
+import { ZonePanel } from "./zone/ZonePanel.js";
+import { ZoneRanking } from "./zone/ZoneRanking.js";
+import { ZoneInspector } from "./zone/ZoneInspector.js";
+import { useZoneStore } from "./zone/zoneStore.js";
 import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
 import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
@@ -24,8 +24,8 @@ export function App() {
   useEffect(() => {
     // Fired without awaiting: a slow Overpass query must never hold the UI.
     for (const preset of OVERPASS_PRESETS) void fetchPreset(preset.id);
-    // The walkway scores and zones are computed with no input from anyone.
-    void useWalkwayStore.getState().load();
+    // The zones and their scores are computed with no input from anyone.
+    void useZoneStore.getState().load();
   }, [fetchPreset]);
 
   return (
@@ -64,9 +64,9 @@ export function App() {
           aria-label="Reglages des couches"
         >
           <div className="space-y-4">
-            <WalkwayPanel />
-            <ZoneList />
-            <SegmentInspector />
+            <ZonePanel />
+            <ZoneRanking />
+            <ZoneInspector />
             <BasemapPicker />
             <LayerPanel />
             <section aria-labelledby="limites" className="card">

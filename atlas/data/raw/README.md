@@ -25,8 +25,10 @@ Categories et correspondance indicative avec les dimensions MJSL :
 
 Ce n'est PAS un fichier note MJSL (pas de champs `d1_physique`..`d6_democratique`,
 pas de `score_mjsl`) : c'est un signalement brut, une seule categorie par point,
-sans note 0-3. Il n'est donc pas lu par `atlas/src/app/import/mjslLayers.ts`
-(qui ne cible que `site/data/*.geojson`).
+sans note 0-3. Il est lu par `npm run data:reports` (`scripts/prepareReports.mjs`), qui en tire
+`public/data/reports.json` ; l'application compte ensuite les signalements par zone
+et par type (stationnement, trottoir etroit, chantier/encombrants, terrasses).
+Source : « Galere pietons » (Marsactu) ; licence de reutilisation a verifier.
 
 ## Comment l'utiliser dans l'atlas
 

@@ -18,7 +18,7 @@ interface PresetLayer {
 /**
  * App-wide state: the basemap, the OSM overlay and the status line. There is no
  * user-entered data in the app: everything on the map is derived automatically
- * from open data (see walkway/walkwayStore.ts for the walkway scores and zones).
+ * from open data (see zone/zoneStore.ts for the zones and their scores).
  */
 interface AppState {
   basemap: string;
