@@ -24,7 +24,7 @@ export function ZoneInspector() {
       ) : (
         <div className="space-y-3 text-sm">
           <p className="font-medium text-slate-900">
-            {zone.name} · {zone.arrondissement.replace("Marseille ", "")} · {zone.areaKm2.toFixed(2)} km² · {zone.streetKm.toFixed(1)} km de rue
+            {zone.name} · {zone.arrondissement.replace("Marseille ", "")} ·{zone.zoneType !== "habitat" ? ` zone ${zone.zoneType === "activite" ? "d'activite" : "diverse (parc, espace naturel...)"} ·` : ""} {zone.areaKm2.toFixed(2)} km² · {zone.streetKm.toFixed(1)} km de rue
             <button type="button" className="btn btn-secondary btn-sm ml-2" onClick={() => select(null)}>Fermer</button>
           </p>
           <p className="text-xs text-slate-600">

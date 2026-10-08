@@ -3,7 +3,7 @@ import { ZONE_CONFIG as config, scoreZone, type Zone } from "../../domain/zone/i
 import { gradientColour, layerValue, zonesGeojson } from "./zoneLayers.js";
 
 const zone = (id: string, values: Record<string, number>): Zone => ({
-  id, name: id, arrondissement: "Marseille 1er Arrondissement",
+  id, name: id, zoneType: "habitat", arrondissement: "Marseille 1er Arrondissement",
   geometry: { type: "Polygon", coordinates: [[[5.35, 43.28], [5.36, 43.28], [5.36, 43.29], [5.35, 43.29], [5.35, 43.28]]] },
   areaKm2: 1, centroid: [5.355, 43.285], streetKm: 2, households: 0,
   values, sources: Object.fromEntries(Object.keys(values).map((k) => [k, "osm" as const])), counts: {},

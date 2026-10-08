@@ -17,11 +17,14 @@ export interface RankedZone {
 /**
  * The priority zones for one profile: the zones with the lowest score, worst first,
  * each with what drives it and how much of it rests on citizens' reports. A zone with
- * no score (no data at all) is never ranked.
+ * no score (no data at all) is never ranked, and neither is a zone where nobody lives
+ * (business areas, parks, the Calanques): they are drawn on the map but a priority list
+ * of the places people live in is the point.
  */
 export function rankZones(zones: Zone[], scores: Record<string, ZoneScore>, config: ZoneConfig): RankedZone[] {
   const scored = zones
     .map((zone) => ({ zone, s: scores[zone.id] }))
+    .filter((x) => x.zone.zoneType === "habitat")
     .filter((x): x is { zone: Zone; s: ZoneScore & { score: number } } => x.s?.score !== null && x.s?.score !== undefined)
     .sort((a, b) => a.s.score - b.s.score || b.zone.areaKm2 - a.zone.areaKm2);
 

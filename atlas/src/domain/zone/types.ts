@@ -21,6 +21,12 @@ export interface Report {
 }
 
 /**
+ * What an IRIS is for, as the statistics office classes it: "habitat" (where people live), "activite"
+ * (business and industrial areas, the port) or "divers" (parks, the Calanques, large facilities).
+ */
+export type ZoneType = "habitat" | "activite" | "divers";
+
+/**
  * The unit of the whole scoring: an area of the city (an IRIS), with the indicators
  * worked out for it from every dataset. `values` holds one number per indicator
  * (anything left out is "no data", never 0); `sources` says where each came from.
@@ -28,6 +34,7 @@ export interface Report {
 export interface Zone {
   id: string;
   name: string;
+  zoneType: ZoneType;
   /** Arrondissement, as written by the statistics office, e.g. "Marseille 6e Arrondissement". */
   arrondissement: string;
   geometry: Polygon | MultiPolygon;

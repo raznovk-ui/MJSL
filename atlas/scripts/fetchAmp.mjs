@@ -7,7 +7,7 @@
  * Sources (Licence Ouverte 2.0, https://data.ampmetropole.fr):
  *   - transit stops (RTM) and metro/tram stations ........ physical: public transport
  *   - tourist offices ..................................... cognitive: information centres
- *   - the zones: IRIS of Marseille, with income and poverty (2014) ... the unit of the whole scoring
+ *   - the zones: every IRIS of Marseille (2024), with income and poverty (2014) where published ... the unit of the whole scoring
  *   - priority neighbourhoods (QPV 2024) and project
  *     perimeters (ZAC, projet urbain partenarial, NPRU) ... political: participation devices
  */
@@ -73,22 +73,41 @@ await save(
 const features = (rows, props) =>
   ({ type: "FeatureCollection", features: rows.flatMap((r) => { const geometry = shapeOf(r); return geometry ? [{ type: "Feature", properties: props(r), geometry }] : []; }) });
 
-// The zones: one per IRIS (the finest official statistical unit, about 2000 inhabitants)
-// of the commune of Marseille, with the households' poverty and income.
-await save(
-  "zones.geojson",
-  features(
-    (await records("fed-revenus-declares-pauvrete-et-niveau-de-vie-en-2014-iris", { where: `intersects(geo_shape, geom'${polygon}')` })).filter((r) => /^Marseille/i.test(r.libcom ?? "")),
-    (r) => ({
-      id: String(r.iris),
-      name: r.libiris,
-      arr: r.libcom,
-      poverty: r.dec_tp6014 ?? null, // % of households under the poverty line (60 % of the median)
-      median: r.dec_med14 ?? null, // median disposable income per consumption unit, euros
-      households: Math.round(r.pop_menages_en_2014_princ ?? 0),
-    }),
-  ),
+// The zones: ALL the IRIS of the commune of Marseille (the 2024 division of the territory:
+// housing, activity and "divers" IRIS such as parks and the Calanques, which together cover
+// the whole land), with the households' poverty and income where the statistics office
+// publishes them (the 2014 income file only covers the inhabited ones).
+const income = new Map(
+  (await records("fed-revenus-declares-pauvrete-et-niveau-de-vie-en-2014-iris", { where: `intersects(geo_shape, geom'${polygon}')` }))
+    .filter((r) => /^Marseille/i.test(r.libcom ?? ""))
+    .map((r) => [String(r.iris), r]),
 );
+const irisUrl = new URL(`${API}/fed-iris-millesime-france/exports/geojson`);
+irisUrl.searchParams.set("where", `com_code="13055" and year(year)=2024`);
+const irisResponse = await fetch(irisUrl, { signal: AbortSignal.timeout(120_000), headers: { "user-agent": "msjl-atlas/0.1 (academic project)" } });
+if (!irisResponse.ok) throw new Error(`IRIS: HTTP ${irisResponse.status}`);
+const irisKind = (t) => (/habitat/i.test(t) ? "habitat" : /activit/i.test(t) ? "activite" : "divers");
+const first = (v) => (Array.isArray(v) ? v[0] : v);
+await save("zones.geojson", {
+  type: "FeatureCollection",
+  features: (await irisResponse.json()).features.map((f) => {
+    const code = String(first(f.properties.iris_code));
+    const inc = income.get(code);
+    return {
+      type: "Feature",
+      properties: {
+        id: code,
+        name: String(first(f.properties.iris_name) ?? code),
+        arr: String(first(f.properties.com_arm_name) ?? ""),
+        type: irisKind(String(f.properties.iris_type ?? "")),
+        poverty: inc?.dec_tp6014 ?? null, // % of households under the poverty line (60 % of the median)
+        median: inc?.dec_med14 ?? null, // median disposable income per consumption unit, euros
+        households: Math.round(inc?.pop_menages_en_2014_princ ?? 0),
+      },
+      geometry: f.geometry && { type: f.geometry.type, coordinates: JSON.parse(JSON.stringify(f.geometry.coordinates), (k, v) => (typeof v === "number" ? round(v) : v)) },
+    };
+  }),
+});
 
 await save("qpv.geojson", features(await records("amest_pdv_qpv_2024_amp-", { where: `intersects(geo_shape, geom'${polygon}')` }), (r) => ({ name: r.lib_qp, kind: "qpv" })));
 

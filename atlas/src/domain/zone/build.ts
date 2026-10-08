@@ -300,6 +300,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     out.push({
       id,
       name: String(p.name ?? id),
+      zoneType: p.type === "activite" || p.type === "divers" ? p.type : "habitat",
       arrondissement: String(p.arr ?? ""),
       geometry: g as Polygon | MultiPolygon,
       areaKm2,

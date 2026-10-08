@@ -300,7 +300,7 @@ describe("slope from the altitude grid", () => {
 
 describe("dimension scores, ranking and export", () => {
   const z = (id: string, areaKm2: number, values: Record<string, number>): Zone =>
-    ({ id, name: id, arrondissement: "Marseille 1er Arrondissement", geometry: { type: "Polygon", coordinates: [] }, areaKm2, centroid: [0, 0], streetKm: 2, households: 0, values, sources: Object.fromEntries(Object.keys(values).map((k) => [k, "osm" as const])), counts: {} });
+    ({ id, name: id, zoneType: "habitat", arrondissement: "Marseille 1er Arrondissement", geometry: { type: "Polygon", coordinates: [] }, areaKm2, centroid: [0, 0], streetKm: 2, households: 0, values, sources: Object.fromEntries(Object.keys(values).map((k) => [k, "osm" as const])), counts: {} });
   const zs = [z("a", 3, { slope: 4 }), z("b", 1, { slope: 12 }), z("c", 5, {})];
   const scores = Object.fromEntries(zs.map((x) => [x.id, scoreAllProfiles(x, config)["wheelchair"]!]));
 
@@ -317,6 +317,13 @@ describe("dimension scores, ranking and export", () => {
     expect(ranking[0]!.rank).toBe(1);
     expect(ranking[0]!.drivers[0]!.indicator).toBe("slope");
     expect(ranking[0]!.summary).toMatch(/Cause principale : pente moyenne/);
+  });
+
+  it("ranks only the zones where people live", () => {
+    const park = { ...z("park", 4, { slope: 12 }), zoneType: "divers" as const };
+    const all = [...zs, park];
+    const sc = Object.fromEntries(all.map((x) => [x.id, scoreAllProfiles(x, config)["wheelchair"]!]));
+    expect(rankZones(all, sc, config).map((r) => r.zone.id)).toEqual(["b", "a"]); // the park scores worst but is not ranked
   });
 
   it("exports every indicator with its source, and the score of every profile", () => {

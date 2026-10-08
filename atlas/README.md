@@ -5,8 +5,9 @@ automatiquement a partir de donnees ouvertes, au demarrage.
 
 ## Ce que fait l'application
 
-1. **Les zones** : les 336 IRIS de Marseille (plus petite unite statistique officielle,
-   environ 2000 habitants), donnees ouvertes de la Metropole Aix-Marseille-Provence.
+1. **Les zones** : tous les IRIS de Marseille (393, plus petite unite statistique
+   officielle, qui couvrent toute la terre de la commune, parcs et Calanques compris),
+   taillees a la terre avec les contours des arrondissements ; donnees ouvertes de la Metropole Aix-Marseille-Provence.
 2. **Chaque zone recoit ses indicateurs**, comptes automatiquement a partir de :
    - OpenStreetMap (rues, bancs, escaliers, passages pietons, abris, commerces...),
    - les **signalements des habitants** (« Galere pietons », 1393 points : stationnement
