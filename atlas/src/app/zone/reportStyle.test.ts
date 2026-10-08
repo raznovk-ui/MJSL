@@ -8,9 +8,17 @@ describe("report symbols", () => {
     for (const shape of shapes) expect(SHAPE_PATH[shape]).toMatch(/^M/);
   });
 
-  it("colours a kind by the dimension it feeds, and marks the unscored one", () => {
-    expect(REPORT_STYLE.parking.colour).toBe(REPORT_STYLE.narrow.colour); // both physical
-    expect(REPORT_STYLE.furniture.colour).not.toBe(REPORT_STYLE.parking.colour); // economic
+  it("draws the reports in shades of the blue-to-purple palette, away from the green-to-red of the zones", () => {
+    for (const kind of REPORT_KINDS) {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(REPORT_STYLE[kind].colour.slice(i, i + 2), 16)) as [number, number, number];
+      expect(b).toBeGreaterThan(g); // never green
+      expect(b).toBeGreaterThanOrEqual(r - 10); // blue or purple, never a warm colour
+    }
+    expect(new Set(REPORT_KINDS.map((k) => REPORT_STYLE[k].colour)).size).toBe(REPORT_KINDS.length);
+  });
+
+  it("marks the kind that is counted but not scored", () => {
     expect(REPORT_STYLE.other.feeds).toBeNull();
+    expect(REPORT_STYLE.parking.feeds).not.toBeNull();
   });
 });

@@ -1,5 +1,4 @@
 import type { ReportKind } from "../../domain/zone/index.js";
-import { dimension } from "../../domain/dimensions.js";
 
 export type ReportShape = "square" | "triangle" | "diamond" | "circle" | "cross";
 
@@ -15,7 +14,7 @@ export const SHAPE_PATH: Record<ReportShape, string> = {
 export interface ReportStyle {
   label: string;
   shape: ReportShape;
-  /** The colour of the dimension the kind feeds, so a kind is recognisable by shape AND by dimension. */
+  /** A shade of the blue-to-purple palette: it stands apart from the green-to-red of the zones underneath. */
   colour: string;
   /** The dimension it feeds, in words; null for reports that are counted but not scored. */
   feeds: string | null;
@@ -23,11 +22,11 @@ export interface ReportStyle {
 
 /** One symbol per kind of report: the shape tells the kind, never the colour alone. */
 export const REPORT_STYLE: Record<ReportKind, ReportStyle> = {
-  parking: { label: "Stationnement genant", shape: "square", colour: dimension("physical").colour, feeds: "D1 Physique" },
-  narrow: { label: "Trottoir etroit ou absent", shape: "triangle", colour: dimension("physical").colour, feeds: "D1 Physique" },
-  works: { label: "Chantier, peril, encombrants", shape: "diamond", colour: dimension("physical").colour, feeds: "D1 Physique" },
-  furniture: { label: "Terrasses, mobilier", shape: "circle", colour: dimension("economic").colour, feeds: "D4 Economique" },
-  other: { label: "Autre / sans type", shape: "cross", colour: "#64748b", feeds: null },
+  parking: { label: "Stationnement genant", shape: "square", colour: "#6b00d7", feeds: "D1 Physique" },
+  narrow: { label: "Trottoir etroit ou absent", shape: "triangle", colour: "#3e00b3", feeds: "D1 Physique" },
+  works: { label: "Chantier, peril, encombrants", shape: "diamond", colour: "#a230ed", feeds: "D1 Physique" },
+  furniture: { label: "Terrasses, mobilier", shape: "circle", colour: "#4a90d9", feeds: "D4 Economique" },
+  other: { label: "Autre / sans type", shape: "cross", colour: "#d391fa", feeds: null },
 };
 
 export const REPORT_KINDS = Object.keys(REPORT_STYLE) as ReportKind[];
