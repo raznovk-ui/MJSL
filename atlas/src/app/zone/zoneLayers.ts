@@ -13,10 +13,10 @@ export const REPORT_SOURCE = "reports";
  * mean the same thing everywhere.
  */
 export const GRADIENT: [number, string][] = [
-  [0.3, "#b91c1c"],
+  [0.35, "#b91c1c"],
   [0.5, "#e8590c"],
-  [0.65, "#eab308"],
-  [0.85, "#15803d"],
+  [0.6, "#eab308"],
+  [0.75, "#15803d"],
 ];
 
 const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));

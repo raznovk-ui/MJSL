@@ -86,6 +86,21 @@ describe("barriers and scores", () => {
     expect(scoreZone(z, "blind", config).score).toBeCloseTo(Math.pow(0.5, 1 / 3) * Math.pow(0.5, 2 / 3), 6);
   });
 
+  it("citizens' reports compound on top of the other indicators and can only make a dimension worse", () => {
+    const sources = { slope: "official" as const, parkingReports: "reported" as const };
+    const base = { id: "z", values: { slope: 8 }, sources }; // physical barrier 0.5 from the slope alone
+    const none = scoreZone({ ...base, values: { slope: 8, parkingReports: 0 } }, "wheelchair", config);
+    expect(none.dimensionBarriers.physical).toBeCloseTo(0.5, 6); // no report: nothing changes
+    // 2 reports per km: barrier 0.5 -> physical = 1 - (1 - 0.5) * (1 - 0.5) = 0.75
+    const some = scoreZone({ ...base, values: { slope: 8, parkingReports: 2 } }, "wheelchair", config);
+    expect(some.dimensionBarriers.physical).toBeCloseTo(0.75, 6);
+    // a mild report load must never lift a zone whose other indicators are worse
+    const worse = scoreZone({ id: "z", values: { slope: 12, parkingReports: 0.4 }, sources }, "wheelchair", config);
+    expect(worse.dimensionBarriers.physical!).toBeGreaterThanOrEqual(1 - 1e-9);
+    // reports alone are enough to give the dimension a value
+    expect(scoreZone({ id: "z", values: { parkingReports: 4 }, sources }, "wheelchair", config).dimensionBarriers.physical).toBe(1);
+  });
+
   it("a dimension at its worst does not zero the whole score: its barrier is capped", () => {
     const z = { id: "z", values: { noise: 85, slope: 4 }, sources: { noise: "official" as const, slope: "official" as const } };
     const s = scoreZone(z, "blind", config);

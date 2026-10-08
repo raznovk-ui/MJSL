@@ -24,7 +24,7 @@ describe("map layers", () => {
   it("uses one green-to-red scale for every layer", () => {
     expect(gradientColour(0)).toBe("#b91c1c");
     expect(gradientColour(1)).toBe("#15803d");
-    expect(gradientColour(0.65)).toBe("#eab308");
+    expect(gradientColour(0.6)).toBe("#eab308");
     expect(gradientColour(0.5)).not.toBe(gradientColour(0.8));
   });
 

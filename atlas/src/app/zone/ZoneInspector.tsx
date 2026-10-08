@@ -50,7 +50,7 @@ export function ZoneInspector() {
                       <th scope="row" className="font-medium">{c.label}</th>
                       <td>{v === undefined ? "—" : `${Number(v.toFixed(2))} ${c.unit}`}</td>
                       <td>{b.source ? SOURCE[b.source] : "—"}</td>
-                      <td className="text-slate-500">{c.kind === "share" ? "deja un obstacle (0 a 1)" : `0 a ${c.noProblemAt}, 1 a ${c.totalObstacleAt}`}</td>
+                      <td className="text-slate-500">{c.kind === "share" ? "deja un obstacle (0 a 1)" : `${c.kind === "evidence" ? "s'ajoute aux autres : " : ""}0 a ${c.noProblemAt}, 1 a ${c.totalObstacleAt}`}</td>
                       <td>{b.barrier === null ? "pas de donnee" : b.barrier.toFixed(2)}</td>
                     </tr>
                   );

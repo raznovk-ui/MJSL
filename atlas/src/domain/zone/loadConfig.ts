@@ -6,7 +6,7 @@ export interface IndicatorConfig {
   label: string;
   unit: string;
   dimension: Dimension;
-  kind: "linear" | "share";
+  kind: "linear" | "share" | "evidence";
   /** Linear only: the value that gives barrier 0, and the one that gives barrier 1. */
   noProblemAt?: number;
   totalObstacleAt?: number;
@@ -104,8 +104,8 @@ export function validateZoneConfig(raw: unknown): ZoneConfig {
       typeof value.dimension === "string" && (DIMENSION_KEYS as readonly string[]).includes(value.dimension),
       `"${path}dimension" must be one of: ${DIMENSION_KEYS.join(", ")}.`,
     );
-    need(value.kind === "linear" || value.kind === "share", `"${path}kind" must be "linear" or "share".`);
-    if (value.kind === "linear") {
+    need(value.kind === "linear" || value.kind === "share" || value.kind === "evidence", `"${path}kind" must be "linear", "share" or "evidence".`);
+    if (value.kind === "linear" || value.kind === "evidence") {
       need(isNumber(value.noProblemAt), `"${path}noProblemAt" must be a number.`);
       need(isNumber(value.totalObstacleAt), `"${path}totalObstacleAt" must be a number.`);
       need(value.noProblemAt !== value.totalObstacleAt, `"${path}noProblemAt" and "totalObstacleAt" must be different numbers.`);
@@ -114,8 +114,8 @@ export function validateZoneConfig(raw: unknown): ZoneConfig {
       label: String(value.label ?? key),
       unit: String(value.unit ?? ""),
       dimension: value.dimension as Dimension,
-      kind: value.kind as "linear" | "share",
-      ...(value.kind === "linear" ? { noProblemAt: value.noProblemAt as number, totalObstacleAt: value.totalObstacleAt as number } : {}),
+      kind: value.kind as "linear" | "share" | "evidence",
+      ...(value.kind === "linear" || value.kind === "evidence" ? { noProblemAt: value.noProblemAt as number, totalObstacleAt: value.totalObstacleAt as number } : {}),
     };
   }
   need(Object.keys(indicators).length > 0, `"indicators" needs at least one indicator.`);
