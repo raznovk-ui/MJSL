@@ -5,6 +5,7 @@ import { SCORED_DIMENSIONS, ZONE_CONFIG, reportKind } from "../../domain/zone/in
 import { dimension as meta } from "../../domain/dimensions.js";
 import { GRADIENT } from "../zone/zoneLayers.js";
 import { REPORT_KINDS, REPORT_STYLE, SHAPE_PATH } from "../zone/reportStyle.js";
+import { OSM_KINDS, OSM_STYLE } from "../map/osmStyle.js";
 
 /** The person each dimension is read through, as the client defined them. */
 const PERSONA: Record<string, string> = {
@@ -116,8 +117,24 @@ export function MapOverlayToggles() {
         )}
         <label className={row}>
           <input type="checkbox" checked={osmVisible} onChange={(e) => setOsm(e.target.checked)} className="mt-0.5" />
-          <span>Indices OSM</span>
+          <span>Indices OSM (donnees OpenStreetMap, pas les citoyens)</span>
         </label>
+        {osmVisible && (
+          <fieldset className="ml-5 space-y-1 border-l pl-2" style={{ borderColor: "var(--line)" }}>
+            <legend className="sr-only">Indices OSM affiches</legend>
+            {OSM_KINDS.map((kind) => {
+              const st = OSM_STYLE[kind];
+              return (
+                <div key={kind} className={row}>
+                  <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="mt-px shrink-0">
+                    <path d={SHAPE_PATH[st.shape]} fill="none" stroke={st.colour} strokeWidth="2.2" strokeLinejoin="round" />
+                  </svg>
+                  <span>{st.label}</span>
+                </div>
+              );
+            })}
+          </fieldset>
+        )}
       </div>
       <button type="button" onClick={() => setAll(allHidden)} className="btn btn-secondary btn-sm btn-block mt-2">
         {allHidden ? "Tout afficher" : "Carte seule"}

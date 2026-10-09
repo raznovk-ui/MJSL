@@ -8,6 +8,7 @@ import { useAppStore } from "../state.js";
 import type { FeatureCollection } from "geojson";
 import { ZONE_CONFIG } from "../../domain/zone/index.js";
 import { syncZoneLayers } from "../zone/zoneLayers.js";
+import { OSM_STYLE, ensureOsmIcons, osmKind } from "./osmStyle.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 
 const EMPTY = { type: "FeatureCollection" as const, features: [] };
@@ -168,10 +169,14 @@ function layerIds(presetId: string) {
 function syncPresetLayers(instance: MapLibreMap) {
   const { presets } = useAppStore.getState();
 
+  ensureOsmIcons(instance);
   for (const preset of OVERPASS_PRESETS) {
     const id = sourceId(preset.id);
     const layer = presets[preset.id];
-    const data = layer?.geojson ?? EMPTY;
+    // Each feature gets its kind (steps, elevator, kerb, tactile) so it can be drawn and listed apart.
+    const data = layer?.geojson
+      ? { ...layer.geojson, features: layer.geojson.features.map((f) => ({ ...f, properties: { ...f.properties, kind: osmKind(f.properties ?? {}) } })) }
+      : EMPTY;
 
     const existing = instance.getSource(id) as GeoJSONSource | undefined;
     if (existing) existing.setData(data);
@@ -187,22 +192,28 @@ function syncPresetLayers(instance: MapLibreMap) {
         source: id,
         filter: ["!=", ["geometry-type"], "Point"],
         layout: { visibility, "line-cap": "round" },
-        paint: { "line-color": "#9e2f2f", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 3, 14, 5, 17, 8], "line-opacity": 0.85 },
+        paint: {
+          "line-color": ["match", ["get", "kind"], "steps", OSM_STYLE.steps.colour, "tactile", OSM_STYLE.tactile.colour, OSM_STYLE.kerb.colour],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 11, 2, 14, 3, 17, 5],
+          "line-opacity": 0.85,
+          "line-dasharray": [1, 1],
+        },
       });
     }
+    // The points used to be red circles; they are now hollow symbols, one shape per kind.
+    if (instance.getLayer(pointId!)?.type === "circle") instance.removeLayer(pointId!);
     if (!instance.getLayer(pointId!)) {
       instance.addLayer({
         id: pointId!,
-        type: "circle",
+        type: "symbol",
         source: id,
         filter: ["==", ["geometry-type"], "Point"],
-        layout: { visibility },
-        paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11, 1.5, 14, 4, 17, 7],
-          "circle-color": "#9e2f2f",
-          // Shape and outline carry meaning too, never colour alone.
-          "circle-stroke-color": "#ffffff",
-          "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 11, 0, 14, 1, 17, 1.5],
+        layout: {
+          visibility,
+          "icon-image": ["concat", "osm-", ["get", "kind"]],
+          "icon-size": ["interpolate", ["linear"], ["zoom"], 11, 0.4, 14, 0.6, 17, 0.9],
+          "icon-allow-overlap": true,
+          "icon-ignore-placement": true,
         },
       });
     }
