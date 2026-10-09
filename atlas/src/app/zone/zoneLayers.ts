@@ -6,6 +6,7 @@ import type { MapLayer } from "./zoneStore.js";
 
 export const ZONE_SOURCE = "zones";
 export const REPORT_SOURCE = "reports";
+export const PENDING_SOURCE = "report-pending";
 
 /**
  * One green-to-red scale for every layer: 0 = total obstacle (red), 1 = none (green).
@@ -76,8 +77,15 @@ function reportsGeojson(reports: Report[]): FeatureCollection {
 
 /** Idempotent: safe to call on every style load and every data change. */
 export function ensureZoneLayers(instance: MapLayerHost) {
-  for (const id of [ZONE_SOURCE, REPORT_SOURCE]) if (!instance.getSource(id)) instance.addSource(id, { type: "geojson", data: EMPTY });
+  for (const id of [ZONE_SOURCE, REPORT_SOURCE, PENDING_SOURCE]) if (!instance.getSource(id)) instance.addSource(id, { type: "geojson", data: EMPTY });
 
+  // The point being placed, until it is saved or cancelled: a white disc with a violet ring.
+  if (!instance.getLayer("report-pending")) {
+    instance.addLayer({
+      id: "report-pending", type: "circle", source: PENDING_SOURCE,
+      paint: { "circle-radius": 9, "circle-color": "#ffffff", "circle-stroke-color": "#6b00d7", "circle-stroke-width": 3 },
+    });
+  }
   if (!instance.getLayer("zone-fill")) {
     instance.addLayer({
       id: "zone-fill", type: "fill", source: ZONE_SOURCE,
@@ -127,6 +135,7 @@ export interface ZoneView {
   reports: Report[];
   reportsVisible: boolean;
   reportKinds: Record<ReportKind, boolean>;
+  pending: { lon: number; lat: number } | null;
 }
 
 type MapLayerHost = MapLibreMap;
@@ -136,6 +145,9 @@ export function syncZoneLayers(instance: MapLibreMap, view: ZoneView, config: Zo
   const set = (id: string, data: FeatureCollection) => (instance.getSource(id) as GeoJSONSource).setData(data);
   set(ZONE_SOURCE, zonesGeojson(view.zones, view.scores, config, view.layer));
   set(REPORT_SOURCE, view.reportsVisible ? reportsGeojson(view.reports) : EMPTY);
+  set(PENDING_SOURCE, view.pending
+    ? { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [view.pending.lon, view.pending.lat] } }] }
+    : EMPTY);
   instance.setFilter("report-points", ["in", ["get", "kind"], ["literal", REPORT_KINDS.filter((k) => view.reportKinds[k])]]);
   instance.setFilter("zone-selected", ["==", ["get", "id"], view.selectedZoneId ?? ""]);
   const visibility = view.visible ? "visible" : "none";

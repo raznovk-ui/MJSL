@@ -51,3 +51,16 @@ export function reportIcon(kind: ReportKind, size = 40): { width: number; height
   const image = ctx.getImageData(0, 0, size, size);
   return { width: size, height: size, data: image.data };
 }
+
+/**
+ * The types a person can choose, in the data's own wording, so a new report is counted
+ * exactly like the existing ones (reportKind matches them by their words).
+ */
+export const REPORT_TYPE_OPTIONS: string[] = [
+  "Stationnement gênant fréquent",
+  "Trottoir étroit ou absent",
+  "Chantier/péril",
+  "Encombrants fréquents",
+  "Terrasses, mobilier",
+  "Autre",
+];

@@ -23,6 +23,7 @@ import { loadPreset } from "../overpass/client.js";
 import { OSM_TILES, SOCIAL_TILES } from "../overpass/zonePreset.js";
 import { useAppStore } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
+import { readOwnReports, writeOwnReports, zoneContaining, type OwnReport } from "./ownReports.js";
 
 const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_all.geojson`;
 const REPORTS_URL = `${import.meta.env.BASE_URL}data/reports.json`;
@@ -58,6 +59,11 @@ interface ZoneState {
   /** Which kinds of report are drawn (the legend doubles as the filter). */
   reportKinds: Record<ReportKind, boolean>;
   selectedZoneId: string | null;
+  /** Reports this person added on this device, counted with the others. */
+  ownReports: OwnReport[];
+  /** Placing a report: a map click sets the point, until it is saved or cancelled. */
+  addMode: boolean;
+  pending: { lon: number; lat: number } | null;
   auto: AutoDataStatus;
 
   load: (options?: { forceRefresh?: boolean }) => Promise<void>;
@@ -67,6 +73,11 @@ interface ZoneState {
   toggleReports: () => void;
   toggleReportKind: (kind: ReportKind) => void;
   selectZone: (id: string | null) => void;
+  toggleAddMode: () => void;
+  placeAt: (lon: number, lat: number) => void;
+  cancelPending: () => void;
+  saveOwnReport: (type: string) => Promise<void>;
+  removeOwnReport: (id: string) => Promise<void>;
 }
 
 const say = (message: string) => useAppStore.getState().setStatus(message);
@@ -171,6 +182,34 @@ async function loadAmp(): Promise<{ zones?: FeatureCollection; amp?: AmpIndex }>
   return { zones, amp: any ? buildAmpIndex({ transit, tourism, qpv, projects }) : undefined };
 }
 
+/** What the zones are built from. Kept outside the store so a new report re-scores without downloading again. */
+let inputs: { collection: FeatureCollection; osm: FeatureCollection; base: Report[] | undefined; amp?: AmpIndex; noiseIndex?: NoiseIndex } | null = null;
+/** Altitudes at the grid points, once downloaded (or read from the cache). */
+let terrain: Record<string, number> = {};
+
+/**
+ * Builds the zones from what was loaded plus this device's reports, then scores them.
+ * Called after every change, so the map, the ranking and the calculations always agree.
+ */
+function recompute(): void {
+  const state = useZoneStore.getState();
+  if (!inputs) return;
+  const reports = inputs.base ? [...inputs.base, ...state.ownReports] : undefined;
+  const built = buildZones(
+    {
+      zones: inputs.collection,
+      osm: inputs.osm,
+      ...(reports ? { reports } : {}),
+      ...(inputs.amp ? { amp: inputs.amp } : {}),
+      ...(inputs.noiseIndex ? { noiseIndex: inputs.noiseIndex } : {}),
+    },
+    ZONE_CONFIG,
+  );
+  const zones = withSlope(built, inputs.collection, terrain, ZONE_CONFIG);
+  const scores = scoreEverything(zones);
+  useZoneStore.setState({ zones, scores, reports: reports ?? [], ranking: rankingOf(zones, scores, state.profileId) });
+}
+
 const IDLE_AUTO: AutoDataStatus = { slope: "idle", slopeProgress: null, slopeError: null };
 
 export const useZoneStore = create<ZoneState>((set, get) => ({
@@ -187,6 +226,9 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   reportsVisible: false,
   reportKinds: { parking: true, narrow: true, works: true, furniture: true, other: true },
   selectedZoneId: null,
+  ownReports: [],
+  addMode: false,
+  pending: null,
   auto: IDLE_AUTO,
 
   load: async ({ forceRefresh = false } = {}) => {
@@ -201,14 +243,12 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
         loadNoiseIndex(),
       ]);
       if (!collection) throw new Error("Les zones (data/amp/zones.geojson) sont introuvables : lance « npm run data:amp ».");
-      const zones = buildZones(
-        { zones: collection, osm: osm.geojson, ...(reports ? { reports } : {}), ...(amp ? { amp } : {}), ...(noiseIndex ? { noiseIndex } : {}) },
-        ZONE_CONFIG,
-      );
-      const scores = scoreEverything(zones);
-      set({ loadState: "ready", zones, collection, scores, reports: reports ?? [], ranking: rankingOf(zones, scores, get().profileId) });
+      inputs = { collection, osm: osm.geojson, base: reports, amp, noiseIndex };
+      set({ ownReports: await readOwnReports() });
+      recompute();
+      set({ loadState: "ready" });
       say(
-        `${zones.length} zones notees` +
+        `${useZoneStore.getState().zones.length} zones notees` +
           (osm.fromCache ? " (cache local)." : " (Overpass).") +
           (osm.failed ? ` ${osm.failed} partie(s) de la ville n'ont pas pu etre chargees : recharge la page.` : ""),
       );
@@ -226,25 +266,51 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   toggleReports: () => set((s) => ({ reportsVisible: !s.reportsVisible })),
   toggleReportKind: (kind) => set((s) => ({ reportKinds: { ...s.reportKinds, [kind]: !s.reportKinds[kind] } })),
   selectZone: (selectedZoneId) => set({ selectedZoneId }),
+
+  toggleAddMode: () => set((s) => ({ addMode: !s.addMode, pending: null })),
+  placeAt: (lon, lat) => {
+    const zone = zoneContaining(get().zones, lon, lat);
+    if (!zone) {
+      set({ pending: null });
+      say("Ce point est hors de la ville : clique a l'interieur d'une zone de Marseille.");
+      return;
+    }
+    set({ pending: { lon, lat } });
+    say(`Point place dans « ${zone.name} ». Choisis le type, puis enregistre.`);
+  },
+  cancelPending: () => set({ pending: null }),
+  saveOwnReport: async (type) => {
+    const { pending, ownReports } = get();
+    if (!pending) return;
+    const next: OwnReport[] = [...ownReports, { id: crypto.randomUUID(), lon: pending.lon, lat: pending.lat, type, addedAt: new Date().toISOString() }];
+    set({ ownReports: next, pending: null, reportsVisible: true });
+    recompute();
+    await writeOwnReports(next);
+    say(`Signalement enregistre : ${next.length} ajoute(s) sur cet appareil, scores mis a jour.`);
+  },
+  removeOwnReport: async (id) => {
+    const next = get().ownReports.filter((r) => r.id !== id);
+    set({ ownReports: next });
+    recompute();
+    await writeOwnReports(next);
+    say("Signalement supprime, scores mis a jour.");
+  },
 }));
 
 /** Slopes come from altitude data and take a moment: the zones are usable meanwhile, and re-scored once the altitudes arrive. */
 async function loadSlope() {
-  const { collection, zones } = useZoneStore.getState();
+  const { collection } = useZoneStore.getState();
   if (!collection) return;
   useZoneStore.setState((s) => ({ auto: { ...s.auto, slope: "running", slopeProgress: { done: 0, total: 0 }, slopeError: null } }));
   const { altitudes, complete, error } = await getAltitudes(terrainPoints(collection, ZONE_CONFIG), {
     onProgress: (done, total) => useZoneStore.setState((s) => ({ auto: { ...s.auto, slopeProgress: { done, total } } })),
   });
-  const withSlopes = withSlope(zones, collection, altitudes, ZONE_CONFIG);
-  const scores = scoreEverything(withSlopes);
+  terrain = altitudes;
+  recompute();
   useZoneStore.setState((s) => ({
-    zones: withSlopes,
-    scores,
-    ranking: rankingOf(withSlopes, scores, s.profileId),
     auto: { ...s.auto, slope: complete ? "done" : Object.keys(altitudes).length > 0 ? "partial" : "error", slopeError: error ?? null },
   }));
-  const gained = withSlopes.filter((z) => z.sources.slope === "official").length;
+  const gained = useZoneStore.getState().zones.filter((z) => z.sources.slope === "official").length;
   say(complete ? `Pentes calculees pour ${gained} zones (altitudes IGN).` : `Pentes partielles (${gained} zones) : ${error ?? "erreur"}.`);
 }
 

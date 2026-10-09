@@ -6,6 +6,7 @@ import { DataTable } from "./components/DataTable.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { Dashboard } from "./components/Dashboard.js";
 import { ZonePanel } from "./zone/ZonePanel.js";
+import { ReportForm } from "./zone/ReportForm.js";
 import { ZoneRanking } from "./zone/ZoneRanking.js";
 import { ZoneInspector } from "./zone/ZoneInspector.js";
 import { useZoneStore } from "./zone/zoneStore.js";
@@ -65,6 +66,7 @@ export function App() {
         >
           <div className="space-y-4">
             <ZonePanel />
+            <ReportForm />
             <ZoneRanking />
             <ZoneInspector />
             <BasemapPicker />

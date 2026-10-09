@@ -34,6 +34,8 @@ export function MapView() {
   const reports = useZoneStore((s) => s.reports);
   const reportsVisible = useZoneStore((s) => s.reportsVisible);
   const reportKinds = useZoneStore((s) => s.reportKinds);
+  const addMode = useZoneStore((s) => s.addMode);
+  const pending = useZoneStore((s) => s.pending);
 
   useEffect(() => {
     if (!container.current || map.current) return;
@@ -64,6 +66,11 @@ export function MapView() {
 
     instance.on("load", () => setStyleReady(true));
     instance.on("click", (event) => {
+      // While a report is being placed, the click is its point.
+      if (useZoneStore.getState().addMode) {
+        useZoneStore.getState().placeAt(event.lngLat.lng, event.lngLat.lat);
+        return;
+      }
       // A click on a zone shows how its score was calculated.
       const hit = instance.queryRenderedFeatures(event.point, { layers: ["zone-fill"].filter((id) => instance.getLayer(id)) });
       useZoneStore.getState().selectZone(hit.length ? String(hit[0]!.properties?.id ?? "") || null : null);
@@ -97,8 +104,15 @@ export function MapView() {
   useEffect(() => {
     const instance = map.current;
     if (!instance || !styleReady) return;
-    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible, reportKinds }, ZONE_CONFIG);
-  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible, reportKinds]);
+    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending }, ZONE_CONFIG);
+  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending]);
+
+  // A crosshair while a report is being placed, so the mode is visible.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance) return;
+    instance.getCanvas().style.cursor = addMode ? "crosshair" : "";
+  }, [addMode]);
 
   // Choosing a zone in the list frames it on the map.
   useEffect(() => {

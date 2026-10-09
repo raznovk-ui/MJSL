@@ -1,7 +1,6 @@
 /**
- * Browser database, used only as a cache for downloaded open data (Overpass
- * responses, IGN altitudes). Nothing a person types is stored: the app has no
- * data entry.
+ * Browser database. A cache of downloaded open data (Overpass responses, IGN
+ * altitudes), and the citizen reports one person adds from this browser (REPORTS).
  *
  * VERSION stays at 4 on purpose. Earlier versions of the app also created
  * "observations", "photos" and "ruptures" stores; they are no longer read or
@@ -9,8 +8,10 @@
  * silently deleting what someone may have stored there.
  */
 const DB_NAME = "mjsl-atlas";
-const VERSION = 4;
+const VERSION = 5;
 export const OVERPASS = "overpass";
+/** Citizen reports added on this device. Kept locally only; never sent anywhere. */
+export const REPORTS = "reports";
 
 /**
  * The single opener for the app's database. Opening the same database at a lower
@@ -22,6 +23,7 @@ export function openDb(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(OVERPASS)) db.createObjectStore(OVERPASS);
+      if (!db.objectStoreNames.contains(REPORTS)) db.createObjectStore(REPORTS, { keyPath: "id" });
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);

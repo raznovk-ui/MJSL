@@ -54,6 +54,14 @@ si la copie OSM manque, ou si on clique « Rafraichir depuis Overpass ». Pour u
 presentation, lance `npm run build && npm run preview` et ouvre l'app une fois en ligne
 avant (les altitudes IGN sont mises en cache dans le navigateur).
 
+## Ajouter un signalement
+
+Dans la colonne de gauche, « Placer un signalement sur la carte », puis clique la carte
+et choisis le type. Le point est compte dans la zone ou il tombe, comme les autres
+signalements : les scores et le classement sont recalcules. Les signalements ajoutes
+restent sur cet appareil (base du navigateur) et peuvent etre supprimes ; ils ne sont
+envoyes nulle part.
+
 ## Limites
 
 - Les seuils sont des valeurs de depart, calibrees sur la repartition des zones de

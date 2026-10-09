@@ -22,3 +22,22 @@ describe("report symbols", () => {
     expect(REPORT_STYLE.parking.feeds).not.toBeNull();
   });
 });
+
+import { REPORT_TYPE_OPTIONS } from "./reportStyle.js";
+import { ZONE_CONFIG, reportKind } from "../../domain/zone/index.js";
+
+describe("the types a person can choose", () => {
+  it("are counted in the kind the data already uses for them", () => {
+    expect(reportKind("Stationnement gênant fréquent", ZONE_CONFIG)).toBe("parking");
+    expect(reportKind("Trottoir étroit ou absent", ZONE_CONFIG)).toBe("narrow");
+    expect(reportKind("Chantier/péril", ZONE_CONFIG)).toBe("works");
+    expect(reportKind("Encombrants fréquents", ZONE_CONFIG)).toBe("works");
+    expect(reportKind("Terrasses, mobilier", ZONE_CONFIG)).toBe("furniture");
+    expect(reportKind("Autre", ZONE_CONFIG)).toBe("other");
+  });
+
+  it("offer every kind of report at least once", () => {
+    const kinds = new Set(REPORT_TYPE_OPTIONS.map((t) => reportKind(t, ZONE_CONFIG)));
+    expect([...kinds].sort()).toEqual(["furniture", "narrow", "other", "parking", "works"]);
+  });
+});
