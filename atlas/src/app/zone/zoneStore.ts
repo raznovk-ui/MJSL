@@ -24,6 +24,7 @@ import { OSM_TILES, SOCIAL_TILES } from "../overpass/zonePreset.js";
 import { useAppStore } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
 import { readOwnReports, writeOwnReports, zoneContaining, type OwnReport } from "./ownReports.js";
+import { locate } from "./locate.js";
 
 const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_all.geojson`;
 const REPORTS_URL = `${import.meta.env.BASE_URL}data/reports.json`;
@@ -64,6 +65,9 @@ interface ZoneState {
   /** Placing a report: a map click sets the point, until it is saved or cancelled. */
   addMode: boolean;
   pending: { lon: number; lat: number } | null;
+  /** A position being looked up, and the last one found (the map flies there). */
+  locating: boolean;
+  target: { lon: number; lat: number; accuracyM: number; nonce: number } | null;
   auto: AutoDataStatus;
 
   load: (options?: { forceRefresh?: boolean }) => Promise<void>;
@@ -78,6 +82,7 @@ interface ZoneState {
   cancelPending: () => void;
   saveOwnReport: (type: string) => Promise<void>;
   removeOwnReport: (id: string) => Promise<void>;
+  locateMe: () => Promise<void>;
 }
 
 const say = (message: string) => useAppStore.getState().setStatus(message);
@@ -229,6 +234,8 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   ownReports: [],
   addMode: false,
   pending: null,
+  locating: false,
+  target: null,
   auto: IDLE_AUTO,
 
   load: async ({ forceRefresh = false } = {}) => {
@@ -287,6 +294,19 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
     recompute();
     await writeOwnReports(next);
     say(`Signalement enregistre : ${next.length} ajoute(s) sur cet appareil, scores mis a jour.`);
+  },
+  locateMe: async () => {
+    set({ locating: true });
+    try {
+      const found = await locate();
+      set({ target: { lon: found.lon, lat: found.lat, accuracyM: found.accuracyM, nonce: Date.now() } });
+      get().placeAt(found.lon, found.lat);
+      if (get().pending) say(`Position trouvee (precision ± ${found.accuracyM} m) : choisis le type, puis enregistre.`);
+    } catch (error) {
+      say(error instanceof Error ? error.message : "Position introuvable.");
+    } finally {
+      set({ locating: false });
+    }
   },
   removeOwnReport: async (id) => {
     const next = get().ownReports.filter((r) => r.id !== id);

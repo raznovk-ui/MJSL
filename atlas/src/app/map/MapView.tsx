@@ -36,6 +36,7 @@ export function MapView() {
   const reportKinds = useZoneStore((s) => s.reportKinds);
   const addMode = useZoneStore((s) => s.addMode);
   const pending = useZoneStore((s) => s.pending);
+  const target = useZoneStore((s) => s.target);
 
   useEffect(() => {
     if (!container.current || map.current) return;
@@ -106,6 +107,13 @@ export function MapView() {
     if (!instance || !styleReady) return;
     syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending }, ZONE_CONFIG);
   }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending]);
+
+  // A position found by "Me localiser": the map flies to it, close enough to place a point.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !target) return;
+    instance.flyTo({ center: [target.lon, target.lat], zoom: Math.max(instance.getZoom(), 16), animate: !prefersReducedMotion() });
+  }, [target]);
 
   // A crosshair while a report is being placed, so the mode is visible.
   useEffect(() => {

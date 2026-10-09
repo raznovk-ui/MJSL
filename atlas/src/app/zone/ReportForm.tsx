@@ -14,11 +14,16 @@ export function ReportForm() {
   const pending = useZoneStore((s) => s.pending);
   const own = useZoneStore((s) => s.ownReports);
   const toggleAddMode = useZoneStore((s) => s.toggleAddMode);
+  const locating = useZoneStore((s) => s.locating);
+  const locateMe = useZoneStore((s) => s.locateMe);
+  const target = useZoneStore((s) => s.target);
   const cancelPending = useZoneStore((s) => s.cancelPending);
   const saveOwnReport = useZoneStore((s) => s.saveOwnReport);
   const removeOwnReport = useZoneStore((s) => s.removeOwnReport);
   const [type, setType] = useState(REPORT_TYPE_OPTIONS[0]!);
   const ready = loadState === "ready";
+  // Accuracy is shown only for a point that came from "Me localiser", not for a manual click.
+  const accuracy = target && pending && target.lon === pending.lon && target.lat === pending.lat ? target.accuracyM : null;
 
   return (
     <section aria-labelledby={`${ids}-h`} className="card">
@@ -27,6 +32,15 @@ export function ReportForm() {
         Clique la carte, choisis le type : le point compte dans la zone ou il tombe, comme les autres signalements. Il reste sur
         cet appareil seulement.
       </p>
+
+      <button
+        type="button"
+        onClick={() => void locateMe()}
+        disabled={!ready || locating}
+        className="btn btn-secondary btn-block mb-2"
+      >
+        {locating ? "Localisation…" : "Me localiser"}
+      </button>
 
       <button
         type="button"
@@ -40,7 +54,9 @@ export function ReportForm() {
 
       {pending && (
         <div className="mt-3 space-y-2">
-          <p className="text-xs text-slate-700">Point place sur la carte.</p>
+          <p className="text-xs text-slate-700">
+            Point place sur la carte{accuracy !== null ? ` (precision ± ${accuracy} m)` : ""}.
+          </p>
           <label htmlFor={`${ids}-type`} className="block text-xs font-medium text-slate-700">Type de signalement</label>
           <select
             id={`${ids}-type`}
