@@ -169,7 +169,7 @@ function layerIds(presetId: string) {
 function syncPresetLayers(instance: MapLibreMap) {
   const { presets } = useAppStore.getState();
 
-  ensureOsmIcons(instance);
+  void ensureOsmIcons(instance);
   for (const preset of OVERPASS_PRESETS) {
     const id = sourceId(preset.id);
     const layer = presets[preset.id];

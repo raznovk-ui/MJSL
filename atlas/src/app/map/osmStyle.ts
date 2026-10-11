@@ -1,18 +1,45 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
-import { SHAPE_PATH, type ReportShape } from "../zone/reportStyle.js";
 
 /**
  * The "Indices OSM" overlay: physical features that OpenStreetMap records. It is NOT the
- * citizens' reports, so it has its own look: hollow outlines (the reports are filled), and
- * shades of blue and purple (never the red of "bad" zones).
+ * citizens' reports: each kind has its own glyph (stairs, lift, kerb, tactile dots), filled
+ * in a shade of the blue-to-purple palette, never the red of the "bad" zones.
  */
 export type OsmKind = "steps" | "elevator" | "kerb" | "tactile";
 
-export const OSM_STYLE: Record<OsmKind, { label: string; colour: string; shape: ReportShape }> = {
-  steps: { label: "Escaliers (OSM)", colour: "#1d4ed8", shape: "triangle" },
-  elevator: { label: "Ascenseur (OSM)", colour: "#6d28d9", shape: "square" },
-  kerb: { label: "Bordure (OSM)", colour: "#0e7490", shape: "diamond" },
-  tactile: { label: "Bandes podotactiles (OSM)", colour: "#4338ca", shape: "circle" },
+/** Each glyph is drawn in a 20 x 20 box. `d` is the outline, `fillRule` decides the holes. */
+interface Glyph {
+  d: string;
+  fillRule?: "evenodd" | "nonzero";
+}
+
+/** Dots for the tactile paving: a 3 x 3 grid of small discs. */
+const dots = (): string =>
+  [5, 10, 15]
+    .flatMap((y) => [5, 10, 15].map((x) => `M${x - 1.5} ${y}a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0z`))
+    .join("");
+
+export const OSM_STYLE: Record<OsmKind, { label: string; colour: string; glyph: Glyph }> = {
+  steps: {
+    label: "Escaliers (OSM)",
+    colour: "#190087",
+    glyph: { d: "M2 18V14H6V10H10V6H14V2H18V18Z" },
+  },
+  elevator: {
+    label: "Ascenseur (OSM)",
+    colour: "#3e00b3",
+    glyph: { d: "M2 2H18V18H2Z M9.2 4.5H10.8V15.5H9.2Z", fillRule: "evenodd" },
+  },
+  kerb: {
+    label: "Bordure (OSM)",
+    colour: "#6b00d7",
+    glyph: { d: "M2 8H18V11H2Z M5 12H15V18H5Z" },
+  },
+  tactile: {
+    label: "Bandes podotactiles (OSM)",
+    colour: "#a230ed",
+    glyph: { d: dots() },
+  },
 };
 
 export const OSM_KINDS = Object.keys(OSM_STYLE) as OsmKind[];
@@ -25,28 +52,45 @@ export function osmKind(tags: Record<string, unknown>): OsmKind {
   return "kerb";
 }
 
-/** A hollow symbol in the kind's colour, with a white halo so it reads on any basemap. */
-export function osmIcon(kind: OsmKind, size = 40): { width: number; height: number; data: Uint8ClampedArray } {
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d")!;
-  ctx.scale(size / 20, size / 20);
-  const path = new Path2D(SHAPE_PATH[OSM_STYLE[kind].shape]);
-  ctx.lineJoin = "round";
-  ctx.lineWidth = 3.4;
-  ctx.strokeStyle = "#ffffff";
-  ctx.stroke(path);
-  ctx.lineWidth = 1.8;
-  ctx.strokeStyle = OSM_STYLE[kind].colour;
-  ctx.stroke(path);
-  const image = ctx.getImageData(0, 0, size, size);
-  return { width: size, height: size, data: image.data };
+/** The glyph as an SVG document: filled, with a thin white outline so it reads on any basemap. */
+export function osmSvg(kind: OsmKind): string {
+  const { colour, glyph } = OSM_STYLE[kind];
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="40" height="40">` +
+    `<path d="${glyph.d}" fill="${colour}" fill-rule="${glyph.fillRule ?? "nonzero"}" stroke="#ffffff" stroke-width="1" stroke-linejoin="round"/>` +
+    `</svg>`
+  );
 }
 
-/** Adds the four symbols to the map (again after a basemap change, which drops them). */
-export function ensureOsmIcons(instance: MapLibreMap): void {
-  for (const kind of OSM_KINDS) {
-    if (!instance.hasImage(`osm-${kind}`)) instance.addImage(`osm-${kind}`, osmIcon(kind), { pixelRatio: 2 });
-  }
+/** Rasterises the SVG glyph to pixels, which is what the map takes as an image. */
+export function osmIconPixels(kind: OsmKind, size = 40): Promise<ImageData> {
+  return new Promise((resolve, reject) => {
+    const image = new Image(size, size);
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(image, 0, 0, size, size);
+      resolve(ctx.getImageData(0, 0, size, size));
+    };
+    image.onerror = () => reject(new Error(`Icone ${kind} illisible.`));
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(osmSvg(kind))}`;
+  });
+}
+
+/**
+ * Adds the four glyphs to the map (again after a basemap change, which drops them). Images
+ * are loaded asynchronously; a symbol layer shows nothing until its image is there, then
+ * the map redraws by itself.
+ */
+export async function ensureOsmIcons(instance: MapLibreMap): Promise<void> {
+  await Promise.all(
+    OSM_KINDS.map(async (kind) => {
+      const id = `osm-${kind}`;
+      if (instance.hasImage(id)) return;
+      const pixels = await osmIconPixels(kind);
+      if (!instance.hasImage(id)) instance.addImage(id, pixels, { pixelRatio: 2 });
+    }),
+  );
 }

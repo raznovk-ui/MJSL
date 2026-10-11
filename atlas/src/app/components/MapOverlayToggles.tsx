@@ -127,7 +127,7 @@ export function MapOverlayToggles() {
               return (
                 <div key={kind} className={row}>
                   <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="mt-px shrink-0">
-                    <path d={SHAPE_PATH[st.shape]} fill="none" stroke={st.colour} strokeWidth="2.2" strokeLinejoin="round" />
+                    <path d={st.glyph.d} fill={st.colour} fillRule={st.glyph.fillRule ?? "nonzero"} />
                   </svg>
                   <span>{st.label}</span>
                 </div>
