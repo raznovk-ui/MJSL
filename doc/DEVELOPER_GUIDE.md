@@ -54,6 +54,7 @@ hand** except optional citizen reports, kept in the browser.
 ├── .github/workflows/static.yml   CI: test, build atlas/, publish atlas/dist on GitHub Pages
 ├── doc/
 │   ├── DEVELOPER_GUIDE.md         this file
+│   ├── SCORING_MATH.md            the score, formula by formula, with a worked example
 │   └── research/                  the memoire's hand-over note (French)
 └── atlas/                         the application (Vite + React + TypeScript + MapLibre)
     ├── index.html
@@ -217,6 +218,9 @@ stores from earlier versions are left alone on purpose. Always open the database
 ---
 
 ## 5. The scoring model
+
+The full derivation, with every formula and a worked example, is in
+[`SCORING_MATH.md`](SCORING_MATH.md); this section is the summary.
 
 Everything below is parameterised by `src/domain/zone/zone.config.json`, which is
 validated at start-up by `loadConfig.ts`: a mistake there stops the app with a message
