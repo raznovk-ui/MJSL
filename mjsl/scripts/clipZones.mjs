@@ -20,7 +20,7 @@ const round = (n) => Math.round(n * 1e5) / 1e5;
 
 const url = new URL(API);
 url.searchParams.set("where", `statut = "arrondissement municipal"`);
-const response = await fetch(url, { signal: AbortSignal.timeout(120_000), headers: { "user-agent": "msjl-atlas/0.1 (academic project)" } });
+const response = await fetch(url, { signal: AbortSignal.timeout(120_000), headers: { "user-agent": "mjsl/0.1 (academic project)" } });
 if (!response.ok) throw new Error(`Could not download the arrondissements: HTTP ${response.status}`);
 const arrondissements = (await response.json()).features.filter((f) => /^Marseille/i.test(f.properties.com_arm_name ?? ""));
 if (arrondissements.length !== 16) throw new Error(`Expected the 16 arrondissements of Marseille, got ${arrondissements.length}.`);

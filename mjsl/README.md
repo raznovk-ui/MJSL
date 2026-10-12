@@ -1,4 +1,4 @@
-# Atlas MJSL
+# MJSL
 
 Carte d'accessibilite de Marseille, **par zone**. Aucune saisie : tout est calcule
 automatiquement a partir de donnees ouvertes, au demarrage.

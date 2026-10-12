@@ -30,7 +30,7 @@ async function records(dataset, { where, select } = {}) {
     url.searchParams.set("offset", String(offset));
     if (where) url.searchParams.set("where", where);
     if (select) url.searchParams.set("select", select);
-    const response = await fetch(url, { signal: AbortSignal.timeout(60_000), headers: { "user-agent": "msjl-atlas/0.1 (academic project)" } });
+    const response = await fetch(url, { signal: AbortSignal.timeout(60_000), headers: { "user-agent": "mjsl/0.1 (academic project)" } });
     if (!response.ok) throw new Error(`${dataset}: HTTP ${response.status}`);
     const page = (await response.json()).results ?? [];
     rows.push(...page);
@@ -84,7 +84,7 @@ const income = new Map(
 );
 const irisUrl = new URL(`${API}/fed-iris-millesime-france/exports/geojson`);
 irisUrl.searchParams.set("where", `com_code="13055" and year(year)=2024`);
-const irisResponse = await fetch(irisUrl, { signal: AbortSignal.timeout(120_000), headers: { "user-agent": "msjl-atlas/0.1 (academic project)" } });
+const irisResponse = await fetch(irisUrl, { signal: AbortSignal.timeout(120_000), headers: { "user-agent": "mjsl/0.1 (academic project)" } });
 if (!irisResponse.ok) throw new Error(`IRIS: HTTP ${irisResponse.status}`);
 const irisKind = (t) => (/habitat/i.test(t) ? "habitat" : /activit/i.test(t) ? "activite" : "divers");
 const first = (v) => (Array.isArray(v) ? v[0] : v);

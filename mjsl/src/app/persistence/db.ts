@@ -7,7 +7,7 @@
  * already have them rather than silently deleting what someone may have stored there.
  * Bump VERSION only to add a store, in onupgradeneeded below.
  */
-const DB_NAME = "mjsl-atlas";
+const DB_NAME = "mjsl";
 const VERSION = 5;
 export const OVERPASS = "overpass";
 /** Citizen reports added on this device. Kept locally only; never sent anywhere. */

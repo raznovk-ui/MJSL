@@ -1,9 +1,9 @@
-# Atlas MJSL: developer guide
+# MJSL: developer guide
 
 This guide is for whoever picks up the code next. It explains what the app computes, how
 the code is laid out, where the data comes from, and how to make the changes you are most
 likely to be asked for. The user-facing description (in French) is
-[`atlas/README.md`](../atlas/README.md). The research behind the method is in
+[`mjsl/README.md`](../mjsl/README.md). The research behind the method is in
 [`doc/research/`](research/).
 
 ---
@@ -12,7 +12,7 @@ likely to be asked for. The user-facing description (in French) is
 
 The **Matrice de Justice Spatiale Littorale (MJSL)** reads accessibility as six
 dimensions (physical, sensory, cognitive, economic, social, political) rather than as a
-checklist of norms. The Atlas applies it to **every zone of Marseille**: the 393 IRIS
+checklist of norms. The MJSL app applies it to **every zone of Marseille**: the 393 IRIS
 (the smallest official statistical unit), trimmed to the land. For each zone it measures
 about 25 **indicators** from open data (OpenStreetMap, the Metropole's open data portal,
 the official noise map, IGN altitudes, citizens' reports), turns each into a **barrier**
@@ -51,12 +51,12 @@ hand** except optional citizen reports, kept in the browser.
 
 ```
 .
-├── .github/workflows/static.yml   CI: test, build atlas/, publish atlas/dist on GitHub Pages
+├── .github/workflows/static.yml   CI: test, build mjsl/, publish mjsl/dist on GitHub Pages
 ├── doc/
 │   ├── DEVELOPER_GUIDE.md         this file
 │   ├── SCORING_MATH.md            the score, formula by formula, with a worked example
 │   └── research/                  the memoire's hand-over note (French)
-└── atlas/                         the application (Vite + React + TypeScript + MapLibre)
+└── mjsl/                          the application (Vite + React + TypeScript + MapLibre)
     ├── index.html
     ├── package.json               scripts: dev, test, build, data:*
     ├── vite.config.ts
@@ -110,12 +110,12 @@ parameter. That is what makes the scoring testable in Node and reusable from the
 Requirements: **Node 22** (Vite 8 needs 20.19+; CI uses 22) and npm.
 
 ```bash
-cd atlas
+cd mjsl
 npm ci             # install exactly what package-lock.json says
 npm run dev        # http://localhost:5173, hot reload
 npm test           # vitest, ~1 s
 npm run typecheck  # tsc --noEmit
-npm run build      # typecheck + production bundle in atlas/dist
+npm run build      # typecheck + production bundle in mjsl/dist
 npm run preview    # serve dist/ locally
 ```
 
@@ -210,7 +210,7 @@ There are two families of presets:
 
 ### Browser storage (`persistence/db.ts`)
 
-One IndexedDB database, `mjsl-atlas`, version 5, two stores: `overpass` (cached Overpass
+One IndexedDB database, `mjsl`, version 5, two stores: `overpass` (cached Overpass
 answers and the altitudes) and `reports` (citizen reports added on this device). Older
 stores from earlier versions are left alone on purpose. Always open the database through
 `openDb()`: opening it elsewhere at another version throws a `VersionError`.
@@ -377,12 +377,12 @@ IndexedDB is kept thin and checked in the running app.
 ## 9. Deployment
 
 Every push to `main` runs `.github/workflows/static.yml`: `npm ci`, `npm test`,
-`npm run build`, then publishes `atlas/dist` to GitHub Pages. The build uses a relative
+`npm run build`, then publishes `mjsl/dist` to GitHub Pages. The build uses a relative
 base (`./`, see `vite.config.ts`), so `dist/` works under `/<repo>/` or any other path,
 and every runtime URL is built from `import.meta.env.BASE_URL`. The repository's Pages
 source must be set to **GitHub Actions** (Settings -> Pages).
 
-To host elsewhere, serve `atlas/dist` as static files. The server must send `.mjs` with
+To host elsewhere, serve `mjsl/dist` as static files. The server must send `.mjs` with
 a JavaScript MIME type (MapLibre's worker): Python's `http.server` on Windows does not,
 and the map then stays blank.
 

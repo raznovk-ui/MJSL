@@ -25,7 +25,7 @@ const ENDPOINTS = [
   "https://overpass.private.coffee/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
 ];
-const USER_AGENT = "msjl-atlas/0.1 (academic project; prepared offline snapshot)";
+const USER_AGENT = "mjsl/0.1 (academic project; prepared offline snapshot)";
 const force = process.argv.includes("--force");
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

@@ -1,9 +1,9 @@
 {
-  "name": "mjsl-atlas",
+  "name": "mjsl",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "MJSL atlas: accessibility of every zone (IRIS) of Marseille, scored from open data",
+  "description": "MJSL: accessibility of every zone (IRIS) of Marseille, scored from open data",
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",

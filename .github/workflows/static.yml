@@ -1,5 +1,5 @@
-# Builds the Atlas (atlas/) and publishes it on GitHub Pages.
-name: Deploy the Atlas to Pages
+# Builds MJSL (mjsl/) and publishes it on GitHub Pages.
+name: Deploy MJSL to Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: atlas
+        working-directory: mjsl
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,12 +38,12 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: atlas/package-lock.json
+          cache-dependency-path: mjsl/package-lock.json
       - name: Install
         run: npm ci
       - name: Test
         run: npm test
-      # Typechecks, then bundles into atlas/dist (relative base: works under /<repo>/).
+      # Typechecks, then bundles into mjsl/dist (relative base: works under /<repo>/).
       - name: Build
         run: npm run build
       - name: Setup Pages
@@ -51,7 +51,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './atlas/dist'
+          path: './mjsl/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

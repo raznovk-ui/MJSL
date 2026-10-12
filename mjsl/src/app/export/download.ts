@@ -24,7 +24,7 @@ const ATTRIBUTION = [
   "Signalements des habitants : \"Galere pietons\" (Marsactu) ; licence de reutilisation a verifier.",
 ];
 
-const README = `Atlas MJSL - export
+const README = `MJSL - export
 
 zones.geojson  Les zones de Marseille (IRIS) avec chaque indicateur, sa source, et le score
                de chaque profil et de chaque dimension.

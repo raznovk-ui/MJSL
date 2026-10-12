@@ -45,7 +45,7 @@ export function Dashboard() {
     setBusy(true);
     try {
       const blob = await buildArchive({ "zones.geojson": JSON.stringify(zonesToGeojson(zones, ZONE_CONFIG), null, 2) });
-      downloadBlob(blob, `atlas-mjsl-${new Date().toISOString().slice(0, 10)}.zip`);
+      downloadBlob(blob, `mjsl-${new Date().toISOString().slice(0, 10)}.zip`);
       setStatus("Archive exportee.");
     } catch (error) {
       console.error(error);

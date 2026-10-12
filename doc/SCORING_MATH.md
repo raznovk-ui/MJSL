@@ -3,7 +3,7 @@
 This document explains, formula by formula, how a zone's score is computed: from the raw
 data to the indicator values, then to barriers, dimension barriers, the score of a
 profile, its colour class, and the city-wide figures. Every number used below comes from
-[`zone.config.json`](../atlas/src/domain/zone/zone.config.json); every formula is the one
+[`zone.config.json`](../mjsl/src/domain/zone/zone.config.json); every formula is the one
 in the code, and the section titles name the function that implements it.
 
 The overview of the pipeline is in the [developer guide](DEVELOPER_GUIDE.md#5-the-scoring-model);
@@ -388,17 +388,17 @@ panel of the app shows the same table for any zone that is clicked.
 
 | Section | Function | File |
 |---|---|---|
-| 1 | `buildZones`, `withSlope`, `terrainPoints` | `atlas/src/domain/zone/build.ts` |
+| 1 | `buildZones`, `withSlope`, `terrainPoints` | `mjsl/src/domain/zone/build.ts` |
 | 1.1 | `distanceM`, `KX`/`KY`, `areaAndCentroid`, `anchorOf`, `PolygonIndex` | `geo.ts`, `zoneGeometry.ts`, `spatial.ts` |
 | 1.3 | `bandAt` (noise) | `noiseMap.ts` |
 | 2 | `linearBarrier`, `computeBarriers` | `score.ts` |
 | 3 | `dimensionBarriers` | `score.ts` |
 | 4 | `scoreZone`, `scoreAllProfiles` | `score.ts` |
-| 5 | `classify`; `gradientColour`, `GRADIENT` | `score.ts`; `atlas/src/app/zone/zoneLayers.ts` |
+| 5 | `classify`; `gradientColour`, `GRADIENT` | `score.ts`; `mjsl/src/app/zone/zoneLayers.ts` |
 | 6 | `dimensionScores`, `dimensionScoreOf` | `dimensionScores.ts` |
 | 7 | `rankZones` | `ranking.ts` |
 
-The tests in `atlas/src/domain/zone/__tests__/zone.test.ts` check each of these properties
+The tests in `mjsl/src/domain/zone/__tests__/zone.test.ts` check each of these properties
 (clamping in both directions, missing data never 0, compounding of the evidence, the cap,
 area weighting, ranking order). If you change a formula, change this document and those
 tests together.

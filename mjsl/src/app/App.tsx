@@ -49,7 +49,7 @@ export function App() {
               Matrice de Justice Spatiale Littorale
             </p>
             <h1 className="truncate text-lg font-bold leading-tight text-slate-900">
-              Atlas d&apos;accessibilite multi-dimensionnelle
+              MJSL — accessibilite multi-dimensionnelle
             </h1>
           </div>
         </div>
