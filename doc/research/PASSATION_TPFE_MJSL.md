@@ -1,6 +1,5 @@
 # Document de passation - TPFE MJSL Marseille
 **Date de creation : 26 juin 2026**
-**A utiliser pour reprendre le travail avec un autre assistant IA.**
 
 ---
 
@@ -238,16 +237,6 @@ Apres cette correction, l'application fonctionnera en ouvrant `webapp/index.html
 
 ### 4. Produire les cartes pour le TPFE
 Voir `docs/cartes_synthese_mjsl.md` et `docs/checklist_rendu_tpfe_mjsl.md` pour la liste des 8 planches a produire.
-
----
-
-## Instructions pour le prochain assistant IA
-
-1. **Lire ce document en entier** avant toute action.
-2. **Ne pas recreer les fichiers qui existent deja** : toute la structure est en place.
-3. **La premiere tache est de corriger `loadMjslData()`** dans `webapp/app.js` (correction donnee ci-dessus).
-4. Apres cette correction, **tester en ouvrant `webapp/index.html`** directement dans Brave ou Chrome : les 7 couches MJSL doivent s'afficher automatiquement.
-5. Ensuite continuer avec les releves terrain et l'enrichissement des donnees.
 
 ---
 
