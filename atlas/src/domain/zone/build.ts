@@ -1,18 +1,17 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import { distanceM, polylineLengthM } from "./geo.js";
 import type { AmpIndex } from "./ampData.js";
-import { PolygonIndex } from "./ampData.js";
-import { bandAt, type NoiseIndex } from "./noiseMap.js";
+import { KX, KY, bboxOfCoordinates, coordKey, distanceM, polylineLengthM } from "./geo.js";
 import type { ZoneConfig } from "./loadConfig.js";
-import { SpatialGrid } from "./spatial.js";
+import { bandAt, type NoiseIndex } from "./noiseMap.js";
+import { PolygonIndex, SpatialGrid } from "./spatial.js";
 import type { LngLat, Report, ReportKind, ValueSource, Zone } from "./types.js";
-import { KX, KY, anchorOf, areaAndCentroid } from "./zoneGeometry.js";
+import { anchorOf, areaAndCentroid } from "./zoneGeometry.js";
 
 type Tags = Record<string, unknown>;
 const str = (v: unknown): string | undefined => (typeof v === "string" && v.trim() ? v.trim() : undefined);
 
 /** "1.5", "1,5 m", "150 cm" -> metres. */
-export function parseMetres(value: unknown): number | undefined {
+function parseMetres(value: unknown): number | undefined {
   const s = str(value)?.toLowerCase().replace(",", ".");
   if (!s) return undefined;
   const n = parseFloat(s);
@@ -32,7 +31,7 @@ export function reportKind(type: string, config: ZoneConfig): ReportKind {
 }
 
 /** A hiking trail rather than a pavement: see excludeTrails in the config. */
-export function isTrail(tags: Tags, config: ZoneConfig): boolean {
+function isTrail(tags: Tags, config: ZoneConfig): boolean {
   const highway = str(tags.highway);
   if (highway !== "path" && highway !== "footway" && highway !== "steps") return false;
   const rule = config.autoData.excludeTrails;
@@ -76,23 +75,10 @@ function lattice(bbox: [number, number, number, number], gridM: number): { i: nu
   return out;
 }
 
-const bboxOf = (zones: FeatureCollection): [number, number, number, number] => {
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  const visit = (c: unknown): void => {
-    if (Array.isArray(c) && typeof c[0] === "number") {
-      const [x, y] = c as [number, number];
-      if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y;
-    } else if (Array.isArray(c)) c.forEach(visit);
-  };
-  for (const f of zones.features) visit((f.geometry as { coordinates: unknown } | null)?.coordinates);
-  return [minX, minY, maxX, maxY];
-};
+const bboxOf = (zones: FeatureCollection) =>
+  bboxOfCoordinates(zones.features.map((f) => (f.geometry as { coordinates: unknown } | null)?.coordinates ?? []));
 
-function zoneIndexOf(zones: FeatureCollection) {
-  return new PolygonIndex(zones);
-}
-
-export interface BuildInput {
+interface BuildInput {
   /** The zones: polygons with `id`, `name`, `arr`, `poverty`, `households` properties (scripts/fetchAmp.mjs). */
   zones: FeatureCollection;
   /** Loaded OpenStreetMap features (as produced by osmToGeojson). */
@@ -111,7 +97,7 @@ export interface BuildInput {
  * left out for a zone with too little street to be meaningful.
  */
 export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseIndex }: BuildInput, config: ZoneConfig): Zone[] {
-  const index = zoneIndexOf(zoneCollection);
+  const index = new PolygonIndex(zoneCollection);
   const zoneAt = (p: LngLat | null): string | undefined => {
     if (!p) return undefined;
     const hit = index.at(p)[0];
@@ -322,7 +308,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
 
 /** Points of the altitude grid (inside a zone) to fetch from the altimetry service. */
 export function terrainPoints(zones: FeatureCollection, config: ZoneConfig): LngLat[] {
-  const index = zoneIndexOf(zones);
+  const index = new PolygonIndex(zones);
   return lattice(bboxOf(zones), config.autoData.terrainGridM).filter(({ p }) => index.at(p).length > 0).map(({ p }) => p);
 }
 
@@ -332,12 +318,11 @@ export function terrainPoints(zones: FeatureCollection, config: ZoneConfig): Lng
  * (source "official": IGN RGE ALTI), the others unchanged.
  */
 export function withSlope(zones: Zone[], collection: FeatureCollection, altitudes: Record<string, number>, config: ZoneConfig): Zone[] {
-  const index = zoneIndexOf(collection);
+  const index = new PolygonIndex(collection);
   const grid = config.autoData.terrainGridM;
   const cells = new Map<string, { zone: string; z: number }>();
   for (const { i, j, p } of lattice(bboxOf(collection), grid)) {
-    const key = `${p[0].toFixed(6)},${p[1].toFixed(6)}`;
-    const z = altitudes[key];
+    const z = altitudes[coordKey(p)];
     if (z === undefined) continue;
     const hit = index.at(p)[0];
     if (hit) cells.set(`${i},${j}`, { zone: String(hit.id), z });

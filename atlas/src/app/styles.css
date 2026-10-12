@@ -19,10 +19,6 @@
   --surface: #ffffff;
   --surface-alt: #f8fafc;
 
-  --danger: #b91c1c;
-  --danger-dark: #7f1d1d;
-  --danger-tint: #fef2f2;
-  --danger-border: #fecaca;
 
   --warning-tint: #fffbeb;
   --warning-border: #fcd34d;
@@ -85,8 +81,8 @@ body {
 }
 
 /* ---------- Buttons ---------- */
-/* One shared shape so a button always looks like a button; three variants so
-   the hierarchy of an action (do this / do this instead / undo this) is
+/* One shared shape so a button always looks like a button; variants so the
+   hierarchy of an action (do this / do this instead / a mode switch) is
    visible before anyone reads the label. */
 .btn {
   display: inline-flex;
@@ -135,27 +131,7 @@ body {
   color: var(--ink);
 }
 
-.btn-danger {
-  background: var(--surface);
-  color: var(--danger);
-  border-color: var(--danger-border);
-}
-.btn-danger:hover:not(:disabled) {
-  background: var(--danger-tint);
-  border-color: var(--danger);
-}
 
-.btn-ghost {
-  background: transparent;
-  color: var(--ink-soft);
-  padding: 0.35rem 0.5rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.btn-ghost:hover:not(:disabled) {
-  color: var(--ink);
-  background: var(--surface-alt);
-}
 
 .btn-block {
   width: 100%;
@@ -165,9 +141,9 @@ body {
   font-size: 0.72rem;
 }
 
-/* Toggle buttons (mode switches: add-point, rupture, layer panels) get a
+/* Toggle buttons (mode switches: placing a report, a ranked zone) get a
    pressed look that does not depend on colour alone. Unpressed looks like a
-   secondary button; only the pressed rule below needs a per-variant override. */
+   secondary button. */
 .btn-toggle {
   background: var(--surface);
   color: var(--ink-soft);
@@ -184,22 +160,6 @@ body {
   box-shadow: inset 0 0 0 2px var(--brand-dark);
 }
 
-/* Rupture reporting is danger-toned even before it is armed, so its urgency
-   reads before anyone presses it. */
-.btn-toggle-danger {
-  background: var(--surface);
-  color: var(--danger-dark);
-  border-color: var(--danger);
-}
-.btn-toggle-danger:hover:not(:disabled) {
-  background: var(--danger-tint);
-}
-.btn-toggle-danger[aria-pressed="true"] {
-  background: var(--danger-dark);
-  color: #ffffff;
-  border-color: var(--danger-dark);
-  box-shadow: var(--shadow-sm);
-}
 
 /* ---------- Cards & panels ---------- */
 .card {
@@ -215,36 +175,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* ---------- Chips (dimension selectors) ---------- */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  cursor: pointer;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  padding: 0.3rem 0.7rem 0.3rem 0.5rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-  background: var(--surface);
-  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
-}
-.chip:hover {
-  border-color: var(--muted);
-}
-.chip-active {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #ffffff;
-}
-.chip-dot {
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 999px;
-  flex: none;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.25);
-}
 
 /* ---------- Tab bar (Carte / Tableau / Analyse) ---------- */
 .tabbar {
@@ -337,7 +267,6 @@ body {
 
 /* Printing the Analyse tab is the report: drop the chrome, keep the content. */
 @media print {
-  .no-print,
   aside,
   nav,
   header button {
@@ -362,21 +291,12 @@ body {
 button,
 summary,
 select,
-input[type="file"],
 [role="tab"] {
   min-height: 24px;
 }
 
-/* Chips hide their checkbox and use the label as the target, so the label is
-   what has to meet the minimum. */
-label:has(> input.sr-only) {
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-}
 
 /* Small text buttons ("Supprimer", "Fermer") still need a real box. */
-button.text-xs,
-button.text-\[10px\] {
+button.text-xs {
   padding-block: 4px;
 }

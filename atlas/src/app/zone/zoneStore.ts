@@ -15,13 +15,13 @@ import {
   type RankedZone,
   type Report,
   type ReportKind,
-  type ScoredDimension,
+  type Dimension,
   type Zone,
   type ZoneScore,
 } from "../../domain/zone/index.js";
 import { loadPreset } from "../overpass/client.js";
 import { OSM_TILES, SOCIAL_TILES } from "../overpass/zonePreset.js";
-import { useAppStore } from "../state.js";
+import { useAppStore, type LoadState } from "../state.js";
 import { getAltitudes } from "./elevationClient.js";
 import { readOwnReports, writeOwnReports, zoneContaining, type OwnReport } from "./ownReports.js";
 import { locate } from "./locate.js";
@@ -30,13 +30,11 @@ const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_all.geojson`;
 const REPORTS_URL = `${import.meta.env.BASE_URL}data/reports.json`;
 const AMP_BASE = `${import.meta.env.BASE_URL}data/amp/`;
 
-type LoadState = "idle" | "loading" | "ready" | "error";
-
 /** What the map shows for each zone: the profile's combined score, or one dimension. */
-export type MapLayer = "combined" | ScoredDimension;
+export type MapLayer = "combined" | Dimension;
 
 /** What the program filled in by itself, and how far it got. */
-export interface AutoDataStatus {
+interface AutoDataStatus {
   slope: "idle" | "running" | "done" | "partial" | "error";
   slopeProgress: { done: number; total: number } | null;
   slopeError: string | null;
@@ -46,8 +44,6 @@ interface ZoneState {
   loadState: LoadState;
   error: string | null;
   zones: Zone[];
-  /** The zone polygons as loaded, for the altitude grid. */
-  collection: FeatureCollection | null;
   /** profile id -> zone id -> score */
   scores: Record<string, Record<string, ZoneScore>>;
   /** Priority zones for the selected profile, worst first. */
@@ -167,11 +163,11 @@ async function loadNoiseIndex(): Promise<NoiseIndex | undefined> {
   const data = await getJson<FeatureCollection>(NOISE_MAP_URL);
   if (!data) return undefined;
   const index = buildNoiseIndex(data);
-  return index.polygons.length > 0 ? index : undefined;
+  return index.size > 0 ? index : undefined;
 }
 
 /**
- * Open data of the Metropole portal (npm run data:amp): the zones themselves, public
+ * Open data of the Metropole portal (npm run data:zones): the zones themselves, public
  * transport, tourist offices, priority neighbourhoods and project perimeters. Only the
  * zones are required; each other file is optional and leaves its indicators at "no data".
  */
@@ -221,7 +217,6 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   loadState: "idle",
   error: null,
   zones: [],
-  collection: null,
   scores: {},
   ranking: [],
   reports: [],
@@ -249,7 +244,7 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
         getJson<Report[]>(REPORTS_URL),
         loadNoiseIndex(),
       ]);
-      if (!collection) throw new Error("Les zones (data/amp/zones.geojson) sont introuvables : lance « npm run data:amp ».");
+      if (!collection) throw new Error("Les zones (data/amp/zones.geojson) sont introuvables : lance « npm run data:zones ».");
       inputs = { collection, osm: osm.geojson, base: reports, amp, noiseIndex };
       set({ ownReports: await readOwnReports() });
       recompute();
@@ -319,8 +314,8 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
 
 /** Slopes come from altitude data and take a moment: the zones are usable meanwhile, and re-scored once the altitudes arrive. */
 async function loadSlope() {
-  const { collection } = useZoneStore.getState();
-  if (!collection) return;
+  if (!inputs) return;
+  const { collection } = inputs;
   useZoneStore.setState((s) => ({ auto: { ...s.auto, slope: "running", slopeProgress: { done: 0, total: 0 }, slopeError: null } }));
   const { altitudes, complete, error } = await getAltitudes(terrainPoints(collection, ZONE_CONFIG), {
     onProgress: (done, total) => useZoneStore.setState((s) => ({ auto: { ...s.auto, slopeProgress: { done, total } } })),

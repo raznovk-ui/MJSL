@@ -1,9 +1,7 @@
-import { DIMENSIONS } from "../../domain/dimensions.js";
-import { ZONE_CONFIG, dimensionScores, type ValueSource } from "../../domain/zone/index.js";
+import { DIMENSIONS, ZONE_CONFIG, dimensionScores } from "../../domain/zone/index.js";
 import { DimensionBars } from "./DimensionBars.js";
+import { SOURCE_LABEL, shortArrondissement } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
-
-const SOURCE: Record<ValueSource, string> = { osm: "OSM", official: "officiel", reported: "signalements" };
 
 /** Shows, for the zone clicked on the map, every step behind its score. */
 export function ZoneInspector() {
@@ -24,7 +22,7 @@ export function ZoneInspector() {
       ) : (
         <div className="space-y-3 text-sm">
           <p className="font-medium text-slate-900">
-            {zone.name} · {zone.arrondissement.replace("Marseille ", "")} ·{zone.zoneType !== "habitat" ? ` zone ${zone.zoneType === "activite" ? "d'activite" : "diverse (parc, espace naturel...)"} ·` : ""} {zone.areaKm2.toFixed(2)} km² · {zone.streetKm.toFixed(1)} km de rue
+            {zone.name} · {shortArrondissement(zone)} ·{zone.zoneType !== "habitat" ? ` zone ${zone.zoneType === "activite" ? "d'activite" : "diverse (parc, espace naturel...)"} ·` : ""} {zone.areaKm2.toFixed(2)} km² · {zone.streetKm.toFixed(1)} km de rue
             <button type="button" className="btn btn-secondary btn-sm ml-2" onClick={() => select(null)}>Fermer</button>
           </p>
           <p className="text-xs text-slate-600">
@@ -49,7 +47,7 @@ export function ZoneInspector() {
                     <tr key={b.indicator} className="border-t border-slate-200">
                       <th scope="row" className="font-medium">{c.label}</th>
                       <td>{v === undefined ? "—" : `${Number(v.toFixed(2))} ${c.unit}`}</td>
-                      <td>{b.source ? SOURCE[b.source] : "—"}</td>
+                      <td>{b.source ? SOURCE_LABEL[b.source] : "—"}</td>
                       <td className="text-slate-500">{c.kind === "share" ? "deja un obstacle (0 a 1)" : `${c.kind === "evidence" ? "s'ajoute aux autres : " : ""}0 a ${c.noProblemAt}, 1 a ${c.totalObstacleAt}`}</td>
                       <td>{b.barrier === null ? "pas de donnee" : b.barrier.toFixed(2)}</td>
                     </tr>

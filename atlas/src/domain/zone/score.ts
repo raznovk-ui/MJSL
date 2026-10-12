@@ -31,7 +31,7 @@ export function computeBarriers(zone: Pick<Zone, "values" | "sources">, config: 
  * on top of it, so they can only add an obstacle, never dilute one. A dimension with no
  * data at all is absent.
  */
-export function dimensionBarriers(barriers: BarrierResult[], config: ZoneConfig): Partial<Record<Dimension, number>> {
+function dimensionBarriers(barriers: BarrierResult[], config: ZoneConfig): Partial<Record<Dimension, number>> {
   const sums = new Map<Dimension, { sum: number; n: number; keep: number }>();
   for (const b of barriers) {
     if (b.barrier === null) continue;

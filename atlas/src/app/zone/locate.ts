@@ -11,7 +11,7 @@
  * which door, and what is stored is never more precise than that.
  */
 
-export interface Location {
+interface Location {
   lon: number;
   lat: number;
   /** Radius, in metres, within which the true position probably lies. */
@@ -22,7 +22,7 @@ export interface Location {
 /** 4 decimals of a degree is about 11 m of latitude. */
 export const roundForPrivacy = (n: number): number => Math.round(n * 1e4) / 1e4;
 
-export function locateWithBrowser(timeoutMs = 15_000): Promise<Location> {
+function locateWithBrowser(timeoutMs = 15_000): Promise<Location> {
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
       reject(new Error("La geolocalisation n'est pas disponible dans ce navigateur."));

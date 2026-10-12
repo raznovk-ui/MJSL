@@ -15,7 +15,7 @@ export function downloadText(text: string, filename: string, mime: string) {
   downloadBlob(new Blob([text], { type: `${mime};charset=utf-8` }), filename);
 }
 
-export const ATTRIBUTION = [
+const ATTRIBUTION = [
   "Donnees OpenStreetMap (c) contributeurs OpenStreetMap, licence ODbL.",
   "Interrogees via Overpass API.",
   "Bruit : carte de bruit routier (Lden), Metropole Aix-Marseille-Provence, Licence Ouverte 2.0 (data.gouv.fr).",
@@ -29,8 +29,8 @@ const README = `Atlas MJSL - export
 zones.geojson  Les zones de Marseille (IRIS) avec chaque indicateur, sa source, et le score
                de chaque profil et de chaque dimension.
 
-Tout est calcule automatiquement a partir de donnees ouvertes. Les valeurs
-marquees "estimees" sont des hypotheses, a confirmer sur le terrain.
+Tout est calcule automatiquement a partir de donnees ouvertes. Les seuils sont
+des valeurs de depart, a confirmer sur le terrain.
 
 ${ATTRIBUTION.join("\n")}
 `;

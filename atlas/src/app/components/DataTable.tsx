@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { ZONE_CONFIG, SCORED_DIMENSIONS, dimensionScoreOf } from "../../domain/zone/index.js";
-import { dimension as meta } from "../../domain/dimensions.js";
+import { ZONE_CONFIG, DIMENSION_KEYS, dimension as meta, dimensionScoreOf } from "../../domain/zone/index.js";
+import { shortArrondissement } from "../zone/labels.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 
 const PAGE = 50;
@@ -46,7 +46,7 @@ export function DataTable() {
               <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Zone</th>
               <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Arrondissement</th>
               <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Score</th>
-              {SCORED_DIMENSIONS.map((d) => (
+              {DIMENSION_KEYS.map((d) => (
                 <th key={d} scope="col" className="px-3 py-2 font-semibold text-slate-700">{meta(d).mjslCode}</th>
               ))}
               <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Voir</th>
@@ -56,9 +56,9 @@ export function DataTable() {
             {rows.slice(0, limit).map(({ zone, score }, index) => (
               <tr key={zone.id} className="border-b" style={{ borderColor: "var(--line)", background: index % 2 ? "var(--surface-alt)" : "var(--surface)" }}>
                 <th scope="row" className="px-3 py-1.5 font-medium text-slate-900">{zone.name}</th>
-                <td className="px-3 py-1.5 text-slate-600">{zone.arrondissement.replace("Marseille ", "")}</td>
+                <td className="px-3 py-1.5 text-slate-600">{shortArrondissement(zone)}</td>
                 <td className="px-3 py-1.5 tabular-nums text-slate-900">{fmt(score?.score)}</td>
-                {SCORED_DIMENSIONS.map((d) => (
+                {DIMENSION_KEYS.map((d) => (
                   <td key={d} className="px-3 py-1.5 tabular-nums text-slate-600">{fmt(dimensionScoreOf(score, d))}</td>
                 ))}
                 <td className="px-3 py-1.5">

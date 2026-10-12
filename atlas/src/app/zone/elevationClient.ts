@@ -10,7 +10,7 @@ const ENDPOINT = "https://data.geopf.fr/altimetrie/1.0/calcul/alti/rest/elevatio
 const NO_DATA = -99999;
 const CACHE_KEY = "altitude:ign_rge_alti";
 
-export interface FetchOptions {
+interface FetchOptions {
   fetchImpl?: typeof fetch;
   batchSize?: number;
   /** Pause between requests, to stay under the service's rate limit. */
@@ -21,7 +21,7 @@ export interface FetchOptions {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Altitudes for the given points, keyed by coordKey. Points the service cannot answer are left out. */
-export async function fetchAltitudes(
+async function fetchAltitudes(
   coords: LngLat[],
   { fetchImpl = fetch, batchSize = 200, delayMs = 250, onProgress }: FetchOptions = {},
   into: Record<string, number> = {},

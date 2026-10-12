@@ -1,8 +1,7 @@
 import { useId, useMemo } from "react";
 import { ZONE_CONFIG, type ValueSource } from "../../domain/zone/index.js";
+import { SOURCE_LABEL } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
-
-const SOURCE_LABEL: Record<ValueSource, string> = { osm: "OSM", official: "officiel", reported: "signalements" };
 
 const { redBelow, orangeBelow, colours } = ZONE_CONFIG.classes;
 

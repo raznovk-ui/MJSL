@@ -2,10 +2,10 @@
  * Browser database. A cache of downloaded open data (Overpass responses, IGN
  * altitudes), and the citizen reports one person adds from this browser (REPORTS).
  *
- * VERSION stays at 4 on purpose. Earlier versions of the app also created
- * "observations", "photos" and "ruptures" stores; they are no longer read or
- * written, and are left alone in browsers that already have them rather than
- * silently deleting what someone may have stored there.
+ * Earlier versions of the app also created "observations", "photos" and "ruptures"
+ * stores; they are no longer read or written, and are left alone in browsers that
+ * already have them rather than silently deleting what someone may have stored there.
+ * Bump VERSION only to add a store, in onupgradeneeded below.
  */
 const DB_NAME = "mjsl-atlas";
 const VERSION = 5;

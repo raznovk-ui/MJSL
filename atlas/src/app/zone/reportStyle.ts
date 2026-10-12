@@ -1,6 +1,6 @@
 import type { ReportKind } from "../../domain/zone/index.js";
 
-export type ReportShape = "square" | "triangle" | "diamond" | "circle" | "cross";
+type ReportShape = "square" | "triangle" | "diamond" | "circle" | "cross";
 
 /** SVG path data, in a 20 x 20 box: the same outline is drawn on the map and in the legend. */
 export const SHAPE_PATH: Record<ReportShape, string> = {
@@ -11,7 +11,7 @@ export const SHAPE_PATH: Record<ReportShape, string> = {
   cross: "M8 3h4v5h5v4h-5v5H8v-5H3V8h5z",
 };
 
-export interface ReportStyle {
+interface ReportStyle {
   label: string;
   shape: ReportShape;
   /** A shade of the blue-to-purple palette: it stands apart from the green-to-red of the zones underneath. */

@@ -1,6 +1,7 @@
 import type { Feature, FeatureCollection } from "geojson";
 import type { ZoneConfig } from "./loadConfig.js";
-import { dimensionScoreOf, SCORED_DIMENSIONS } from "./dimensionScores.js";
+import { DIMENSION_KEYS } from "../dimensions.js";
+import { dimensionScoreOf } from "./dimensionScores.js";
 import { scoreAllProfiles } from "./score.js";
 import type { Zone } from "./types.js";
 
@@ -20,7 +21,7 @@ export function zonesToGeojson(zones: Zone[], config: ZoneConfig): FeatureCollec
       properties[`class_${profileId}`] = s.cls;
     }
     const first = Object.values(scores)[0];
-    for (const d of SCORED_DIMENSIONS) {
+    for (const d of DIMENSION_KEYS) {
       const v = dimensionScoreOf(first, d);
       properties[`dim_${d}`] = v === null ? null : Number(v.toFixed(3));
     }

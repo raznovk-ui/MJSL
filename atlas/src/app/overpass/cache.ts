@@ -7,7 +7,7 @@ import { openDb, OVERPASS as STORE } from "../persistence/db.js";
 
 export const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-export interface CachedResponse<T> {
+interface CachedResponse<T> {
   timestamp: number;
   payload: T;
 }

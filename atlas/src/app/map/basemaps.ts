@@ -1,6 +1,6 @@
 import type { StyleSpecification } from "maplibre-gl";
 
-export interface Basemap {
+interface Basemap {
   id: string;
   label: string;
   description: string;

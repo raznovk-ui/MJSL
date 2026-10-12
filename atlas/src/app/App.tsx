@@ -76,7 +76,7 @@ export function App() {
                 Limites
               </h2>
               <p className="text-xs text-slate-500">
-                Tout est calcule automatiquement a partir de donnees ouvertes ; les valeurs estimees sont des hypotheses a verifier sur le terrain. Cet outil ne
+                Tout est calcule automatiquement a partir de donnees ouvertes ; les seuils sont des valeurs de depart a verifier sur le terrain. Cet outil ne
                 remplace pas la consultation des personnes handicapees et des habitants concernes.
               </p>
             </section>

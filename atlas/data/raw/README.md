@@ -1,7 +1,7 @@
 # Donnees brutes externes
 
 Ce dossier contient des jeux de donnees externes, non produits par l'application,
-distincts des couches MJSL deja notees dans `../../site/data/`.
+lus par les scripts de `../../scripts/` et jamais servis tels quels.
 
 ## signalements_voirie_marseille.geojson
 
@@ -30,12 +30,8 @@ sans note 0-3. Il est lu par `npm run data:reports` (`scripts/prepareReports.mjs
 et par type (stationnement, trottoir etroit, chantier/encombrants, terrasses).
 Source : « Galere pietons » (Marsactu) ; licence de reutilisation a verifier.
 
-## Comment l'utiliser dans l'atlas
+## Mettre a jour
 
-Le fichier est un GeoJSON standard (EPSG:4326, points) : il s'importe tel quel
-via l'assistant d'import de l'application (`npm run dev` -> panneau "Import" ->
-"Importer un fichier GeoJSON"), qui propose alors de mapper `Types`/`Texte` sur
-titre/description et d'attribuer des notes MJSL en bloc ou au cas par cas.
-
-Aucune notation n'est fournie ici : les scores 0-3 restent un jugement a
-produire, pas une conversion automatique du texte libre.
+Remplace le fichier par une version plus recente (memes champs), puis lance
+`npm run data:reports` : `public/data/reports.json` est regenere. Seuls la position et
+`Types` sont gardes ; le texte libre et les photos ne sont pas publies avec l'application.

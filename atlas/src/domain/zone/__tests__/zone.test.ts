@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Feature, FeatureCollection } from "geojson";
 import rawConfig from "../zone.config.json";
 import {
-  SCORED_DIMENSIONS,
+  DIMENSION_KEYS,
   ZONE_CONFIG as config,
   ZoneConfigError,
   buildAmpIndex,
@@ -122,7 +122,7 @@ describe("barriers and scores", () => {
     for (const p of Object.values(config.profiles)) {
       expect(Object.values(p.weights).reduce((a, b) => a + (b ?? 0), 0)).toBeCloseTo(1, 6);
     }
-    for (const d of SCORED_DIMENSIONS) expect(Object.values(config.indicators).some((i) => i.dimension === d)).toBe(true);
+    for (const d of DIMENSION_KEYS) expect(Object.values(config.indicators).some((i) => i.dimension === d)).toBe(true);
   });
 });
 

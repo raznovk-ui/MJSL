@@ -8,12 +8,16 @@ import type { Feature, FeatureCollection } from "geojson";
 
 /** The only tags the scoring and the map read. Everything else is dropped to keep the files small. */
 const KEEP_TAGS = new Set([
-  "highway", "name", "width", "sidewalk:width", "incline", "surface", "ramp", "ramp:wheelchair",
-  "lit", "amenity", "shop", "tourism", "historic", "leisure", "office", "outdoor_seating",
-  "kerb", "maxspeed", "foot", "access", "tactile_paving", "wheelchair",
+  // read by the scoring (domain/zone/build.ts)
+  "highway", "name", "width", "sidewalk:width", "surface", "ramp", "ramp:wheelchair", "lit",
+  "amenity", "shop", "tourism", "historic", "leisure", "office", "outdoor_seating", "fee",
+  "man_made", "barrier", "shelter", "covered", "building:part", "crossing", "information",
+  "traffic_signals", "tactile_paving",
+  // the trail tags of autoData.excludeTrails in zone.config.json
   "sac_scale", "trail_visibility", "mtb:scale",
-  "man_made", "barrier", "entrance", "shelter", "covered", "step_count", "fee", "building:part", "crossing", "information", "traffic_signals", "traffic_signals:sound",
-  "osm_id", "osm_nodes", "label",
+  // read by the "Indices OSM" map layer (app/map/osmStyle.ts)
+  "kerb",
+  "osm_id",
 ]);
 
 const round = (n: number) => Math.round(n * 1e6) / 1e6;
@@ -66,7 +70,7 @@ export async function decodeSnapshot(bytes: ArrayBuffer): Promise<FeatureCollect
   }
 }
 
-export const snapshotUrl = (presetId: string) => `${import.meta.env.BASE_URL}data/osm/${presetId}.geojson.gz`;
+const snapshotUrl = (presetId: string) => `${import.meta.env.BASE_URL}data/osm/${presetId}.geojson.gz`;
 
 export async function fetchSnapshot(presetId: string, fetchImpl: typeof fetch = fetch): Promise<FeatureCollection | null> {
   try {

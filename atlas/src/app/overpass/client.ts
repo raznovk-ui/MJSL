@@ -17,7 +17,7 @@ const ENDPOINTS = [
   "https://overpass.kumi.systems/api/interpreter",
 ];
 
-export interface OverpassResult {
+interface OverpassResult {
   geojson: FeatureCollection;
   fromCache: boolean;
   timestamp: number;

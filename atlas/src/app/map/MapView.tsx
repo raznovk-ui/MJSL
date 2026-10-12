@@ -5,8 +5,7 @@ import { BASEMAPS } from "./basemaps.js";
 import { STUDY_AREA } from "../studyArea.js";
 import { OVERPASS_PRESETS } from "../overpass/presets.js";
 import { useAppStore } from "../state.js";
-import type { FeatureCollection } from "geojson";
-import { ZONE_CONFIG } from "../../domain/zone/index.js";
+import { ZONE_CONFIG, bboxOfCoordinates } from "../../domain/zone/index.js";
 import { syncZoneLayers } from "../zone/zoneLayers.js";
 import { OSM_STYLE, ensureOsmIcons, osmKind } from "./osmStyle.js";
 import { useZoneStore } from "../zone/zoneStore.js";
@@ -128,14 +127,7 @@ export function MapView() {
     const instance = map.current;
     const zone = zones.find((z) => z.id === selectedZoneId);
     if (!instance || !zone) return;
-    let w = Infinity, s = Infinity, e = -Infinity, n = -Infinity;
-    const visit = (c: unknown): void => {
-      if (Array.isArray(c) && typeof c[0] === "number") {
-        const [x, y] = c as [number, number];
-        if (x < w) w = x; if (x > e) e = x; if (y < s) s = y; if (y > n) n = y;
-      } else if (Array.isArray(c)) c.forEach(visit);
-    };
-    visit(zone.geometry.coordinates);
+    const [w, s, e, n] = bboxOfCoordinates(zone.geometry.coordinates);
     instance.fitBounds([[w, s], [e, n]], { padding: 80, maxZoom: 16, animate: !prefersReducedMotion() });
   }, [selectedZoneId, zones]);
 
@@ -200,8 +192,6 @@ function syncPresetLayers(instance: MapLibreMap) {
         },
       });
     }
-    // The points used to be red circles; they are now hollow symbols, one shape per kind.
-    if (instance.getLayer(pointId!)?.type === "circle") instance.removeLayer(pointId!);
     if (!instance.getLayer(pointId!)) {
       instance.addLayer({
         id: pointId!,

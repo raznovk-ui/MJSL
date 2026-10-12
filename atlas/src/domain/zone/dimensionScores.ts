@@ -1,9 +1,5 @@
-import type { Dimension } from "../dimensions.js";
+import { DIMENSION_KEYS, type Dimension } from "../dimensions.js";
 import type { Zone, ZoneScore } from "./types.js";
-
-/** The six dimensions of the MJSL, in the order of the memoire (D1 to D6). */
-export const SCORED_DIMENSIONS = ["physical", "sensory", "cognitive", "economic", "socio_cultural", "political"] as const satisfies readonly Dimension[];
-export type ScoredDimension = (typeof SCORED_DIMENSIONS)[number];
 
 export interface DimensionScore {
   /** 0 = total obstacle, 1 = no obstacle; null when no zone has data for it. */
@@ -12,7 +8,7 @@ export interface DimensionScore {
   coverage: number;
 }
 
-export type DimensionScores = Record<ScoredDimension, DimensionScore>;
+export type DimensionScores = Record<Dimension, DimensionScore>;
 
 /** Score of one zone for one dimension: 1 minus its average obstacle. */
 export const dimensionScoreOf = (score: ZoneScore | undefined, dimension: Dimension): number | null => {
@@ -29,7 +25,7 @@ export const dimensionScoreOf = (score: ZoneScore | undefined, dimension: Dimens
 export function dimensionScores(zones: Pick<Zone, "id" | "areaKm2">[], scores: Record<string, ZoneScore>): DimensionScores {
   const out = {} as DimensionScores;
   const totalArea = zones.reduce((sum, z) => sum + z.areaKm2, 0);
-  for (const dimension of SCORED_DIMENSIONS) {
+  for (const dimension of DIMENSION_KEYS) {
     let weighted = 0;
     let known = 0;
     for (const zone of zones) {

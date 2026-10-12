@@ -1,12 +1,7 @@
 import type { Geometry, MultiPolygon, Polygon } from "geojson";
+import { KX, KY } from "./geo.js";
+import { polygonsOf } from "./spatial.js";
 import type { LngLat } from "./types.js";
-
-/** Local flat projection around Marseille: good to a fraction of a percent over the whole city. */
-export const KY = 110_540;
-export const KX = 111_320 * Math.cos((43.28 * Math.PI) / 180);
-
-export const polygonsOf = (geometry: Polygon | MultiPolygon): LngLat[][][] =>
-  geometry.type === "Polygon" ? [geometry.coordinates as LngLat[][]] : (geometry.coordinates as LngLat[][][]);
 
 const ringArea = (ring: LngLat[]): { area: number; cx: number; cy: number } => {
   let a = 0, cx = 0, cy = 0;

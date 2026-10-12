@@ -1,5 +1,6 @@
 import { ZONE_CONFIG, dimensionScores } from "../../domain/zone/index.js";
 import { DimensionBars } from "./DimensionBars.js";
+import { shortArrondissement } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
 
 /** The zones with the lowest score for the chosen profile, worst first. */
@@ -35,7 +36,7 @@ export function ZoneRanking() {
                   className="btn btn-toggle btn-block !items-start !text-left"
                 >
                   <span className="font-bold">
-                    #{r.rank} · {r.zone.name} <span className="font-normal text-slate-600">({r.zone.arrondissement.replace("Marseille ", "")})</span>
+                    #{r.rank} · {r.zone.name} <span className="font-normal text-slate-600">({shortArrondissement(r.zone)})</span>
                   </span>
                   <span className="block text-xs font-normal">{r.summary}</span>
                   {selected === r.zone.id && (

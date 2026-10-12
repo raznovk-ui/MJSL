@@ -1,13 +1,12 @@
 /**
- * Inline SVG charts. No chart library: these are three small forms, and owning
+ * Inline SVG charts. No chart library: these are two small forms, and owning
  * the markup is what lets every one of them carry a real table alternative and
  * text labels rather than colour alone.
  *
  * One hue throughout. The job here is magnitude, not identity, so a sequential
  * single hue is the correct encoding and no categorical palette is in play.
  */
-export const SERIES = "#2a78d6";
-export const MUTED = "#94a3b8";
+const SERIES = "#2a78d6";
 
 interface BarDatum {
   key: string;
@@ -95,62 +94,6 @@ export function BarChart({
   );
 }
 
-export function Histogram({
-  bins,
-  caption,
-}: {
-  bins: { label: string; count: number }[];
-  caption: string;
-}) {
-  const max = Math.max(1, ...bins.map((b) => b.count));
-  const width = 260;
-  const height = 90;
-  const gap = 4;
-  const barWidth = (width - gap * (bins.length - 1)) / bins.length;
-
-  return (
-    <figure className="m-0">
-      <figcaption className="mb-1 text-xs font-medium text-slate-800">{caption}</figcaption>
-      <svg
-        width="100%"
-        viewBox={`0 0 ${width} ${height + 18}`}
-        role="img"
-        aria-label={`${caption}. ${bins.map((b) => `${b.label} : ${b.count}`).join(". ")}`}
-      >
-        {bins.map((bin, index) => {
-          const barHeight = (bin.count / max) * height;
-          const x = index * (barWidth + gap);
-          return (
-            <g key={bin.label}>
-              <rect
-                x={x}
-                y={height - barHeight}
-                width={barWidth}
-                height={Math.max(bin.count > 0 ? 2 : 0, barHeight)}
-                rx={4}
-                fill={bin.count > 0 ? SERIES : MUTED}
-              />
-              <text x={x + barWidth / 2} y={height + 12} fontSize={9} textAnchor="middle" fill="#475569">
-                {bin.label}
-              </text>
-              {bin.count > 0 && (
-                <text
-                  x={x + barWidth / 2}
-                  y={height - barHeight - 3}
-                  fontSize={9}
-                  textAnchor="middle"
-                  fill="#334155"
-                >
-                  {bin.count}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    </figure>
-  );
-}
 
 export function StatTile({ label, value, note }: { label: string; value: string; note?: string }) {
   return (

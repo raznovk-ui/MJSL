@@ -1,8 +1,7 @@
 import { useAppStore } from "../state.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 import { IconLayers } from "./icons.js";
-import { SCORED_DIMENSIONS, ZONE_CONFIG, reportKind } from "../../domain/zone/index.js";
-import { dimension as meta } from "../../domain/dimensions.js";
+import { DIMENSION_KEYS, ZONE_CONFIG, dimension as meta, reportKind } from "../../domain/zone/index.js";
 import { GRADIENT } from "../zone/zoneLayers.js";
 import { REPORT_KINDS, REPORT_STYLE, SHAPE_PATH } from "../zone/reportStyle.js";
 import { OSM_KINDS, OSM_STYLE } from "../map/osmStyle.js";
@@ -58,7 +57,7 @@ export function MapOverlayToggles() {
       </p>
       <div role="radiogroup" aria-label="Couche affichee" className="mb-2 space-y-1 border-b pb-2" style={{ borderColor: "var(--line)" }}>
         <p className="text-xs font-semibold text-slate-700">Couche affichee</p>
-        {([["combined", "Score combine (profil choisi)"], ...SCORED_DIMENSIONS.map((d) => [d, `${meta(d).mjslCode} ${meta(d).label} — ${PERSONA[d]}`] as const)] as const).map(([key, label]) => (
+        {([["combined", "Score combine (profil choisi)"], ...DIMENSION_KEYS.map((d) => [d, `${meta(d).mjslCode} ${meta(d).label} — ${PERSONA[d]}`] as const)] as const).map(([key, label]) => (
           <label key={key} className={row}>
             <input type="radio" name="map-layer" checked={layer === key} onChange={() => setLayer(key)} className="mt-0.5" />
             <span>{label}</span>

@@ -1,12 +1,12 @@
 import type { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
 import type { Feature, FeatureCollection } from "geojson";
-import { ZONE_CONFIG, dimensionScoreOf, reportKind, type Report, type ReportKind, type Zone, type ZoneConfig, type ZoneScore } from "../../domain/zone/index.js";
+import { ZONE_CONFIG, classify, dimensionScoreOf, reportKind, type Report, type ReportKind, type Zone, type ZoneConfig, type ZoneScore } from "../../domain/zone/index.js";
 import { REPORT_KINDS, reportIcon } from "./reportStyle.js";
 import type { MapLayer } from "./zoneStore.js";
 
-export const ZONE_SOURCE = "zones";
-export const REPORT_SOURCE = "reports";
-export const PENDING_SOURCE = "report-pending";
+const ZONE_SOURCE = "zones";
+const REPORT_SOURCE = "reports";
+const PENDING_SOURCE = "report-pending";
 
 /**
  * One green-to-red scale for every layer: 0 = total obstacle (red), 1 = none (green).
@@ -49,7 +49,7 @@ export function layerValue(score: ZoneScore | undefined, layer: MapLayer): numbe
 export function zonesGeojson(zones: Zone[], scores: Record<string, ZoneScore> | undefined, config: ZoneConfig, layer: MapLayer): FeatureCollection {
   const features: Feature[] = zones.map((zone) => {
     const value = layerValue(scores?.[zone.id], layer);
-    const cls = value === null ? "none" : value < config.classes.redBelow ? "red" : value < config.classes.orangeBelow ? "orange" : "green";
+    const cls = classify(value, config);
     return {
       type: "Feature",
       id: zone.id,
@@ -76,7 +76,7 @@ function reportsGeojson(reports: Report[]): FeatureCollection {
 }
 
 /** Idempotent: safe to call on every style load and every data change. */
-export function ensureZoneLayers(instance: MapLayerHost) {
+function ensureZoneLayers(instance: MapLibreMap) {
   for (const id of [ZONE_SOURCE, REPORT_SOURCE, PENDING_SOURCE]) if (!instance.getSource(id)) instance.addSource(id, { type: "geojson", data: EMPTY });
 
   // The point being placed, until it is saved or cancelled: a white disc with a violet ring.
@@ -126,7 +126,7 @@ export function ensureZoneLayers(instance: MapLayerHost) {
   }
 }
 
-export interface ZoneView {
+interface ZoneView {
   zones: Zone[];
   scores: Record<string, ZoneScore> | undefined;
   visible: boolean;
@@ -137,8 +137,6 @@ export interface ZoneView {
   reportKinds: Record<ReportKind, boolean>;
   pending: { lon: number; lat: number } | null;
 }
-
-type MapLayerHost = MapLibreMap;
 
 export function syncZoneLayers(instance: MapLibreMap, view: ZoneView, config: ZoneConfig) {
   ensureZoneLayers(instance);

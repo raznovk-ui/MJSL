@@ -5,7 +5,7 @@ import type { Map as MapLibreMap } from "maplibre-gl";
  * citizens' reports: each kind has its own glyph (stairs, lift, kerb, tactile dots), filled
  * in a shade of the blue-to-purple palette, never the red of the "bad" zones.
  */
-export type OsmKind = "steps" | "elevator" | "kerb" | "tactile";
+type OsmKind = "steps" | "elevator" | "kerb" | "tactile";
 
 /** Each glyph is drawn in a 20 x 20 box. `d` is the outline, `fillRule` decides the holes. */
 interface Glyph {
@@ -53,7 +53,7 @@ export function osmKind(tags: Record<string, unknown>): OsmKind {
 }
 
 /** The glyph as an SVG document: filled, with a thin white outline so it reads on any basemap. */
-export function osmSvg(kind: OsmKind): string {
+function osmSvg(kind: OsmKind): string {
   const { colour, glyph } = OSM_STYLE[kind];
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="40" height="40">` +
@@ -63,7 +63,7 @@ export function osmSvg(kind: OsmKind): string {
 }
 
 /** Rasterises the SVG glyph to pixels, which is what the map takes as an image. */
-export function osmIconPixels(kind: OsmKind, size = 40): Promise<ImageData> {
+function osmIconPixels(kind: OsmKind, size = 40): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const image = new Image(size, size);
     image.onload = () => {

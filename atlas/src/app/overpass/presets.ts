@@ -1,18 +1,18 @@
 import { OVERPASS_BBOX } from "../studyArea.js";
-import type { Dimension } from "../../domain/dimensions.js";
 
 export interface OverpassPreset {
   id: string;
   label: string;
   description: string;
-  /** Dimensions these features are indices for. */
-  dimensions: Dimension[];
+  /** Overpass QL; must end with `out body geom` so ways come with their geometry. */
   query: string;
 }
 
 /**
- * Step 2 ships one preset, per the delivery plan. The shape is what matters:
- * further presets from the spec's list drop straight in here.
+ * The OSM layers drawn on the map as they are ("Indices OSM"), loaded at start-up and
+ * listed in the "Couches OpenStreetMap" panel. A new entry here gets a source, a layer,
+ * a panel entry and a snapshot file (npm run data:osm) with no other change. The data
+ * behind the scores is NOT here: see zonePreset.ts.
  */
 export const OVERPASS_PRESETS: OverpassPreset[] = [
   {
@@ -20,7 +20,6 @@ export const OVERPASS_PRESETS: OverpassPreset[] = [
     label: "Ruptures physiques (OSM)",
     description:
       "Escaliers, ascenseurs, bordures et bandes podotactiles. Indices de continuite a verifier sur le terrain, pas des preuves.",
-    dimensions: ["physical", "sensory"],
     query: `[out:json][timeout:30];
 (
   node["highway"="steps"](${OVERPASS_BBOX});

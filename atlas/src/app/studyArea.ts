@@ -11,7 +11,7 @@ export const STUDY_AREA = {
  * is limited to it: those objects are drawn as plain markers and a whole-city load
  * would bury the map.
  */
-export const CORRIDOR_BBOX = { south: 43.255, west: 5.335, north: 43.305, east: 5.385 } as const;
+const CORRIDOR_BBOX = { south: 43.255, west: 5.335, north: 43.305, east: 5.385 } as const;
 
 export const OVERPASS_BBOX = `${CORRIDOR_BBOX.south},${CORRIDOR_BBOX.west},${CORRIDOR_BBOX.north},${CORRIDOR_BBOX.east}`;
 

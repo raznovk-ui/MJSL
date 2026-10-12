@@ -6,8 +6,6 @@ interface OsmElement {
   lat?: number;
   lon?: number;
   tags?: Record<string, string>;
-  /** Way only: ids of its nodes, aligned with `geometry`. */
-  nodes?: number[];
   geometry?: { lat: number; lon: number }[];
 }
 
@@ -27,16 +25,7 @@ function geometryFor(element: OsmElement): Geometry | null {
   return null;
 }
 
-/** Human-readable label for an OSM feature, used in the table and popups. */
-export function osmLabel(tags: Record<string, string>): string {
-  if (tags.name) return tags.name;
-  if (tags.highway === "steps") return "Escalier";
-  if (tags.highway === "elevator") return "Ascenseur";
-  if (tags.tactile_paving) return `Bande podotactile (${tags.tactile_paving})`;
-  if (tags.kerb) return `Bordure (${tags.kerb})`;
-  return "Objet OSM";
-}
-
+/** An Overpass answer (`out body geom`) as GeoJSON: nodes become points, ways lines (or polygons when closed), tags become properties. */
 export function osmToGeojson(payload: { elements?: OsmElement[] }): FeatureCollection {
   const features: Feature[] = [];
   for (const element of payload.elements ?? []) {
@@ -46,14 +35,7 @@ export function osmToGeojson(payload: { elements?: OsmElement[] }): FeatureColle
     features.push({
       type: "Feature",
       id: `${element.type}/${element.id}`,
-      properties: {
-        osm_id: `${element.type}/${element.id}`,
-        label: osmLabel(tags),
-        wheelchair: tags.wheelchair ?? "",
-        // Kept for ways: the ids of their nodes.
-        ...(element.nodes ? { osm_nodes: element.nodes } : {}),
-        ...tags,
-      },
+      properties: { osm_id: `${element.type}/${element.id}`, ...tags },
       geometry,
     });
   }

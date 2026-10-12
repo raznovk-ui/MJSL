@@ -3,6 +3,10 @@ import type { LngLat } from "./types.js";
 /** Stable key for a coordinate (about 0.1 m), shared by every place that matches points. */
 export const coordKey = (c: LngLat) => `${c[0].toFixed(6)},${c[1].toFixed(6)}`;
 
+/** Local flat projection around Marseille (metres per degree): good to a fraction of a percent over the whole city. */
+export const KY = 110_540;
+export const KX = 111_320 * Math.cos((43.28 * Math.PI) / 180);
+
 const R = 6371008.8;
 const rad = (d: number) => (d * Math.PI) / 180;
 
@@ -20,42 +24,16 @@ export function polylineLengthM(coords: LngLat[]): number {
   return total;
 }
 
-/** Distance from a point to a polyline, on a local flat projection (fine at street scale). */
-export function pointToPolylineM(p: LngLat, coords: LngLat[]): number {
-  if (coords.length === 0) return Infinity;
-  const kx = R * Math.cos(rad(p[1])) * (Math.PI / 180);
-  const ky = R * (Math.PI / 180);
-  const toXY = (c: LngLat): [number, number] => [(c[0] - p[0]) * kx, (c[1] - p[1]) * ky];
-  if (coords.length === 1) {
-    const [x, y] = toXY(coords[0]!);
-    return Math.hypot(x, y);
+/** Bounding box [west, south, east, north] of any nested GeoJSON coordinate array. */
+export function bboxOfCoordinates(coordinates: unknown, into: [number, number, number, number] = [Infinity, Infinity, -Infinity, -Infinity]): [number, number, number, number] {
+  if (Array.isArray(coordinates) && typeof coordinates[0] === "number") {
+    const [x, y] = coordinates as [number, number];
+    if (x < into[0]) into[0] = x;
+    if (y < into[1]) into[1] = y;
+    if (x > into[2]) into[2] = x;
+    if (y > into[3]) into[3] = y;
+  } else if (Array.isArray(coordinates)) {
+    for (const c of coordinates) bboxOfCoordinates(c, into);
   }
-  let best = Infinity;
-  for (let i = 1; i < coords.length; i += 1) {
-    const [ax, ay] = toXY(coords[i - 1]!);
-    const [bx, by] = toXY(coords[i]!);
-    const dx = bx - ax;
-    const dy = by - ay;
-    const len2 = dx * dx + dy * dy;
-    const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2));
-    best = Math.min(best, Math.hypot(ax + t * dx, ay + t * dy));
-  }
-  return best;
-}
-
-/** The point `d` metres along a polyline (clamped to its ends). */
-export function pointAlong(coords: LngLat[], d: number): LngLat {
-  if (coords.length === 0) return [0, 0];
-  let remaining = Math.max(0, d);
-  for (let i = 1; i < coords.length; i += 1) {
-    const a = coords[i - 1]!;
-    const b = coords[i]!;
-    const len = distanceM(a, b);
-    if (remaining <= len || i === coords.length - 1) {
-      const t = len === 0 ? 0 : Math.min(1, remaining / len);
-      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
-    }
-    remaining -= len;
-  }
-  return coords[0]!;
+  return into;
 }

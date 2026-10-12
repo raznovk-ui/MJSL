@@ -33,6 +33,9 @@ Tous les seuils et poids sont dans `src/domain/zone/zone.config.json`.
 
 ## Lancer
 
+Pour travailler sur le code (architecture, modele de score, donnees, recettes) :
+[`doc/DEVELOPER_GUIDE.md`](../doc/DEVELOPER_GUIDE.md).
+
 ```bash
 npm install
 npm run dev      # http://localhost:5173

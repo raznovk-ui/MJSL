@@ -16,13 +16,12 @@ import type { OverpassPreset } from "./presets.js";
  * Deliberately NOT in OVERPASS_PRESETS: that list is loaded on start-up and
  * drawn as generic red points and lines, which would paint every road red.
  */
-export function osmTilePreset(tile: Tile): OverpassPreset {
+function osmTilePreset(tile: Tile): OverpassPreset {
   const b = tile.bbox;
   return {
     id: `walkways_mjsl5_${tile.id}`,
     label: `Donnees OSM de la ville ${tile.id}`,
     description: "Cheminements, rues, bancs, grands axes, terrasses, parkings et bordures pour le score par profil.",
-    dimensions: ["physical", "sensory", "economic"],
     query: `[out:json][timeout:120];
 (
   way["highway"~"^(footway|path|pedestrian|steps)$"](${b});
@@ -53,13 +52,12 @@ export const OSM_TILES: OverpassPreset[] = cityTiles().map(osmTilePreset);
  * bigger tiles, and they are optional: if they cannot be loaded the social indicators
  * built on them simply stay "no data".
  */
-export function socialPresetFor(tile: Tile): OverpassPreset {
+function socialPresetFor(tile: Tile): OverpassPreset {
   const b = tile.bbox;
   return {
     id: `social_mjsl2_${tile.id}`,
     label: `Controle, abris et seuils (OSM) ${tile.id}`,
     description: "Cameras, portails, abris et passages couverts pour la dimension sociale.",
-    dimensions: ["socio_cultural"],
     query: `[out:json][timeout:90];
 (
   node["man_made"="surveillance"](${b});
