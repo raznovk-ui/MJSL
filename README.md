@@ -26,7 +26,7 @@ Then open http://localhost:5173. Requires Node 22. All datasets are committed un
 | [`doc/DEVELOPER_GUIDE.md`](doc/DEVELOPER_GUIDE.md) | **Start here if you will work on the code**: architecture, scoring model, data, recipes, pitfalls |
 | [`atlas/README.md`](atlas/README.md) | What the app shows and how to use it (French) |
 | [`atlas/src/domain/zone/zone.config.json`](atlas/src/domain/zone/zone.config.json) | Every threshold, weight and profile: the file to edit to tune the scores |
-| [`doc/research/`](doc/research/) | The research behind the method: hand-over note and design conversation (French) |
+| [`doc/research/`](doc/research/) | The research behind the method: the hand-over note (French) |
 
 ## Deployment
 

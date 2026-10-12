@@ -54,7 +54,7 @@ hand** except optional citizen reports, kept in the browser.
 ├── .github/workflows/static.yml   CI: test, build atlas/, publish atlas/dist on GitHub Pages
 ├── doc/
 │   ├── DEVELOPER_GUIDE.md         this file
-│   └── research/                  the memoire's hand-over note and design conversation (French)
+│   └── research/                  the memoire's hand-over note (French)
 └── atlas/                         the application (Vite + React + TypeScript + MapLibre)
     ├── index.html
     ├── package.json               scripts: dev, test, build, data:*
