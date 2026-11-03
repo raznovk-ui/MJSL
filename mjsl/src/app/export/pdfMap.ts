@@ -295,9 +295,14 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
     pdf.setFillColor(colour);
     pdf.rect(x + index * width, y + 10, width + 0.1, 5, "F");
   }
+  pdf.setTextColor("#ffffff");
+  pdf.setFontSize(6);
+  pdf.text("0", x + 2, y + 13.5, { align: "center" });
+  pdf.text("1", x + 46, y + 13.5, { align: "center" });
+  pdf.setTextColor("#334155");
   pdf.setFontSize(7);
-  pdf.text("0 = inaccessible", x, y + 20);
-  pdf.text("1 = capacitant", x + 48, y + 20, { align: "right" });
+  pdf.text("inaccessible", x, y + 20);
+  pdf.text("capacitant", x + 48, y + 20, { align: "right" });
 
   pdf.setFillColor(ZONE_CONFIG.classes.colours.none);
   pdf.rect(x, y + 27, 8, 5, "F");
