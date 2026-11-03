@@ -290,29 +290,25 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   pdf.setTextColor("#334155");
   pdf.text("Score d'accessibilite", x, y + 7);
 
-  const width = 48 / GRADIENT.length;
+  const height = 32 / GRADIENT.length;
   for (const [index, [, colour]] of GRADIENT.entries()) {
     pdf.setFillColor(colour);
-    pdf.rect(x + index * width, y + 10, width + 0.1, 5, "F");
+    pdf.rect(x, y + 10 + index * height, 5, height + 0.1, "F");
   }
-  pdf.setTextColor("#ffffff");
-  pdf.setFontSize(6);
-  pdf.text("0", x + 2, y + 13.5, { align: "center" });
-  pdf.text("1", x + 46, y + 13.5, { align: "center" });
   pdf.setTextColor("#334155");
-  pdf.setFontSize(7);
-  pdf.text("inaccessible", x, y + 20);
-  pdf.text("capacitant", x + 48, y + 20, { align: "right" });
+  pdf.setFontSize(8);
+  pdf.text("0 = inaccessible", x + 8, y + 14);
+  pdf.text("1 = capacitant", x + 8, y + 42);
 
   pdf.setFillColor(ZONE_CONFIG.classes.colours.none);
-  pdf.rect(x, y + 27, 8, 5, "F");
+  pdf.rect(x, y + 48, 8, 5, "F");
   pdf.setDrawColor("#64748b");
   pdf.setLineDashPattern([1, 1], 0);
-  pdf.rect(x, y + 27, 8, 5, "S");
+  pdf.rect(x, y + 48, 8, 5, "S");
   pdf.setLineDashPattern([], 0);
   pdf.setTextColor("#334155");
   pdf.setFontSize(8);
-  pdf.text("Pas assez de donnees", x + 11, y + 31);
+  pdf.text("Pas assez de donnees", x + 11, y + 52);
 }
 
 function drawNorthArrow(pdf: Pdf, image: string, x: number, y: number) {
