@@ -105,15 +105,29 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
   const profileLabel = ZONE_CONFIG.profiles[input.profileId]?.label ?? input.profileId;
   const layers = orderedLayers(input.layers);
   const northArrowImage = await renderNorthArrow();
+  const scoreGradientImage = renderScoreGradient();
 
   for (const [index, layer] of layers.entries()) {
     onProgress?.(`Preparation de la carte ${index + 1} sur ${layers.length}...`);
     const rendered = await renderMap(layer, input, basemap.style);
     if (index > 0) pdf.addPage("a4", "landscape");
-    drawPage(pdf, rendered.image, northArrowImage, layer, rendered.bounds, profileLabel, basemap.attribution);
+    drawPage(pdf, rendered.image, northArrowImage, scoreGradientImage, layer, rendered.bounds, profileLabel, basemap.attribution);
   }
 
   return pdf.output("blob");
+}
+
+function renderScoreGradient(): string {
+  const canvas = document.createElement("canvas");
+  canvas.width = 40;
+  canvas.height = 320;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("La legende des scores n'a pas pu etre preparee.");
+  const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+  for (const [index, [, colour]] of GRADIENT.entries()) gradient.addColorStop(index / (GRADIENT.length - 1), colour);
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/png");
 }
 
 function renderNorthArrow(): Promise<string> {
@@ -253,7 +267,7 @@ type Pdf = {
   triangle: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: "F" | "S" | "FD" | "DF") => void;
 };
 
-function drawPage(pdf: Pdf, image: string, northArrowImage: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
+function drawPage(pdf: Pdf, image: string, northArrowImage: string, scoreGradientImage: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
   const mapX = 76;
   const mapY = 30;
   const mapWidth = 209;
@@ -271,7 +285,7 @@ function drawPage(pdf: Pdf, image: string, northArrowImage: string, layer: MapLa
   pdf.addImage(image, "PNG", mapX, mapY, mapWidth, mapHeight);
   drawNorthArrow(pdf, northArrowImage, mapX + 7, mapY + 7);
   drawScaleBar(pdf, mapX + 8, mapY + mapHeight - 9, mapWidth, bounds);
-  drawLegend(pdf, legendX, 36);
+  drawLegend(pdf, scoreGradientImage, legendX, 36);
 
   pdf.setFontSize(7);
   pdf.setTextColor("#475569");
@@ -280,7 +294,7 @@ function drawPage(pdf: Pdf, image: string, northArrowImage: string, layer: MapLa
   pdf.text("Les couleurs indiquent un niveau relatif d'obstacles ; une zone sans donnees n'est pas une zone sans obstacle.", 12, 195);
 }
 
-function drawLegend(pdf: Pdf, x: number, y: number) {
+function drawLegend(pdf: Pdf, scoreGradientImage: string, x: number, y: number) {
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(10);
   pdf.setTextColor("#0f172a");
@@ -290,11 +304,9 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   pdf.setTextColor("#334155");
   pdf.text("Score d'accessibilite", x, y + 7);
 
-  const height = 32 / GRADIENT.length;
-  for (const [index, [, colour]] of GRADIENT.entries()) {
-    pdf.setFillColor(colour);
-    pdf.rect(x, y + 10 + index * height, 5, height + 0.1, "F");
-  }
+  pdf.addImage(scoreGradientImage, "PNG", x, y + 10, 5, 32);
+  pdf.setDrawColor("#0f172a");
+  pdf.rect(x, y + 10, 5, 32, "S");
   pdf.setTextColor("#334155");
   pdf.setFontSize(8);
   pdf.text("0 = inaccessible", x + 8, y + 10, { baseline: "top" });
