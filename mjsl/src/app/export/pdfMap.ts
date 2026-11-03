@@ -9,6 +9,8 @@ export const PDF_TITLE = "Matrice de justice spatiale : Cas littoral marseillais
 
 const MAP_WIDTH_PX = 1600;
 const MAP_HEIGHT_PX = 1110;
+// North Arrow N by Jean-Marc Viglino (Font-GIS), CC BY 4.0.
+const NORTH_ARROW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="#0f172a" fill-rule="evenodd" d="M42.066 0v20h3.752V6.957L53.881 20h4.053V0h-3.752v13.355L45.996 0Zm5.57 26.688l-25.77 69.949c-.823 2.238 1.658 4.248 3.677 2.978L50 84.195l24.455 15.42c2.02 1.273 4.504-.738 3.68-2.978l-25.79-70c-.472-1.096-1.283-1.632-2.384-1.635s-2.017.856-2.324 1.686m-.136 14.83V79.86L29.1 91.463Z"/></svg>`;
 
 export interface PdfMapExportInput {
   layers: MapLayer[];
@@ -102,15 +104,41 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
   const basemap = BASEMAPS.find((entry) => entry.id === input.basemapId) ?? BASEMAPS[0]!;
   const profileLabel = ZONE_CONFIG.profiles[input.profileId]?.label ?? input.profileId;
   const layers = orderedLayers(input.layers);
+  const northArrowImage = await renderNorthArrow();
 
   for (const [index, layer] of layers.entries()) {
     onProgress?.(`Preparation de la carte ${index + 1} sur ${layers.length}...`);
     const rendered = await renderMap(layer, input, basemap.style);
     if (index > 0) pdf.addPage("a4", "landscape");
-    drawPage(pdf, rendered.image, layer, rendered.bounds, profileLabel, basemap.attribution);
+    drawPage(pdf, rendered.image, northArrowImage, layer, rendered.bounds, profileLabel, basemap.attribution);
   }
 
   return pdf.output("blob");
+}
+
+function renderNorthArrow(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    const url = URL.createObjectURL(new Blob([NORTH_ARROW_SVG], { type: "image/svg+xml" }));
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      canvas.width = 200;
+      canvas.height = 200;
+      const context = canvas.getContext("2d");
+      if (!context) {
+        reject(new Error("L'indicateur nord n'a pas pu etre prepare."));
+        return;
+      }
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("L'indicateur nord n'a pas pu etre prepare."));
+    };
+    image.src = url;
+  });
 }
 
 async function renderMap(
@@ -225,7 +253,7 @@ type Pdf = {
   triangle: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: "F" | "S" | "FD" | "DF") => void;
 };
 
-function drawPage(pdf: Pdf, image: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
+function drawPage(pdf: Pdf, image: string, northArrowImage: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
   const mapX = 76;
   const mapY = 30;
   const mapWidth = 209;
@@ -241,14 +269,15 @@ function drawPage(pdf: Pdf, image: string, layer: MapLayer, bounds: MapBounds, p
   pdf.setTextColor("#334155");
   pdf.text(layerSubtitle(layer, profileLabel), 12, 21);
   pdf.addImage(image, "PNG", mapX, mapY, mapWidth, mapHeight);
-  drawNorthArrow(pdf, mapX + 12, mapY + 12);
+  drawNorthArrow(pdf, northArrowImage, mapX + 7, mapY + 7);
   drawScaleBar(pdf, mapX + 8, mapY + mapHeight - 9, mapWidth, bounds);
   drawLegend(pdf, legendX, 36);
 
   pdf.setFontSize(7);
   pdf.setTextColor("#475569");
   pdf.text(`Fond de carte : ${basemapAttribution}. Donnees et scores MJSL, ${new Date().toLocaleDateString("fr-FR")}.`, 12, 187);
-  pdf.text("Les couleurs indiquent un niveau relatif d'obstacles ; une zone sans donnees n'est pas une zone sans obstacle.", 12, 192);
+  pdf.text("Indicateur nord : Font-GIS, Jean-Marc Viglino (CC BY 4.0).", 12, 190);
+  pdf.text("Les couleurs indiquent un niveau relatif d'obstacles ; une zone sans donnees n'est pas une zone sans obstacle.", 12, 195);
 }
 
 function drawLegend(pdf: Pdf, x: number, y: number) {
@@ -284,19 +313,11 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   pdf.text("1 = aucun obstacle", x, y + 45);
 }
 
-function drawNorthArrow(pdf: Pdf, x: number, y: number) {
-  // A modest white panel keeps the arrow legible on both a pale street map and
-  // a dark score polygon without competing with the mapped result.
+function drawNorthArrow(pdf: Pdf, image: string, x: number, y: number) {
+  // The white panel keeps the supplied marker legible on map imagery and score polygons.
   pdf.setFillColor("#ffffff");
-  pdf.setDrawColor("#0f172a");
-  pdf.rect(x - 5, y - 7, 10, 14, "FD");
-  pdf.setTextColor("#0f172a");
-  pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text("N", x, y - 2.5, { align: "center" });
-  pdf.setFillColor("#0f172a");
-  pdf.setDrawColor("#0f172a");
-  pdf.triangle(x, y, x - 2.75, y + 6, x + 2.75, y + 6, "F");
+  pdf.rect(x - 1.5, y - 1.5, 13, 13, "F");
+  pdf.addImage(image, "PNG", x, y, 10, 10);
 }
 
 function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds: MapBounds) {
@@ -305,15 +326,11 @@ function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds
   const meters = scaleDistance(metersAcross);
   const width = (meters / metersAcross) * mapWidthMm;
   pdf.setDrawColor("#0f172a");
-  pdf.setFillColor("#ffffff");
-  pdf.rect(x, y - 3, width, 3, "FD");
-  pdf.setFillColor("#0f172a");
-  pdf.rect(x, y - 3, width / 2, 3, "F");
+  pdf.line(x, y, x + width, y);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
   pdf.setTextColor("#0f172a");
-  pdf.text("0", x, y + 4);
-  pdf.text(formatDistance(meters), x + width, y + 4, { align: "right" });
+  pdf.text(formatDistance(meters), x + width / 2, y - 2, { align: "center" });
 }
 
 function formatDistance(meters: number) {
