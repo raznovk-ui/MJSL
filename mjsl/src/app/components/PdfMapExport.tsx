@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/componen
 import { buildMapPdf, orderedLayers } from "../export/pdfMap.js";
 import { downloadBlob } from "../export/download.js";
 import { useAppStore } from "../state.js";
+import { STUDY_AREA } from "../studyArea.js";
 import { type MapLayer, useZoneStore } from "../zone/zoneStore.js";
 
 const ALL_LAYERS: MapLayer[] = ["combined", ...DIMENSION_KEYS];
@@ -22,7 +23,6 @@ export function PdfMapExport() {
   const scores = useZoneStore((s) => s.scores);
   const profileId = useZoneStore((s) => s.profileId);
   const activeLayer = useZoneStore((s) => s.layer);
-  const viewport = useZoneStore((s) => s.viewport);
   const basemapId = useAppStore((s) => s.basemap);
   const setStatus = useAppStore((s) => s.setStatus);
   const [open, setOpen] = useState(false);
@@ -41,7 +41,7 @@ export function PdfMapExport() {
       const blob = await buildMapPdf(
         {
           layers: selected,
-          bounds: viewport,
+          bounds: [STUDY_AREA.bbox.west, STUDY_AREA.bbox.south, STUDY_AREA.bbox.east, STUDY_AREA.bbox.north],
           basemapId,
           profileId,
           zones,
@@ -78,7 +78,7 @@ export function PdfMapExport() {
       <DialogContent showCloseButton={!busy} className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Exporter des cartes PDF</DialogTitle>
-          <DialogDescription>A4 paysage, une page par carte, sur la vue actuelle adaptee au format paysage.</DialogDescription>
+          <DialogDescription>A4 paysage, une page par carte couvrant Marseille au format paysage.</DialogDescription>
         </DialogHeader>
 
         <FieldSet>
