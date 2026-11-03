@@ -17,10 +17,10 @@ function fakeVisibility() {
 }
 
 describe("PDF map export helpers", () => {
-  it("uses the approved study title and labels both combined and dimension maps", () => {
+  it("uses the approved study title and labels combined and dimension maps", () => {
     expect(PDF_TITLE).toBe("Matrice de justice spatiale : Cas littoral marseillais");
-    expect(layerSubtitle("combined", "Mobilite reduite")).toBe("Score combine · Profil : Mobilite reduite");
-    expect(layerSubtitle("physical", "unused")).toBe("D1 · Physique et continuite");
+    expect(layerSubtitle("combined")).toBe("Score combine");
+    expect(layerSubtitle("physical")).toBe("D1 · Physique et continuite");
   });
 
   it("puts selected pages into their stable combined, D1 to D6 order", () => {

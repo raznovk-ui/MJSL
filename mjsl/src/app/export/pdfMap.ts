@@ -21,8 +21,8 @@ export interface PdfMapExportInput {
   scores: Record<string, ZoneScore>;
 }
 
-export function layerSubtitle(layer: MapLayer, profileLabel: string): string {
-  if (layer === "combined") return `Score combine · Profil : ${profileLabel}`;
+export function layerSubtitle(layer: MapLayer): string {
+  if (layer === "combined") return "Score combine";
   const meta = dimension(layer);
   return `${meta.mjslCode} · ${meta.label}`;
 }
@@ -102,7 +102,6 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
   const basemap = BASEMAPS.find((entry) => entry.id === input.basemapId) ?? BASEMAPS[0]!;
-  const profileLabel = ZONE_CONFIG.profiles[input.profileId]?.label ?? input.profileId;
   const layers = orderedLayers(input.layers);
   const northArrowImage = await renderNorthArrow();
   const scoreGradientImage = renderScoreGradient();
@@ -111,7 +110,7 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
     onProgress?.(`Preparation de la carte ${index + 1} sur ${layers.length}...`);
     const rendered = await renderMap(layer, input, basemap.style);
     if (index > 0) pdf.addPage("a4", "landscape");
-    drawPage(pdf, rendered.image, northArrowImage, scoreGradientImage, layer, rendered.bounds, profileLabel, basemap.attribution);
+    drawPage(pdf, rendered.image, northArrowImage, scoreGradientImage, layer, rendered.bounds, basemap.attribution);
   }
 
   return pdf.output("blob");
@@ -267,7 +266,7 @@ type Pdf = {
   triangle: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: "F" | "S" | "FD" | "DF") => void;
 };
 
-function drawPage(pdf: Pdf, image: string, northArrowImage: string, scoreGradientImage: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
+function drawPage(pdf: Pdf, image: string, northArrowImage: string, scoreGradientImage: string, layer: MapLayer, bounds: MapBounds, basemapAttribution: string) {
   const mapX = 76;
   const mapY = 30;
   const mapWidth = 209;
@@ -281,7 +280,7 @@ function drawPage(pdf: Pdf, image: string, northArrowImage: string, scoreGradien
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.setTextColor("#334155");
-  pdf.text(layerSubtitle(layer, profileLabel), 12, 21);
+  pdf.text(layerSubtitle(layer), 12, 21);
   pdf.addImage(image, "PNG", mapX, mapY, mapWidth, mapHeight);
   drawNorthArrow(pdf, northArrowImage, mapX + 7, mapY + 7);
   drawScaleBar(pdf, mapX + 8, mapY + mapHeight - 9, mapWidth, bounds);
