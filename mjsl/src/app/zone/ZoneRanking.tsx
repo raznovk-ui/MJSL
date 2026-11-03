@@ -1,5 +1,4 @@
-import { ZONE_CONFIG, dimensionScores } from "../../domain/zone/index.js";
-import { DimensionBars } from "./DimensionBars.js";
+import { ZONE_CONFIG } from "../../domain/zone/index.js";
 import { shortArrondissement } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
 
@@ -8,7 +7,6 @@ export function ZoneRanking() {
   const ranking = useZoneStore((s) => s.ranking);
   const loadState = useZoneStore((s) => s.loadState);
   const profileId = useZoneStore((s) => s.profileId);
-  const scores = useZoneStore((s) => s.scores);
   const selected = useZoneStore((s) => s.selectedZoneId);
   const select = useZoneStore((s) => s.selectZone);
   const profile = ZONE_CONFIG.profiles[profileId];
@@ -39,12 +37,6 @@ export function ZoneRanking() {
                     #{r.rank} · {r.zone.name} <span className="font-normal text-slate-600">({shortArrondissement(r.zone)})</span>
                   </span>
                   <span className="block text-xs font-normal">{r.summary}</span>
-                  {selected === r.zone.id && (
-                    <span className="mt-2 block w-full font-normal">
-                      <span className="mb-1 block text-xs font-semibold">Score par dimension (0 = obstacle total, 1 = aucun)</span>
-                      <DimensionBars scores={dimensionScores([r.zone], scores[profileId] ?? {})} />
-                    </span>
-                  )}
                 </button>
               </li>
             ))}
