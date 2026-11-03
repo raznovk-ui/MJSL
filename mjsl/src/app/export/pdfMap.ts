@@ -314,10 +314,7 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
 }
 
 function drawNorthArrow(pdf: Pdf, image: string, x: number, y: number) {
-  // The white panel keeps the supplied marker legible on map imagery and score polygons.
-  pdf.setFillColor("#ffffff");
-  pdf.rect(x - 1.5, y - 1.5, 13, 13, "F");
-  pdf.addImage(image, "PNG", x, y, 10, 10);
+  pdf.addImage(image, "PNG", x, y, 8, 8);
 }
 
 function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds: MapBounds) {
@@ -327,10 +324,12 @@ function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds
   const width = (meters / metersAcross) * mapWidthMm;
   pdf.setDrawColor("#0f172a");
   pdf.line(x, y, x + width, y);
+  pdf.line(x, y - 2.5, x, y + 2.5);
+  pdf.line(x + width, y - 2.5, x + width, y + 2.5);
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(7);
   pdf.setTextColor("#0f172a");
-  pdf.text(formatDistance(meters), x + width / 2, y - 2, { align: "center" });
+  pdf.text(formatDistance(meters), x + width / 2, y - 3.5, { align: "center" });
 }
 
 function formatDistance(meters: number) {
