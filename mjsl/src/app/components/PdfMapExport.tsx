@@ -1,11 +1,12 @@
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
+import { DownloadIcon } from "lucide-react";
 import { DIMENSION_KEYS, ZONE_CONFIG, dimension } from "../../domain/zone/index.js";
+import { Button } from "@/components/ui/button";
 import { buildMapPdf, orderedLayers } from "../export/pdfMap.js";
 import { downloadBlob } from "../export/download.js";
 import { useAppStore } from "../state.js";
 import { type MapLayer, useZoneStore } from "../zone/zoneStore.js";
-import { IconDownload } from "./icons.js";
 
 const ALL_LAYERS: MapLayer[] = ["combined", ...DIMENSION_KEYS];
 
@@ -77,42 +78,41 @@ export function PdfMapExport() {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => {
           setSelected([activeLayer]);
           setOpen(true);
         }}
         disabled={zones.length === 0}
-        className="btn btn-primary"
       >
-        <IconDownload />
+        <DownloadIcon data-icon="inline-start" />
         Cartes (PDF)
-      </button>
+      </Button>
 
       {open ? createPortal(
         <div className="modal-backdrop" role="presentation">
           <section role="dialog" aria-modal="true" aria-labelledby="pdf-export-title" className="modal-card">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 id="pdf-export-title" className="text-base font-bold text-slate-900">Exporter des cartes PDF</h2>
-                <p className="mt-1 text-sm text-slate-600">A4 paysage, une page par carte, sur la vue actuelle adaptee au format paysage.</p>
+                <h2 id="pdf-export-title" className="text-base font-semibold">Exporter des cartes PDF</h2>
+                <p className="mt-1 text-sm text-muted-foreground">A4 paysage, une page par carte, sur la vue actuelle adaptee au format paysage.</p>
               </div>
-              <button type="button" onClick={() => setOpen(false)} disabled={busy} className="btn btn-secondary btn-sm" aria-label="Fermer">
+              <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)} disabled={busy} aria-label="Fermer">
                 Fermer
-              </button>
+              </Button>
             </div>
 
             <fieldset className="mt-5">
-              <legend className="text-sm font-semibold text-slate-800">Cartes a inclure</legend>
+              <legend className="text-sm font-semibold">Cartes a inclure</legend>
               <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" onClick={() => setSelected(ALL_LAYERS)} disabled={busy} className="btn btn-secondary btn-sm">Tout selectionner</button>
-                <button type="button" onClick={() => setSelected([])} disabled={busy} className="btn btn-secondary btn-sm">Tout deselectionner</button>
-                <button type="button" onClick={selectCurrent} disabled={busy} className="btn btn-secondary btn-sm">Couche active</button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setSelected(ALL_LAYERS)} disabled={busy}>Tout selectionner</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setSelected([])} disabled={busy}>Tout deselectionner</Button>
+                <Button type="button" variant="outline" size="sm" onClick={selectCurrent} disabled={busy}>Couche active</Button>
               </div>
               <div className="mt-3 space-y-2">
                 {ALL_LAYERS.map((layer, index) => (
-                  <label key={layer} className="flex items-center gap-2 text-sm text-slate-800">
+                  <label key={layer} className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       checked={selected.includes(layer)}
@@ -126,17 +126,17 @@ export function PdfMapExport() {
               </div>
             </fieldset>
 
-            <p className="mt-4 text-xs text-slate-600">
+            <p className="mt-4 text-xs text-muted-foreground">
               Chaque page comprend le titre de l&apos;etude, une legende propre a la dimension, une echelle graphique, le nord et les sources.
               Les signalements et les indices OSM ne sont pas inclus.
             </p>
-            {progress ? <p className="mt-3 text-sm font-medium text-slate-700" role="status">{progress}</p> : null}
+            {progress ? <p className="mt-3 text-sm font-medium" role="status">{progress}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setOpen(false)} disabled={busy} className="btn btn-secondary">Annuler</button>
-              <button type="button" onClick={() => void exportPdf()} disabled={busy || selected.length === 0} className="btn btn-primary">
-                <IconDownload />
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>Annuler</Button>
+              <Button type="button" onClick={() => void exportPdf()} disabled={busy || selected.length === 0}>
+                <DownloadIcon data-icon="inline-start" />
                 {busy ? "Export en cours..." : `Exporter ${selected.length} carte(s)`}
-              </button>
+              </Button>
             </div>
           </section>
         </div>

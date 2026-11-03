@@ -35,7 +35,7 @@ export function BarChart({
 
   return (
     <figure className="m-0">
-      <figcaption className="mb-1 text-xs font-medium text-slate-800">{caption}</figcaption>
+      <figcaption className="mb-1 text-xs font-medium">{caption}</figcaption>
       <svg
         width="100%"
         viewBox={`0 0 ${labelWidth + trackWidth + 46} ${height}`}
@@ -73,18 +73,18 @@ export function BarChart({
         })}
       </svg>
       <details className="mt-1">
-        <summary className="cursor-pointer text-xs text-slate-600">Voir les valeurs</summary>
+        <summary className="cursor-pointer text-xs text-muted-foreground">Voir les valeurs</summary>
         <table className="mt-1 w-full border-collapse text-left text-xs">
           <tbody>
             {data.map((datum) => (
-              <tr key={datum.key} className="border-b border-slate-100">
+              <tr key={datum.key} className="border-b border-border">
                 <th scope="row" className="py-1 pr-2 font-normal">
                   {datum.label}
                 </th>
                 <td className="py-1 pr-2">
                   {datum.value === null ? "non renseignee" : `${datum.value.toFixed(2)}${unit}`}
                 </td>
-                <td className="py-1 text-slate-600">{datum.note ?? ""}</td>
+                <td className="py-1 text-muted-foreground">{datum.note ?? ""}</td>
               </tr>
             ))}
           </tbody>
@@ -97,10 +97,10 @@ export function BarChart({
 
 export function StatTile({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="stat-tile">
-      <p className="stat-tile-label">{label}</p>
-      <p className="stat-tile-value">{value}</p>
-      {note && <p className="stat-tile-note">{note}</p>}
+    <div className="rounded-md border border-border bg-muted/30 p-3">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mt-1 text-xl font-semibold leading-none tabular-nums">{value}</p>
+      {note && <p className="mt-1 text-xs text-muted-foreground">{note}</p>}
     </div>
   );
 }

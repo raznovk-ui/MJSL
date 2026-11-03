@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { ArchiveIcon, DownloadIcon, FileJson2Icon, PrinterIcon } from "lucide-react";
 import { ZONE_CONFIG, dimensionScores, zonesToGeojson, type ScoreClass } from "../../domain/zone/index.js";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppStore } from "../state.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 import { DimensionBars } from "../zone/DimensionBars.js";
 import { BarChart, StatTile } from "./charts.js";
-import { IconDownload } from "./icons.js";
 import { buildArchive, downloadBlob, downloadText } from "../export/download.js";
 import { PdfMapExport } from "./PdfMapExport.js";
 
@@ -57,57 +59,76 @@ export function Dashboard() {
   }
 
   if (zones.length === 0) {
-    return <p className="card text-sm text-slate-500">Le calcul automatique n&apos;est pas termine.</p>;
+    return (
+      <Card>
+        <CardContent className="py-6 text-center text-muted-foreground">Le calcul automatique n&apos;est pas termine.</CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <section aria-labelledby="synthese" className="card">
-        <h2 id="synthese" className="card-title">Synthese — profil « {profile?.label ?? profileId} »</h2>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+    <div className="flex flex-col gap-4">
+      <Card role="region" aria-labelledby="synthese">
+        <CardHeader>
+          <CardTitle id="synthese" role="heading" aria-level={2}>Synthese - profil « {profile?.label ?? profileId} »</CardTitle>
+          <CardDescription>Les indicateurs principaux pour le profil actuellement selectionne.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatTile label="Zones notees" value={String(zones.length)} note={`${stats.total.toFixed(0)} km², ${stats.streetKm.toFixed(0)} km de rue`} />
           <StatTile label="Zones prioritaires" value={String(stats.area.red ? ranking.filter((r) => scores[profileId]?.[r.zone.id]?.cls === "red").length : 0)} note="en rouge pour ce profil" />
           <StatTile label="Signalements d'habitants" value={String(reports.length)} note={`${stats.inZones} places dans une zone`} />
           <StatTile label="Part de la ville en rouge" value={pct(stats.area.red)} note={`${stats.area.red.toFixed(0)} km²`} />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section aria-labelledby="dims" className="card">
-        <h2 id="dims" className="card-title">Score par dimension — toute la ville</h2>
-        <p className="mb-2 text-xs text-slate-600">
+      <Card role="region" aria-labelledby="dims">
+        <CardHeader>
+          <CardTitle id="dims" role="heading" aria-level={2}>Score par dimension - toute la ville</CardTitle>
+          <CardDescription>
           De 0 (obstacle total) a 1 (aucun obstacle), moyenne ponderee par la surface des zones. Entre parentheses : la part de la
           ville pour laquelle les donnees ouvertes donnent une reponse. Ces six scores ne dependent pas du profil : le profil
           decide seulement du poids de chacun dans le score final.
-        </p>
-        <DimensionBars scores={dims} />
-      </section>
+          </CardDescription>
+        </CardHeader>
+        <CardContent><DimensionBars scores={dims} /></CardContent>
+      </Card>
 
-      <section aria-labelledby="classes" className="card">
-        <h2 id="classes" className="card-title">Repartition par surface</h2>
-        <div className="min-w-0">
+      <Card role="region" aria-labelledby="classes">
+        <CardHeader>
+          <CardTitle id="classes" role="heading" aria-level={2}>Repartition par surface</CardTitle>
+          <CardDescription>Surface des zones selon leur niveau de priorite pour ce profil.</CardDescription>
+        </CardHeader>
+        <CardContent className="min-w-0">
           <BarChart
             data={(["red", "orange", "green", "none"] as const).map((cls) => ({ key: cls, label: CLASS_LABEL[cls], value: stats.area[cls] }))}
             max={Math.max(stats.total, 1)}
             caption="Kilometres carres de zones par classe"
             unit=" km²"
           />
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      <section aria-labelledby="export" className="card">
-        <h2 id="export" className="card-title">Export</h2>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => void exportArchive()} disabled={busy} className="btn btn-primary">
-            <IconDownload />
+      <Card role="region" aria-labelledby="export">
+        <CardHeader>
+          <CardTitle id="export" role="heading" aria-level={2}>Exporter et imprimer</CardTitle>
+          <CardDescription>Telechargez les donnees ou une carte de la vue actuelle.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button type="button" onClick={() => void exportArchive()} disabled={busy}>
+            <ArchiveIcon data-icon="inline-start" />
             Archive (.zip)
-          </button>
+          </Button>
           <PdfMapExport />
-          <button type="button" onClick={() => downloadText(JSON.stringify(zonesToGeojson(zones, ZONE_CONFIG), null, 2), "zones.geojson", "application/geo+json")} className="btn btn-secondary">
+          <Button type="button" variant="outline" onClick={() => downloadText(JSON.stringify(zonesToGeojson(zones, ZONE_CONFIG), null, 2), "zones.geojson", "application/geo+json")}>
+            <FileJson2Icon data-icon="inline-start" />
             Zones (GeoJSON)
-          </button>
-          <button type="button" onClick={() => window.print()} className="btn btn-secondary">Imprimer</button>
-        </div>
-      </section>
+          </Button>
+          <Button type="button" variant="outline" onClick={() => window.print()}>
+            <PrinterIcon data-icon="inline-start" />
+            Imprimer
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
