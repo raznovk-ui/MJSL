@@ -296,8 +296,8 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
     pdf.rect(x + index * width, y + 10, width + 0.1, 5, "F");
   }
   pdf.setFontSize(7);
-  pdf.text("obstacles eleves", x, y + 20);
-  pdf.text("peu d'obstacles", x + 48, y + 20, { align: "right" });
+  pdf.text("0 = inaccessible", x, y + 20);
+  pdf.text("1 = capacitant", x + 48, y + 20, { align: "right" });
 
   pdf.setFillColor(ZONE_CONFIG.classes.colours.none);
   pdf.rect(x, y + 27, 8, 5, "F");
@@ -308,9 +308,6 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   pdf.setTextColor("#334155");
   pdf.setFontSize(8);
   pdf.text("Pas assez de donnees", x + 11, y + 31);
-  pdf.setFontSize(7);
-  pdf.text("0 = obstacle total", x, y + 40);
-  pdf.text("1 = aucun obstacle", x, y + 45);
 }
 
 function drawNorthArrow(pdf: Pdf, image: string, x: number, y: number) {
