@@ -203,6 +203,7 @@ describe("building the zones from the data", () => {
   it("sorts citizen reports into kinds and counts them per km of street", () => {
     expect(reportKind("Stationnement gênant fréquent", config)).toBe("parking");
     expect(reportKind("Trottoir étroit ou absent", config)).toBe("narrow");
+    expect(reportKind("Poteaux gênants", config)).toBe("narrow");
     expect(reportKind("Chantier/péril", config)).toBe("works");
     expect(reportKind("Encombrants fréquents", config)).toBe("works");
     expect(reportKind("Terrasses, mobilier", config)).toBe("furniture");
@@ -212,11 +213,12 @@ describe("building the zones from the data", () => {
       { lon: 5.353, lat: LAT0 + 0.004, type: "Stationnement gênant fréquent" },
       { lon: 5.354, lat: LAT0 + 0.004, type: "Stationnement gênant fréquent" },
       { lon: 5.355, lat: LAT0 + 0.004, type: "Trottoir étroit ou absent" },
+      { lon: 5.356, lat: LAT0 + 0.004, type: "Poteaux gênants" },
       { lon: 5.50, lat: LAT0, type: "Stationnement gênant fréquent" }, // in no zone
     ];
     const a = zoneOf(build([streetA()], { reports }), "A");
     expect(a.values.parkingReports).toBeCloseTo(2 / 0.405, 0);
-    expect(a.values.narrowReports).toBeCloseTo(1 / 0.405, 0);
+    expect(a.values.narrowReports).toBeCloseTo(2 / 0.405, 0);
     expect(a.sources.parkingReports).toBe("reported");
     expect(a.counts.reportsParking).toBe(2);
     expect(zoneOf(build([streetA()], {}), "A").values.parkingReports).toBeUndefined(); // no reports file: no data

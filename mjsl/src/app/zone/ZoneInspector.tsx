@@ -26,7 +26,7 @@ export function ZoneInspector() {
             <button type="button" className="btn btn-secondary btn-sm ml-2" onClick={() => select(null)}>Fermer</button>
           </p>
           <p className="text-xs text-slate-600">
-            Signalements d&apos;habitants : stationnement {zone.counts.reportsParking ?? 0}, trottoir etroit {zone.counts.reportsNarrow ?? 0},
+            Signalements d&apos;habitants : stationnement {zone.counts.reportsParking ?? 0}, trottoir / poteau {zone.counts.reportsNarrow ?? 0},
             chantier / encombrants {zone.counts.reportsWorks ?? 0}, terrasses / mobilier {zone.counts.reportsFurniture ?? 0}.
           </p>
 

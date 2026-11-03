@@ -5,7 +5,7 @@
     "_comment": "Each indicator turns a number measured over a ZONE into a barrier from 0 (no problem) to 1 (total obstacle). kind 'linear': 'noProblemAt' is the value that gives barrier 0, 'totalObstacleAt' the value that gives barrier 1, a straight line in between (it works whichever is larger). kind 'share': the number is already a barrier between 0 and 1. kind 'evidence': a linear barrier like 'linear', but it does NOT enter the average of its dimension: it compounds on top of it, so the dimension's barrier = 1 - (1 - mean of the other indicators) x (1 - barrier of each evidence). Used for the citizens' reports, which can only add an obstacle: no report is not proof of no obstacle, and a few reports must never make a zone look better than the open data alone. 'dimension' is the dimension of the memoire the indicator belongs to: physical, sensory, cognitive, economic, socio_cultural or political. 'per km' means per kilometre of street in the zone, so a large zone is not penalised for being large. Most thresholds are STARTING VALUES, set from how the 336 zones of Marseille are spread out in the October 2026 data (a density's 'no problem' point is about the 90th percentile of the city): they say 'compared with the rest of Marseille', and are to be calibrated with the field work.",
 
     "parkingReports": { "label": "Stationnement genant signale", "unit": "signalements / km de rue", "dimension": "physical", "kind": "evidence", "noProblemAt": 0, "totalObstacleAt": 4, "_comment": "Citizens' reports of cars, scooters or bikes parked on the pavement (clandestine parking)." },
-    "narrowReports": { "label": "Trottoir etroit ou absent signale", "unit": "signalements / km de rue", "dimension": "physical", "kind": "evidence", "noProblemAt": 0, "totalObstacleAt": 3 },
+    "narrowReports": { "label": "Trottoir etroit, absent ou encombre signale", "unit": "signalements / km de rue", "dimension": "physical", "kind": "evidence", "noProblemAt": 0, "totalObstacleAt": 3 },
     "worksReports": { "label": "Chantiers, peril, encombrants signales", "unit": "signalements / km de rue", "dimension": "physical", "kind": "evidence", "noProblemAt": 0, "totalObstacleAt": 1.5 },
     "steps": { "label": "Escaliers sans rampe", "unit": "escaliers / km de rue", "dimension": "physical", "kind": "linear", "noProblemAt": 0, "totalObstacleAt": 6, "_comment": "Flights of steps in OSM with no ramp tag (stairs with no detour)." },
     "transit": { "label": "Transports en commun", "unit": "modes dans la zone", "dimension": "physical", "kind": "linear", "noProblemAt": 2, "totalObstacleAt": 0, "_comment": "Number of public transport modes (bus, tram, metro) with a stop in the zone. Two or more is fine, as the client asked." },
@@ -40,7 +40,7 @@
   "reports": {
     "_comment": "How a citizen report is sorted into a kind, from the type the citizen chose. A report goes to the first kind with a word that appears in its type (lower case, accents removed). Reports of kind 'other' or with no type are counted but not scored.",
     "parking": ["stationnement"],
-    "narrow": ["trottoir"],
+    "narrow": ["trottoir", "poteau"],
     "works": ["chantier", "peril", "encombrants"],
     "furniture": ["terrasse", "mobilier"]
   },

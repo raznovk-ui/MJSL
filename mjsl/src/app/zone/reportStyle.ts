@@ -23,7 +23,7 @@ interface ReportStyle {
 /** One symbol per kind of report: the shape tells the kind, never the colour alone. */
 export const REPORT_STYLE: Record<ReportKind, ReportStyle> = {
   parking: { label: "Stationnement genant", shape: "square", colour: "#6b00d7", feeds: "D1 Physique" },
-  narrow: { label: "Trottoir etroit ou absent", shape: "triangle", colour: "#3e00b3", feeds: "D1 Physique" },
+  narrow: { label: "Trottoir etroit, absent ou encombre", shape: "triangle", colour: "#3e00b3", feeds: "D1 Physique" },
   works: { label: "Chantier, peril, encombrants", shape: "diamond", colour: "#a230ed", feeds: "D1 Physique" },
   furniture: { label: "Terrasses, mobilier", shape: "circle", colour: "#4a90d9", feeds: "D4 Economique" },
   other: { label: "Autre / sans type", shape: "cross", colour: "#d391fa", feeds: null },
@@ -59,6 +59,7 @@ export function reportIcon(kind: ReportKind, size = 40): { width: number; height
 export const REPORT_TYPE_OPTIONS: string[] = [
   "Stationnement gênant fréquent",
   "Trottoir étroit ou absent",
+  "Poteaux gênants",
   "Chantier/péril",
   "Encombrants fréquents",
   "Terrasses, mobilier",

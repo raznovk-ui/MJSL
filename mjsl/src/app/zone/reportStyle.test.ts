@@ -30,6 +30,7 @@ describe("the types a person can choose", () => {
   it("are counted in the kind the data already uses for them", () => {
     expect(reportKind("Stationnement gênant fréquent", ZONE_CONFIG)).toBe("parking");
     expect(reportKind("Trottoir étroit ou absent", ZONE_CONFIG)).toBe("narrow");
+    expect(reportKind("Poteaux gênants", ZONE_CONFIG)).toBe("narrow");
     expect(reportKind("Chantier/péril", ZONE_CONFIG)).toBe("works");
     expect(reportKind("Encombrants fréquents", ZONE_CONFIG)).toBe("works");
     expect(reportKind("Terrasses, mobilier", ZONE_CONFIG)).toBe("furniture");
