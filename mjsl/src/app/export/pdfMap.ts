@@ -249,7 +249,7 @@ type Pdf = {
   setFontSize: (size: number) => void;
   setLineDashPattern: (dashArray: number[], dashPhase: number) => void;
   setTextColor: (colour: string) => void;
-  text: (text: string | string[], x: number, y: number, options?: { align?: "left" | "center" | "right" }) => void;
+  text: (text: string | string[], x: number, y: number, options?: { align?: "left" | "center" | "right"; baseline?: "top" | "bottom" }) => void;
   triangle: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: "F" | "S" | "FD" | "DF") => void;
 };
 
@@ -297,8 +297,8 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   }
   pdf.setTextColor("#334155");
   pdf.setFontSize(8);
-  pdf.text("0 = inaccessible", x + 8, y + 14);
-  pdf.text("1 = capacitant", x + 8, y + 39);
+  pdf.text("0 = inaccessible", x + 8, y + 10, { baseline: "top" });
+  pdf.text("1 = capacitant", x + 8, y + 42, { baseline: "bottom" });
 
   pdf.setFillColor(ZONE_CONFIG.classes.colours.none);
   pdf.rect(x, y + 48, 8, 5, "F");
