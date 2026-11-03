@@ -298,7 +298,7 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
   pdf.setTextColor("#334155");
   pdf.setFontSize(8);
   pdf.text("0 = inaccessible", x + 8, y + 14);
-  pdf.text("1 = capacitant", x + 8, y + 42);
+  pdf.text("1 = capacitant", x + 8, y + 38);
 
   pdf.setFillColor(ZONE_CONFIG.classes.colours.none);
   pdf.rect(x, y + 48, 8, 5, "F");
