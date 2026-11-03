@@ -1,4 +1,6 @@
 import { ZONE_CONFIG } from "../../domain/zone/index.js";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { shortArrondissement } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
 
@@ -10,42 +12,44 @@ export function ZoneRanking() {
   const selected = useZoneStore((s) => s.selectedZoneId);
   const select = useZoneStore((s) => s.selectZone);
   const profile = ZONE_CONFIG.profiles[profileId];
-  const top = ranking.slice(0, ZONE_CONFIG.ranking.topN);
+  const top = ranking.slice(0, Math.min(5, ZONE_CONFIG.ranking.topN));
 
   return (
-    <section aria-labelledby="zones-title" className="card">
-      <h2 id="zones-title" className="card-title">Zones prioritaires</h2>
-      <p className="mb-2 text-xs text-slate-600">
-        Les zones au score le plus bas pour le profil « {profile?.label ?? profileId} », classees automatiquement : aucun releve n&apos;est saisi.
-      </p>
-      {loadState !== "ready" ? (
-        <p className="text-sm text-slate-500">{loadState === "error" ? "Calcul impossible." : "Calcul en cours..."}</p>
-      ) : top.length === 0 ? (
-        <p className="text-sm text-slate-500">Aucune zone notee.</p>
-      ) : (
-        <>
-          <ol className="space-y-2">
-            {top.map((r) => (
-              <li key={r.zone.id}>
-                <button
-                  type="button"
-                  onClick={() => select(selected === r.zone.id ? null : r.zone.id)}
-                  aria-pressed={selected === r.zone.id}
-                  className="btn btn-toggle btn-block !items-start !text-left"
-                >
-                  <span className="font-bold">
-                    #{r.rank} · {r.zone.name} <span className="font-normal text-slate-600">({shortArrondissement(r.zone)})</span>
-                  </span>
-                  <span className="block text-xs font-normal">{r.summary}</span>
-                </button>
-              </li>
-            ))}
-          </ol>
-          {ranking.length > top.length && (
-            <p className="mt-2 text-xs text-slate-500">Les {top.length} premieres sur {ranking.length}. Liste complete dans l&apos;onglet Tableau.</p>
+    <section aria-labelledby="zones-title">
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle id="zones-title" role="heading" aria-level={2}>Zones prioritaires</CardTitle>
+          <CardDescription>Les scores les plus bas pour le profil « {profile?.label ?? profileId} ».</CardDescription>
+          <CardAction className="tabular-nums text-xs text-muted-foreground">{ranking.length}</CardAction>
+        </CardHeader>
+        <CardContent>
+          {loadState !== "ready" ? (
+            <p className="text-muted-foreground">{loadState === "error" ? "Calcul impossible." : "Calcul en cours..."}</p>
+          ) : top.length === 0 ? (
+            <p className="text-muted-foreground">Aucune zone notee.</p>
+          ) : (
+            <ol className="divide-y divide-border">
+              {top.map((r) => (
+                <li key={r.zone.id}>
+                  <Button
+                    type="button"
+                    variant={selected === r.zone.id ? "secondary" : "ghost"}
+                    className="h-auto w-full flex-col items-start whitespace-normal px-0 py-2 text-left hover:bg-transparent"
+                    onClick={() => select(selected === r.zone.id ? null : r.zone.id)}
+                    aria-pressed={selected === r.zone.id}
+                  >
+                    <span className="font-medium">#{r.rank} · {r.zone.name} <span className="font-normal text-muted-foreground">({shortArrondissement(r.zone)})</span></span>
+                    <span className="text-muted-foreground">{r.summary}</span>
+                  </Button>
+                </li>
+              ))}
+            </ol>
           )}
-        </>
-      )}
+        </CardContent>
+        {ranking.length > top.length && (
+          <CardFooter className="border-t text-muted-foreground">Top {top.length} sur {ranking.length}. Liste complete dans l&apos;onglet Tableau.</CardFooter>
+        )}
+      </Card>
     </section>
   );
 }

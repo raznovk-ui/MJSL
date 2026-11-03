@@ -64,21 +64,15 @@ export function App() {
           style={{ background: "var(--surface-alt)" }}
           aria-label="Reglages des couches"
         >
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             <ZonePanel />
             <ReportForm />
             <ZoneRanking />
             <ZoneInspector />
             <MapDataSettings />
-            <section aria-labelledby="limites" className="card">
-              <h2 id="limites" className="card-title">
-                Limites
-              </h2>
-              <p className="text-xs text-slate-500">
-                Tout est calcule automatiquement a partir de donnees ouvertes ; les seuils sont des valeurs de depart a verifier sur le terrain. Cet outil ne
-                remplace pas la consultation des personnes handicapees et des habitants concernes.
-              </p>
-            </section>
+            <p className="px-1 text-xs text-muted-foreground">
+              Les seuils sont des valeurs de depart a verifier sur le terrain. Cet outil ne remplace pas la consultation des personnes handicapees et des habitants concernes.
+            </p>
           </div>
         </aside>
 
