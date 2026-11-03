@@ -1,5 +1,10 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { ZONE_CONFIG, DIMENSION_KEYS, dimension as meta, dimensionScoreOf } from "../../domain/zone/index.js";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { shortArrondissement } from "../zone/labels.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 
@@ -15,6 +20,8 @@ export function DataTable() {
   const profileId = useZoneStore((s) => s.profileId);
   const select = useZoneStore((s) => s.selectZone);
   const [limit, setLimit] = useState(PAGE);
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase("fr-FR"));
 
   const rows = useMemo(
     () =>
@@ -23,12 +30,23 @@ export function DataTable() {
         .sort((a, b) => (a.score?.score ?? 2) - (b.score?.score ?? 2)),
     [zones, scores, profileId],
   );
+  const filteredRows = useMemo(
+    () =>
+      deferredQuery
+        ? rows.filter(({ zone }) => `${zone.name} ${shortArrondissement(zone)}`.toLocaleLowerCase("fr-FR").includes(deferredQuery))
+        : rows,
+    [deferredQuery, rows],
+  );
+
+  useEffect(() => setLimit(PAGE), [deferredQuery, profileId]);
 
   if (rows.length === 0) {
     return (
-      <p className="m-4 rounded-md border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-        Aucune zone chargee pour l&apos;instant.
-      </p>
+      <div className="p-4">
+        <Card>
+          <CardContent className="py-6 text-center text-muted-foreground">Aucune zone chargee pour l&apos;instant.</CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -36,45 +54,57 @@ export function DataTable() {
 
   return (
     <div className="p-4">
-      <div className="card overflow-x-auto p-0">
-        <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-          <caption className="p-3 text-left text-xs text-slate-500">
-            {rows.length} zones, de la plus basse a la plus haute pour le profil « {ZONE_CONFIG.profiles[profileId]?.label ?? profileId} ». Memes donnees que la carte.
-          </caption>
-          <thead>
-            <tr className="border-b" style={{ borderColor: "var(--line)", background: "var(--surface-alt)" }}>
-              <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Zone</th>
-              <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Arrondissement</th>
-              <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Score</th>
-              {DIMENSION_KEYS.map((d) => (
-                <th key={d} scope="col" className="px-3 py-2 font-semibold text-slate-700">{meta(d).mjslCode}</th>
-              ))}
-              <th scope="col" className="px-3 py-2 font-semibold text-slate-700">Voir</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.slice(0, limit).map(({ zone, score }, index) => (
-              <tr key={zone.id} className="border-b" style={{ borderColor: "var(--line)", background: index % 2 ? "var(--surface-alt)" : "var(--surface)" }}>
-                <th scope="row" className="px-3 py-1.5 font-medium text-slate-900">{zone.name}</th>
-                <td className="px-3 py-1.5 text-slate-600">{shortArrondissement(zone)}</td>
-                <td className="px-3 py-1.5 tabular-nums text-slate-900">{fmt(score?.score)}</td>
-                {DIMENSION_KEYS.map((d) => (
-                  <td key={d} className="px-3 py-1.5 tabular-nums text-slate-600">{fmt(dimensionScoreOf(score, d))}</td>
-                ))}
-                <td className="px-3 py-1.5">
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => select(zone.id)}>Fiche</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle role="heading" aria-level={2}>Toutes les zones</CardTitle>
+          <CardDescription>{rows.length} zones classees de la plus basse a la plus haute pour le profil « {ZONE_CONFIG.profiles[profileId]?.label ?? profileId} ».</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <Field>
+            <FieldLabel htmlFor="zone-search">Rechercher une zone</FieldLabel>
+            <Input id="zone-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nom ou arrondissement" />
+          </Field>
+          <p className="text-muted-foreground" role="status">{filteredRows.length} zone{filteredRows.length > 1 ? "s" : ""} correspondante{filteredRows.length > 1 ? "s" : ""}.</p>
 
-      {limit < rows.length && (
-        <button type="button" onClick={() => setLimit((n) => n + PAGE)} className="btn btn-secondary mt-3">
-          Afficher {Math.min(PAGE, rows.length - limit)} zones de plus
-        </button>
-      )}
+          {filteredRows.length === 0 ? (
+            <p className="rounded-md bg-muted p-3 text-muted-foreground">Aucune zone ne correspond a cette recherche.</p>
+          ) : (
+            <Table className="min-w-[900px]">
+              <TableCaption className="sr-only">Scores par zone et par dimension</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead scope="col">Zone</TableHead>
+                  <TableHead scope="col">Arrondissement</TableHead>
+                  <TableHead scope="col">Score</TableHead>
+                  {DIMENSION_KEYS.map((dimension) => (
+                    <TableHead key={dimension} scope="col">{meta(dimension).mjslCode}</TableHead>
+                  ))}
+                  <TableHead scope="col">Calcul</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRows.slice(0, limit).map(({ zone, score }) => (
+                  <TableRow key={zone.id}>
+                    <th scope="row" className="p-2 text-left font-medium whitespace-nowrap">{zone.name}</th>
+                    <TableCell className="text-muted-foreground">{shortArrondissement(zone)}</TableCell>
+                    <TableCell className="tabular-nums">{fmt(score?.score)}</TableCell>
+                    {DIMENSION_KEYS.map((dimension) => (
+                      <TableCell key={dimension} className="tabular-nums text-muted-foreground">{fmt(dimensionScoreOf(score, dimension))}</TableCell>
+                    ))}
+                    <TableCell><Button type="button" variant="outline" size="xs" onClick={() => select(zone.id)}>Voir</Button></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {limit < filteredRows.length && (
+            <Button type="button" variant="outline" className="self-start" onClick={() => setLimit((current) => current + PAGE)}>
+              Afficher {Math.min(PAGE, filteredRows.length - limit)} zones de plus
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
