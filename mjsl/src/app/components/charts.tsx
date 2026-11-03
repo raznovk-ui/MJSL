@@ -1,13 +1,10 @@
 /**
- * Inline SVG charts. No chart library: these are two small forms, and owning
- * the markup is what lets every one of them carry a real table alternative and
- * text labels rather than colour alone.
+ * No chart library: these small charts use semantic HTML, direct value labels,
+ * and a table alternative rather than depending on an axis or colour alone.
  *
  * One hue throughout. The job here is magnitude, not identity, so a sequential
  * single hue is the correct encoding and no categorical palette is in play.
  */
-const SERIES = "#2a78d6";
-
 interface BarDatum {
   key: string;
   label: string;
@@ -27,53 +24,25 @@ export function BarChart({
   caption: string;
   unit?: string;
 }) {
-  const rows = data.length;
-  const rowHeight = 26;
-  const height = rows * rowHeight + 4;
-  const labelWidth = 132;
-  const trackWidth = 150;
-
   return (
     <figure className="m-0">
       <figcaption className="mb-1 text-xs font-medium">{caption}</figcaption>
-      <svg
-        width={labelWidth + trackWidth + 46}
-        height={height}
-        className="block h-auto max-w-full"
-        viewBox={`0 0 ${labelWidth + trackWidth + 46} ${height}`}
-        role="img"
-        aria-label={`${caption}. ${data
-          .map((d) => `${d.label} ${d.value === null ? "non renseignee" : `${d.value.toFixed(2)}${unit}`}`)
-          .join(". ")}`}
-      >
-        {data.map((datum, index) => {
-          const y = index * rowHeight;
+      <div className="flex flex-col gap-2" aria-label={`${caption}. ${data
+        .map((datum) => `${datum.label} ${datum.value === null ? "non renseignee" : `${datum.value.toFixed(2)}${unit}`}`)
+        .join(". ")}`}>
+        {data.map((datum) => {
           const ratio = datum.value === null ? 0 : Math.max(0, Math.min(1, datum.value / max));
           return (
-            <g key={datum.key}>
-              <text x={0} y={y + 15} fontSize={11} fill="#0f172a">
-                {datum.label}
-              </text>
-              <rect x={labelWidth} y={y + 5} width={trackWidth} height={12} rx={4} fill="#e2e8f0" />
-              {datum.value !== null && (
-                <rect
-                  x={labelWidth}
-                  y={y + 5}
-                  width={Math.max(2, ratio * trackWidth)}
-                  height={12}
-                  rx={4}
-                  fill={SERIES}
-                />
-              )}
-              {/* Direct label on every row: the value is the point, and this
-                  removes any dependence on reading a bar against an axis. */}
-              <text x={labelWidth + trackWidth + 6} y={y + 15} fontSize={11} fill="#334155">
-                {datum.value === null ? "—" : `${datum.value.toFixed(2)}${unit}`}
-              </text>
-            </g>
+            <div key={datum.key} className="grid grid-cols-[minmax(7rem,10rem)_minmax(0,1fr)_auto] items-center gap-2 text-xs">
+              <span>{datum.label}</span>
+              <span className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+                {datum.value !== null && <span className="block h-full min-w-0 rounded-full bg-primary" style={{ width: `${Math.max(1, ratio * 100)}%` }} />}
+              </span>
+              <span className="w-12 text-right tabular-nums text-muted-foreground">{datum.value === null ? "—" : `${datum.value.toFixed(2)}${unit}`}</span>
+            </div>
           );
         })}
-      </svg>
+      </div>
       <details className="mt-1">
         <summary className="cursor-pointer text-xs text-muted-foreground">Voir les valeurs</summary>
         <table className="mt-1 w-full border-collapse text-left text-xs">
