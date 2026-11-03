@@ -234,14 +234,14 @@ function drawNorthArrow(pdf: Pdf, x: number, y: number) {
   // a dark score polygon without competing with the mapped result.
   pdf.setFillColor("#ffffff");
   pdf.setDrawColor("#0f172a");
-  pdf.rect(x - 6, y - 8, 12, 18, "FD");
+  pdf.rect(x - 5, y - 7, 10, 14, "FD");
   pdf.setTextColor("#0f172a");
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(9);
-  pdf.text("N", x, y - 3, { align: "center" });
+  pdf.setFontSize(8);
+  pdf.text("N", x, y - 2.5, { align: "center" });
   pdf.setFillColor("#0f172a");
   pdf.setDrawColor("#0f172a");
-  pdf.triangle(x, y, x - 3.5, y + 8, x + 3.5, y + 8, "F");
+  pdf.triangle(x, y, x - 2.75, y + 6, x + 2.75, y + 6, "F");
 }
 
 function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds: MapBounds) {
