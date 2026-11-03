@@ -141,6 +141,27 @@ body {
   font-size: 0.72rem;
 }
 
+/* Export is a short, focused choice rather than a separate screen. */
+.modal-backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+}
+.modal-card {
+  width: min(100%, 32rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
 /* Toggle buttons (mode switches: placing a report, a ranked zone) get a
    pressed look that does not depend on colour alone. Unpressed looks like a
    secondary button. */

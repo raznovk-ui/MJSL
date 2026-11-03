@@ -32,6 +32,7 @@ const AMP_BASE = `${import.meta.env.BASE_URL}data/amp/`;
 
 /** What the map shows for each zone: the profile's combined score, or one dimension. */
 export type MapLayer = "combined" | Dimension;
+export type MapBounds = [west: number, south: number, east: number, north: number];
 
 /** What the program filled in by itself, and how far it got. */
 interface AutoDataStatus {
@@ -51,6 +52,8 @@ interface ZoneState {
   reports: Report[];
   profileId: string;
   layer: MapLayer;
+  /** Last viewport of the interactive map, retained for map exports. */
+  viewport: MapBounds;
   visible: boolean;
   reportsVisible: boolean;
   /** Which kinds of report are drawn (the legend doubles as the filter). */
@@ -69,6 +72,7 @@ interface ZoneState {
   load: (options?: { forceRefresh?: boolean }) => Promise<void>;
   setProfile: (id: string) => void;
   setLayer: (layer: MapLayer) => void;
+  setViewport: (viewport: MapBounds) => void;
   toggleVisible: () => void;
   toggleReports: () => void;
   toggleReportKind: (kind: ReportKind) => void;
@@ -222,6 +226,7 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
   reports: [],
   profileId: Object.keys(ZONE_CONFIG.profiles)[0]!,
   layer: "combined",
+  viewport: [5.22, 43.17, 5.54, 43.39],
   visible: true,
   reportsVisible: false,
   reportKinds: { parking: true, narrow: true, works: true, furniture: true, other: true },
@@ -264,6 +269,7 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
 
   setProfile: (profileId) => set((s) => ({ profileId, ranking: rankingOf(s.zones, s.scores, profileId) })),
   setLayer: (layer) => set({ layer }),
+  setViewport: (viewport) => set({ viewport }),
   toggleVisible: () => set((s) => ({ visible: !s.visible })),
   toggleReports: () => set((s) => ({ reportsVisible: !s.reportsVisible })),
   toggleReportKind: (kind) => set((s) => ({ reportKinds: { ...s.reportKinds, [kind]: !s.reportKinds[kind] } })),

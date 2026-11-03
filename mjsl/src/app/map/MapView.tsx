@@ -65,7 +65,15 @@ export function MapView() {
     // Dev-only handle, so the rendered state can be inspected from the console.
     if (import.meta.env.DEV) (window as unknown as Record<string, unknown>).__map = instance;
 
-    instance.on("load", () => setStyleReady(true));
+    const rememberViewport = () => {
+      const bounds = instance.getBounds();
+      useZoneStore.getState().setViewport([bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]);
+    };
+    instance.on("load", () => {
+      setStyleReady(true);
+      rememberViewport();
+    });
+    instance.on("moveend", rememberViewport);
     instance.on("click", (event) => {
       // While a report is being placed, the click is its point.
       if (useZoneStore.getState().addMode) {

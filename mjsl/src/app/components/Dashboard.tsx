@@ -6,6 +6,7 @@ import { DimensionBars } from "../zone/DimensionBars.js";
 import { BarChart, StatTile } from "./charts.js";
 import { IconDownload } from "./icons.js";
 import { buildArchive, downloadBlob, downloadText } from "../export/download.js";
+import { PdfMapExport } from "./PdfMapExport.js";
 
 const CLASS_LABEL: Record<ScoreClass, string> = {
   red: "Rouge (contour pointille)",
@@ -100,6 +101,7 @@ export function Dashboard() {
             <IconDownload />
             Archive (.zip)
           </button>
+          <PdfMapExport />
           <button type="button" onClick={() => downloadText(JSON.stringify(zonesToGeojson(zones, ZONE_CONFIG), null, 2), "zones.geojson", "application/geo+json")} className="btn btn-secondary">
             Zones (GeoJSON)
           </button>

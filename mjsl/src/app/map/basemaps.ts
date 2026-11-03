@@ -1,9 +1,11 @@
 import type { StyleSpecification } from "maplibre-gl";
 
-interface Basemap {
+export interface Basemap {
   id: string;
   label: string;
   description: string;
+  /** Plain-text attribution for PDF and other non-HTML exports. */
+  attribution: string;
   style: StyleSpecification;
 }
 
@@ -24,6 +26,7 @@ export const BASEMAPS: Basemap[] = [
     id: "osm",
     label: "OpenStreetMap",
     description: "Fond standard, lisible pour le reperage.",
+    attribution: "© contributeurs OpenStreetMap",
     style: rasterStyle(
       "osm",
       ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png", "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png"],
@@ -34,6 +37,7 @@ export const BASEMAPS: Basemap[] = [
     id: "carto-light",
     label: "Clair (contraste eleve)",
     description: "Fond desature : les couches MJSL ressortent davantage.",
+    attribution: "© contributeurs OpenStreetMap, © CARTO",
     style: rasterStyle(
       "carto-light",
       ["https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"],
