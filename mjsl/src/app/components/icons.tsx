@@ -16,18 +16,6 @@ const base = {
   "aria-hidden": true,
 };
 
-export function IconPin({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M10 18s6-5.2 6-9.6A6 6 0 0 0 4 8.4C4 12.8 10 18 10 18Z" />
-      <circle cx="10" cy="8.3" r="2.2" />
-    </svg>
-  );
-}
-
-
-
-
 export function IconDownload({ className }: IconProps) {
   return (
     <svg {...base} className={className}>
@@ -37,4 +25,3 @@ export function IconDownload({ className }: IconProps) {
     </svg>
   );
 }
-

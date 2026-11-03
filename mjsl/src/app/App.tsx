@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapPinIcon } from "lucide-react";
 import { MapView } from "./map/MapView.js";
 import { MapDataSettings } from "./components/MapDataSettings.js";
 import { DataTable } from "./components/DataTable.js";
@@ -10,7 +11,6 @@ import { ZoneRanking } from "./zone/ZoneRanking.js";
 import { ZoneInspector } from "./zone/ZoneInspector.js";
 import { useZoneStore } from "./zone/zoneStore.js";
 import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
-import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
 import { STUDY_AREA } from "./studyArea.js";
 import { useAppStore } from "./state.js";
@@ -30,39 +30,29 @@ export function App() {
   }, [fetchPreset]);
 
   return (
-    <div className="flex min-h-screen flex-col text-slate-900 lg:h-screen" style={{ background: "var(--surface-alt)" }}>
+    <div className="flex min-h-screen flex-col bg-muted/30 text-foreground antialiased lg:h-screen">
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>
 
-      <header className="px-4 py-3" style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}>
-        <div className="flex items-center gap-3">
-          <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white shadow-sm"
-            style={{ background: "var(--brand)" }}
-            aria-hidden="true"
-          >
-            <IconPin className="h-5 w-5" />
+      <header className="border-b border-border bg-background">
+        <div className="flex min-w-0 items-center gap-3 px-4 py-3">
+          <span className="grid size-8 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground shadow-sm" aria-hidden="true">
+            <MapPinIcon className="size-4" />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--brand-dark)" }}>
-              Matrice de Justice Spatiale Littorale
-            </p>
-            <h1 className="truncate text-lg font-bold leading-tight text-slate-900">
-              MJSL — accessibilite multi-dimensionnelle
-            </h1>
+            <h1 className="text-sm font-semibold tracking-tight text-balance">Matrice de Justice Spatiale Littorale</h1>
+            <p className="truncate text-xs text-muted-foreground">Accessibilite multi-dimensionnelle - {STUDY_AREA.name}</p>
           </div>
         </div>
-        <p className="mt-1 text-sm text-slate-500">{STUDY_AREA.name}</p>
       </header>
 
       {/* Stacks below lg so the page reflows at 320px without sideways scrolling
           (WCAG 1.4.10), which also makes it usable on a phone in the field. */}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <aside
-          className="w-full shrink-0 overflow-y-auto border-b border-[var(--line)] p-4 lg:w-80 lg:border-b-0 lg:border-r"
-          style={{ background: "var(--surface-alt)" }}
-          aria-label="Reglages des couches"
+          className="w-full shrink-0 overflow-y-auto border-b border-border bg-muted/20 p-4 lg:w-80 lg:border-b-0 lg:border-r"
+          aria-label="Explorer Marseille"
         >
           <div className="flex flex-col gap-4">
             <ZonePanel />
@@ -76,7 +66,7 @@ export function App() {
           </div>
         </aside>
 
-        <main id="contenu" className="flex min-h-[70vh] min-w-0 flex-1 flex-col lg:min-h-0" style={{ background: "var(--surface-alt)" }}>
+        <main id="contenu" className="flex min-h-[70vh] min-w-0 flex-1 flex-col bg-muted/30 lg:min-h-0">
           <Tabs
             value={view}
             onValueChange={(value) => {
