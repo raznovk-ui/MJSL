@@ -38,14 +38,3 @@ export function IconDownload({ className }: IconProps) {
   );
 }
 
-
-
-
-export function IconLayers({ className }: IconProps) {
-  return (
-    <svg {...base} className={className}>
-      <path d="M10 3 3 7.2 10 11.4l7-4.2L10 3Z" />
-      <path d="M3 11l7 4.2L17 11" />
-    </svg>
-  );
-}

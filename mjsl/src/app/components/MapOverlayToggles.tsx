@@ -1,12 +1,18 @@
-import { useAppStore } from "../state.js";
-import { useZoneStore } from "../zone/zoneStore.js";
-import { IconLayers } from "./icons.js";
+import { useId } from "react";
+import { Layers3Icon } from "lucide-react";
 import { DIMENSION_KEYS, ZONE_CONFIG, dimension as meta, reportKind } from "../../domain/zone/index.js";
-import { GRADIENT } from "../zone/zoneLayers.js";
-import { REPORT_KINDS, REPORT_STYLE, SHAPE_PATH } from "../zone/reportStyle.js";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
 import { OSM_KINDS, OSM_STYLE } from "../map/osmStyle.js";
+import { useAppStore } from "../state.js";
+import { GRADIENT } from "../zone/zoneLayers.js";
+import { useZoneStore } from "../zone/zoneStore.js";
+import { REPORT_KINDS, REPORT_STYLE, SHAPE_PATH } from "../zone/reportStyle.js";
 
-/** The person each dimension is read through, as the client defined them. */
 const PERSONA: Record<string, string> = {
   physical: "mobilite reduite",
   sensory: "malvoyant.e / neurodivergent.e",
@@ -16,11 +22,9 @@ const PERSONA: Record<string, string> = {
   political: "co-participation",
 };
 
-/**
- * On/off switches for every overlay, on the map itself, so any layer can be hidden
- * to compare against the bare basemap. "Carte seule" hides them all at once.
- */
+/** Map overlays are kept close to the map, but stay out of the way until requested. */
 export function MapOverlayToggles() {
+  const ids = useId();
   const presets = useAppStore((s) => s.presets);
   const visible = useZoneStore((s) => s.visible);
   const reportsVisible = useZoneStore((s) => s.reportsVisible);
@@ -30,114 +34,128 @@ export function MapOverlayToggles() {
   const reports = useZoneStore((s) => s.reports);
   const setLayer = useZoneStore((s) => s.setLayer);
 
-  const osmVisible = Object.values(presets).some((p) => p.visible);
+  const osmVisible = Object.values(presets).some((preset) => preset.visible);
   const allHidden = !visible && !osmVisible && !reportsVisible;
+  const layerOptions = [
+    ["combined", "Score combine (profil choisi)"],
+    ...DIMENSION_KEYS.map((key) => [key, `${meta(key).mjslCode} ${meta(key).label} — ${PERSONA[key]}`]),
+  ] as const;
 
-  const setOsm = (visible: boolean) =>
-    useAppStore.setState((s) => ({
-      presets: Object.fromEntries(Object.entries(s.presets).map(([id, p]) => [id, { ...p, visible }])),
+  const setOsm = (nextVisible: boolean) =>
+    useAppStore.setState((state) => ({
+      presets: Object.fromEntries(Object.entries(state.presets).map(([id, preset]) => [id, { ...preset, visible: nextVisible }])),
     }));
 
-  const setAll = (visible: boolean) => {
-    setOsm(visible);
-    useZoneStore.setState({ visible, reportsVisible: visible && reportsVisible });
+  const setAll = (nextVisible: boolean) => {
+    setOsm(nextVisible);
+    useZoneStore.setState({ visible: nextVisible, reportsVisible: nextVisible && reportsVisible });
   };
 
-  const row = "flex items-start gap-2 text-xs";
-
   return (
-    <fieldset
-      className="absolute left-2 top-2 z-10 max-h-[calc(100%-1rem)] w-64 overflow-y-auto rounded-md border bg-white p-2 shadow-md"
-      style={{ borderColor: "var(--line)" }}
-    >
-      <legend className="sr-only">Calques de la carte</legend>
-      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-slate-900">
-        <IconLayers className="h-4 w-4" />
-        Calques
-      </p>
-      <div role="radiogroup" aria-label="Couche affichee" className="mb-2 space-y-1 border-b pb-2" style={{ borderColor: "var(--line)" }}>
-        <p className="text-xs font-semibold text-slate-700">Couche affichee</p>
-        {([["combined", "Score combine (profil choisi)"], ...DIMENSION_KEYS.map((d) => [d, `${meta(d).mjslCode} ${meta(d).label} — ${PERSONA[d]}`] as const)] as const).map(([key, label]) => (
-          <label key={key} className={row}>
-            <input type="radio" name="map-layer" checked={layer === key} onChange={() => setLayer(key)} className="mt-0.5" />
-            <span>{label}</span>
-          </label>
-        ))}
-        <div className="pt-1">
-          <div
-            className="h-2 rounded"
-            aria-hidden="true"
-            style={{ background: `linear-gradient(to right, ${GRADIENT.map(([x, c]) => `${c} ${x * 100}%`).join(", ")})` }}
-          />
-          <p className="mt-0.5 flex justify-between text-[11px] text-slate-600">
-            <span>bas : obstacles (pointille)</span>
-            <span>haut : peu d'obstacles</span>
-          </p>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <label className={row}>
-          <input
-            type="checkbox"
-            checked={visible && zoneCount > 0}
-            disabled={zoneCount === 0}
-            onChange={() => useZoneStore.getState().toggleVisible()}
-            className="mt-0.5"
-          />
-          <span>
-            Zones
-            {zoneCount === 0 && <span className="block text-slate-500">calcul en cours</span>}
-          </span>
-        </label>
-        <label className={row}>
-          <input type="checkbox" checked={reportsVisible} onChange={() => useZoneStore.getState().toggleReports()} className="mt-0.5" />
-          <span>Signalements des habitants</span>
-        </label>
-        {reportsVisible && (
-          <fieldset className="ml-5 space-y-1 border-l pl-2" style={{ borderColor: "var(--line)" }}>
-            <legend className="sr-only">Types de signalements affiches</legend>
-            {REPORT_KINDS.map((kind) => {
-              const st = REPORT_STYLE[kind];
-              const n = reports.filter((r) => reportKind(r.type, ZONE_CONFIG) === kind).length;
-              return (
-                <label key={kind} className={row}>
-                  <input type="checkbox" checked={reportKinds[kind]} onChange={() => useZoneStore.getState().toggleReportKind(kind)} className="mt-0.5" />
-                  <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="mt-px shrink-0">
-                    <path d={SHAPE_PATH[st.shape]} fill={st.colour} stroke="#111827" strokeWidth="1" strokeLinejoin="round" />
-                  </svg>
-                  <span>
-                    {st.label} ({n})
-                    {st.feeds && <span className="block text-slate-500">alimente {st.feeds}</span>}
-                  </span>
-                </label>
-              );
-            })}
-          </fieldset>
-        )}
-        <label className={row}>
-          <input type="checkbox" checked={osmVisible} onChange={(e) => setOsm(e.target.checked)} className="mt-0.5" />
-          <span>Indices OSM (donnees OpenStreetMap, pas les citoyens)</span>
-        </label>
-        {osmVisible && (
-          <fieldset className="ml-5 space-y-1 border-l pl-2" style={{ borderColor: "var(--line)" }}>
-            <legend className="sr-only">Indices OSM affiches</legend>
-            {OSM_KINDS.map((kind) => {
-              const st = OSM_STYLE[kind];
-              return (
-                <div key={kind} className={row}>
-                  <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="mt-px shrink-0">
-                    <path d={st.glyph.d} fill={st.colour} fillRule={st.glyph.fillRule ?? "nonzero"} />
-                  </svg>
-                  <span>{st.label}</span>
-                </div>
-              );
-            })}
-          </fieldset>
-        )}
-      </div>
-      <button type="button" onClick={() => setAll(allHidden)} className="btn btn-secondary btn-sm btn-block mt-2">
-        {allHidden ? "Tout afficher" : "Carte seule"}
-      </button>
-    </fieldset>
+    <div className="absolute top-3 left-3 z-10">
+      <Popover>
+        <PopoverTrigger render={<Button type="button" variant="outline" className="bg-background/95 shadow-sm backdrop-blur" />}>
+          <Layers3Icon data-icon="inline-start" />
+          Calques
+        </PopoverTrigger>
+        <PopoverContent align="start" className="max-h-[calc(100dvh-5rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto p-3">
+          <PopoverHeader>
+            <PopoverTitle>Calques de la carte</PopoverTitle>
+            <PopoverDescription>Choisissez le score et les informations affichees.</PopoverDescription>
+          </PopoverHeader>
+
+          <FieldGroup className="gap-4">
+            <Field>
+              <FieldLabel htmlFor={`${ids}-layer`}>Couche affichee</FieldLabel>
+              <NativeSelect id={`${ids}-layer`} value={layer} onChange={(event) => setLayer(event.target.value as typeof layer)} className="w-full">
+                {layerOptions.map(([value, label]) => (
+                  <NativeSelectOption key={value} value={value}>{label}</NativeSelectOption>
+                ))}
+              </NativeSelect>
+              <div>
+                <div className="h-2 rounded-sm" aria-hidden="true" style={{ background: `linear-gradient(to right, ${GRADIENT.map(([value, colour]) => `${colour} ${value * 100}%`).join(", ")})` }} />
+                <div className="mt-1 flex justify-between gap-2 text-muted-foreground"><span>Obstacles</span><span>Peu d&apos;obstacles</span></div>
+              </div>
+            </Field>
+
+            <FieldSet>
+              <FieldLegend variant="label">Afficher</FieldLegend>
+              <FieldGroup className="gap-3">
+                <Field orientation="horizontal" data-disabled={zoneCount === 0 || undefined}>
+                  <Checkbox id={`${ids}-zones`} checked={visible && zoneCount > 0} disabled={zoneCount === 0} onCheckedChange={() => useZoneStore.getState().toggleVisible()} />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`${ids}-zones`}>Scores par zone</FieldLabel>
+                    {zoneCount === 0 && <FieldDescription>Calcul en cours.</FieldDescription>}
+                  </FieldContent>
+                </Field>
+                <Field orientation="horizontal">
+                  <Checkbox id={`${ids}-reports`} checked={reportsVisible} onCheckedChange={() => useZoneStore.getState().toggleReports()} />
+                  <FieldLabel htmlFor={`${ids}-reports`}>Signalements des habitants</FieldLabel>
+                </Field>
+                {reportsVisible && (
+                  <Accordion>
+                    <AccordionItem value="report-kinds">
+                      <AccordionTrigger>Filtrer les types de signalement</AccordionTrigger>
+                      <AccordionContent>
+                        <FieldGroup className="gap-3">
+                          {REPORT_KINDS.map((kind) => {
+                            const style = REPORT_STYLE[kind];
+                            const count = reports.filter((report) => reportKind(report.type, ZONE_CONFIG) === kind).length;
+                            return (
+                              <Field key={kind} orientation="horizontal">
+                                <Checkbox id={`${ids}-${kind}`} checked={reportKinds[kind]} onCheckedChange={() => useZoneStore.getState().toggleReportKind(kind)} />
+                                <FieldContent>
+                                  <FieldLabel htmlFor={`${ids}-${kind}`} className="items-center">
+                                    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="shrink-0">
+                                      <path d={SHAPE_PATH[style.shape]} fill={style.colour} stroke="#111827" strokeWidth="1" strokeLinejoin="round" />
+                                    </svg>
+                                    {style.label} <span className="tabular-nums text-muted-foreground">({count})</span>
+                                  </FieldLabel>
+                                  {style.feeds && <FieldDescription>Alimente {style.feeds}</FieldDescription>}
+                                </FieldContent>
+                              </Field>
+                            );
+                          })}
+                        </FieldGroup>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+                <Field orientation="horizontal">
+                  <Checkbox id={`${ids}-osm`} checked={osmVisible} onCheckedChange={(checked) => setOsm(checked)} />
+                  <FieldLabel htmlFor={`${ids}-osm`}>Indices OpenStreetMap</FieldLabel>
+                </Field>
+                {osmVisible && (
+                  <Accordion>
+                    <AccordionItem value="osm-symbols">
+                      <AccordionTrigger>Voir les symboles OSM</AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="flex flex-col gap-2">
+                          {OSM_KINDS.map((kind) => {
+                            const style = OSM_STYLE[kind];
+                            return (
+                              <li key={kind} className="flex items-center gap-2 text-muted-foreground">
+                                <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true" className="shrink-0">
+                                  <path d={style.glyph.d} fill={style.colour} fillRule={style.glyph.fillRule ?? "nonzero"} />
+                                </svg>
+                                {style.label}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              </FieldGroup>
+            </FieldSet>
+          </FieldGroup>
+
+          <Button type="button" variant="outline" className="w-full" onClick={() => setAll(allHidden)}>
+            {allHidden ? "Tout afficher" : "Carte seule"}
+          </Button>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
