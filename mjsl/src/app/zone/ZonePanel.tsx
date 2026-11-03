@@ -2,6 +2,12 @@ import { useId, useMemo } from "react";
 import { ZONE_CONFIG, type ValueSource } from "../../domain/zone/index.js";
 import { SOURCE_LABEL } from "./labels.js";
 import { useZoneStore } from "./zoneStore.js";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
 const { redBelow, orangeBelow, colours } = ZONE_CONFIG.classes;
 
@@ -45,79 +51,81 @@ export function ZonePanel() {
     [zones],
   );
   const loading = loadState === "loading";
+  const slopeStatus =
+    auto.slope === "running"
+      ? `altitudes IGN en cours${auto.slopeProgress?.total ? ` (${auto.slopeProgress.done} / ${auto.slopeProgress.total} points)` : "..."}`
+      : auto.slope === "done"
+        ? "calculee a partir des altitudes IGN (grille de 200 m)"
+        : auto.slope === "partial"
+          ? "partielle (altitudes IGN incompletes)"
+          : auto.slope === "error"
+            ? `indisponible (${auto.slopeError ?? "erreur"})`
+            : "en attente";
 
   return (
-    <section aria-labelledby={`${ids}-h`} className="card">
-      <h2 id={`${ids}-h`} className="card-title">Zones de Marseille ({zones.length})</h2>
+    <section aria-labelledby={`${ids}-h`}>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle id={`${ids}-h`} role="heading" aria-level={2}>Explorer les zones</CardTitle>
+          <CardDescription>Score d&apos;accessibilite par IRIS de Marseille.</CardDescription>
+          <CardAction className="tabular-nums text-xs text-muted-foreground">{zones.length} IRIS</CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <Button type="button" variant="outline" className="w-full" onClick={() => void load({ forceRefresh: loadState === "ready" })} disabled={loading}>
+            {loading ? "Chargement..." : loadState === "ready" ? "Rafraichir les donnees" : "Charger les zones"}
+          </Button>
+          {error && <p className="callout-warning">{error}</p>}
 
-      <button type="button" onClick={() => void load({ forceRefresh: loadState === "ready" })} disabled={loading} className="btn btn-secondary btn-block">
-        {loading ? "Chargement..." : loadState === "ready" ? "Rafraichir depuis Overpass" : "Charger les zones"}
-      </button>
-      {error && <p className="callout-warning mt-2">{error}</p>}
+          {loadState === "ready" && (
+            <>
+              <FieldGroup className="gap-3">
+                <Field>
+                  <FieldLabel htmlFor={`${ids}-profile`}>Profil</FieldLabel>
+                  <NativeSelect id={`${ids}-profile`} value={profileId} onChange={(e) => setProfile(e.target.value)} className="w-full">
+                    {Object.entries(ZONE_CONFIG.profiles).map(([id, p]) => (
+                      <NativeSelectOption key={id} value={id}>{p.label}</NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <Field orientation="horizontal">
+                  <Checkbox id={`${ids}-zones-visible`} checked={visible} onCheckedChange={() => toggleVisible()} />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`${ids}-zones-visible`}>Afficher le score sur la carte</FieldLabel>
+                    <FieldDescription>Masquez-le pour comparer avec le fond de carte.</FieldDescription>
+                  </FieldContent>
+                </Field>
+              </FieldGroup>
 
-      {loadState === "ready" && (
-        <div className="mt-3 space-y-3">
-          <div>
-            <label htmlFor={`${ids}-profile`} className="block text-xs font-medium text-slate-700">Profil</label>
-            <select
-              id={`${ids}-profile`}
-              value={profileId}
-              onChange={(e) => setProfile(e.target.value)}
-              className="w-full rounded-md border p-1.5 text-sm"
-              style={{ borderColor: "var(--line-strong)" }}
-            >
-              {Object.entries(ZONE_CONFIG.profiles).map(([id, p]) => (
-                <option key={id} value={id}>{p.label}</option>
-              ))}
-            </select>
-          </div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-2 border-y border-border py-3 text-xs">
+                <div className="flex items-center justify-between gap-2"><span className="flex items-center gap-1.5"><span aria-hidden="true" className="size-2.5 rounded-sm" style={{ background: colours.red, outline: "2px dashed #7f1d1d", outlineOffset: -2 }} />Rouge</span><span className="tabular-nums text-muted-foreground">{counts.red}</span></div>
+                <div className="flex items-center justify-between gap-2"><span className="flex items-center gap-1.5"><span aria-hidden="true" className="size-2.5 rounded-sm" style={{ background: colours.orange }} />Orange</span><span className="tabular-nums text-muted-foreground">{counts.orange}</span></div>
+                <div className="flex items-center justify-between gap-2"><span className="flex items-center gap-1.5"><span aria-hidden="true" className="size-2.5 rounded-sm" style={{ background: colours.green }} />Vert</span><span className="tabular-nums text-muted-foreground">{counts.green}</span></div>
+                <div className="flex items-center justify-between gap-2"><span className="flex items-center gap-1.5"><span aria-hidden="true" className="size-2.5 rounded-sm" style={{ background: colours.none }} />Sans donnee</span><span className="tabular-nums text-muted-foreground">{counts.none}</span></div>
+              </div>
 
-          <div className="callout-info">
-            <p className="font-semibold">Remplissage automatique</p>
-            <ul className="mt-0.5 list-disc pl-4">
-              <li>Zones : IRIS de Marseille (donnees ouvertes de la Metropole).</li>
-              <li>Signalements des habitants : {reports.length} (« Galere pietons »).</li>
-              <li>Bruit : carte officielle (Lden 24 h, Metropole AMP).</li>
-              <li>
-                Pente :{" "}
-                {auto.slope === "running"
-                  ? `altitudes IGN en cours${auto.slopeProgress && auto.slopeProgress.total ? ` (${auto.slopeProgress.done} / ${auto.slopeProgress.total} points)` : "..."}`
-                  : auto.slope === "done" ? "calculee a partir des altitudes IGN (grille de 200 m)"
-                  : auto.slope === "partial" ? "partielle (altitudes IGN incompletes)"
-                  : auto.slope === "error" ? `indisponible (${auto.slopeError ?? "erreur"})` : "en attente"}
-              </li>
-            </ul>
-          </div>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={visible} onChange={toggleVisible} />
-            Afficher les zones sur la carte
-          </label>
-
-          <div>
-            <p className="mb-1 text-xs font-semibold text-slate-700">Legende et nombre de zones</p>
-            <ul className="space-y-1 text-xs text-slate-700">
-              <li className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-3 w-6 rounded-sm" style={{ background: colours.red, outline: "2px dashed #7f1d1d", outlineOffset: -2 }} />Rouge (&lt; {redBelow}) — contour pointille : {counts.red}</li>
-              <li className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-3 w-6 rounded-sm" style={{ background: colours.orange }} />Orange (&lt; {orangeBelow}) : {counts.orange}</li>
-              <li className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-3 w-6 rounded-sm" style={{ background: colours.green }} />Vert ({orangeBelow} et plus) : {counts.green}</li>
-              <li className="flex items-center gap-2"><span aria-hidden="true" className="inline-block h-3 w-6 rounded-sm" style={{ background: colours.none }} />Pas assez de donnees : {counts.none}</li>
-            </ul>
-            <p className="mt-1 text-xs text-slate-600">
-              Chaque score est un produit : une dimension tres mauvaise tire le score vers le bas. Une valeur manquante est
-              ignoree, jamais comptee comme 0. Les couleurs disent « pire que la plupart de la ville », pas « inutilisable ».
-            </p>
-          </div>
-
-          <details className="text-xs">
-            <summary className="cursor-pointer font-semibold text-slate-700">Donnees disponibles par indicateur</summary>
-            <ul className="mt-1 space-y-0.5 text-slate-700">
-              {coverage.map((c) => (
-                <li key={c.key}>{c.label} : {c.known} / {zones.length}{c.detail ? ` (${c.detail})` : ""}</li>
-              ))}
-            </ul>
-          </details>
-        </div>
-      )}
+              <Accordion>
+                <AccordionItem value="sources">
+                  <AccordionTrigger>Sources et couverture</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="flex flex-col gap-3">
+                      <p>IRIS de la Metropole, {reports.length} signalements d&apos;habitants, carte de bruit AMP et altitudes IGN.</p>
+                      <p>Pente : {slopeStatus}.</p>
+                      <div>
+                        <p className="mb-1 font-medium text-foreground">Donnees disponibles par indicateur</p>
+                        <ul className="flex flex-col gap-1 text-muted-foreground">
+                          {coverage.map((c) => (
+                            <li key={c.key}>{c.label} : {c.known} / {zones.length}{c.detail ? ` (${c.detail})` : ""}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }
