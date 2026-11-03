@@ -1,8 +1,10 @@
-import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useId, useState } from "react";
 import { DownloadIcon } from "lucide-react";
 import { DIMENSION_KEYS, ZONE_CONFIG, dimension } from "../../domain/zone/index.js";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { buildMapPdf, orderedLayers } from "../export/pdfMap.js";
 import { downloadBlob } from "../export/download.js";
 import { useAppStore } from "../state.js";
@@ -15,6 +17,7 @@ function layerLabel(layer: MapLayer) {
 }
 
 export function PdfMapExport() {
+  const ids = useId();
   const zones = useZoneStore((s) => s.zones);
   const scores = useZoneStore((s) => s.scores);
   const profileId = useZoneStore((s) => s.profileId);
@@ -26,24 +29,6 @@ export function PdfMapExport() {
   const [selected, setSelected] = useState<MapLayer[]>([activeLayer]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !busy) setOpen(false);
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [busy, open]);
-
-  useEffect(() => {
-    if (!open) return;
-    // The dialog is portalled outside #root, letting inert block every control
-    // behind it for both pointer and keyboard users.
-    const root = document.getElementById("root");
-    root?.setAttribute("inert", "");
-    return () => root?.removeAttribute("inert");
-  }, [open]);
 
   const selectCurrent = () => setSelected([activeLayer]);
   const toggle = (layer: MapLayer) =>
@@ -77,70 +62,61 @@ export function PdfMapExport() {
   }
 
   return (
-    <>
-      <Button
-        type="button"
-        onClick={() => {
-          setSelected([activeLayer]);
-          setOpen(true);
-        }}
-        disabled={zones.length === 0}
+    <Dialog open={open} onOpenChange={(nextOpen) => { if (!busy) setOpen(nextOpen); }}>
+      <DialogTrigger
+        render={
+          <Button
+            type="button"
+            disabled={zones.length === 0}
+            onClick={() => setSelected([activeLayer])}
+          />
+        }
       >
         <DownloadIcon data-icon="inline-start" />
         Cartes (PDF)
-      </Button>
+      </DialogTrigger>
+      <DialogContent showCloseButton={!busy} className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Exporter des cartes PDF</DialogTitle>
+          <DialogDescription>A4 paysage, une page par carte, sur la vue actuelle adaptee au format paysage.</DialogDescription>
+        </DialogHeader>
 
-      {open ? createPortal(
-        <div className="modal-backdrop" role="presentation">
-          <section role="dialog" aria-modal="true" aria-labelledby="pdf-export-title" className="modal-card">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 id="pdf-export-title" className="text-base font-semibold">Exporter des cartes PDF</h2>
-                <p className="mt-1 text-sm text-muted-foreground">A4 paysage, une page par carte, sur la vue actuelle adaptee au format paysage.</p>
-              </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)} disabled={busy} aria-label="Fermer">
-                Fermer
-              </Button>
-            </div>
+        <FieldSet>
+          <FieldLegend>Cartes a inclure</FieldLegend>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setSelected(ALL_LAYERS)} disabled={busy}>Tout selectionner</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setSelected([])} disabled={busy}>Tout deselectionner</Button>
+            <Button type="button" variant="outline" size="sm" onClick={selectCurrent} disabled={busy}>Couche active</Button>
+          </div>
+          <FieldGroup className="gap-2">
+            {ALL_LAYERS.map((layer, index) => (
+              <Field key={layer} orientation="horizontal">
+                <Checkbox
+                  id={`${ids}-${layer}`}
+                  checked={selected.includes(layer)}
+                  onCheckedChange={() => toggle(layer)}
+                  disabled={busy}
+                  autoFocus={index === 0}
+                />
+                <FieldLabel htmlFor={`${ids}-${layer}`}>{layerLabel(layer)}</FieldLabel>
+              </Field>
+            ))}
+          </FieldGroup>
+        </FieldSet>
 
-            <fieldset className="mt-5">
-              <legend className="text-sm font-semibold">Cartes a inclure</legend>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setSelected(ALL_LAYERS)} disabled={busy}>Tout selectionner</Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => setSelected([])} disabled={busy}>Tout deselectionner</Button>
-                <Button type="button" variant="outline" size="sm" onClick={selectCurrent} disabled={busy}>Couche active</Button>
-              </div>
-              <div className="mt-3 space-y-2">
-                {ALL_LAYERS.map((layer, index) => (
-                  <label key={layer} className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(layer)}
-                      onChange={() => toggle(layer)}
-                      disabled={busy}
-                      autoFocus={index === 0}
-                    />
-                    {layerLabel(layer)}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-
-            <p className="mt-4 text-xs text-muted-foreground">
-              Chaque page comprend le titre de l&apos;etude, une legende propre a la dimension, une echelle graphique, le nord et les sources.
-              Les signalements et les indices OSM ne sont pas inclus.
-            </p>
-            {progress ? <p className="mt-3 text-sm font-medium" role="status">{progress}</p> : null}
-            <div className="mt-5 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>Annuler</Button>
-              <Button type="button" onClick={() => void exportPdf()} disabled={busy || selected.length === 0}>
-                <DownloadIcon data-icon="inline-start" />
-                {busy ? "Export en cours..." : `Exporter ${selected.length} carte(s)`}
-              </Button>
-            </div>
-          </section>
-        </div>
-      , document.body) : null}
-    </>
+        <p className="text-muted-foreground">
+          Chaque page comprend le titre de l&apos;etude, une legende propre a la dimension, une echelle graphique, le nord et les sources.
+          Les signalements et les indices OSM ne sont pas inclus.
+        </p>
+        <p className="empty:hidden text-sm font-medium" role="status">{progress}</p>
+        <DialogFooter>
+          <DialogClose render={<Button type="button" variant="outline" disabled={busy} />}>Annuler</DialogClose>
+          <Button type="button" onClick={() => void exportPdf()} disabled={busy || selected.length === 0}>
+            <DownloadIcon data-icon="inline-start" />
+            {busy ? "Export en cours..." : `Exporter ${selected.length} carte(s)`}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

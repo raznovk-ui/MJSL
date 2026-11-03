@@ -74,7 +74,7 @@ export function ZonePanel() {
           <Button type="button" variant="outline" className="w-full" onClick={() => void load({ forceRefresh: loadState === "ready" })} disabled={loading}>
             {loading ? "Chargement..." : loadState === "ready" ? "Rafraichir les donnees" : "Charger les zones"}
           </Button>
-          {error && <p className="callout-warning">{error}</p>}
+          {error && <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">{error}</p>}
 
           {loadState === "ready" && (
             <>

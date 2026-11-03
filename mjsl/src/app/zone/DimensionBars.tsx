@@ -7,16 +7,16 @@ import { DIMENSION_KEYS, dimension as meta, type DimensionScores } from "../../d
  */
 export function DimensionBars({ scores }: { scores: DimensionScores }) {
   return (
-    <ul className="space-y-1 text-xs">
+    <ul className="flex flex-col gap-2 text-xs">
       {DIMENSION_KEYS.map((key) => {
         const { score, coverage } = scores[key];
         return (
           <li key={key} className="grid grid-cols-[7.5rem_1fr_auto] items-center gap-2">
-            <span className="font-medium text-slate-800">{meta(key).label.split(" et ")[0]}</span>
-            <span className="h-2 rounded bg-slate-200" aria-hidden="true">
-              {score !== null && <span className="block h-2 rounded" style={{ width: `${Math.round(score * 100)}%`, background: meta(key).colour }} />}
+            <span className="font-medium">{meta(key).label.split(" et ")[0]}</span>
+            <span className="h-2 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+              {score !== null && <span className="block h-full rounded-full" style={{ width: `${Math.round(score * 100)}%`, background: meta(key).colour }} />}
             </span>
-            <span className="w-24 text-right tabular-nums text-slate-700">
+            <span className="w-24 text-right tabular-nums text-muted-foreground">
               {score === null ? "pas de donnee" : `${score.toFixed(2)} (${Math.round(coverage * 100)} %)`}
             </span>
           </li>

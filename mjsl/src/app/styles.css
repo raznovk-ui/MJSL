@@ -25,10 +25,6 @@
   --surface: #ffffff;
   --surface-alt: #f8fafc;
 
-  --warning-tint: #fffbeb;
-  --warning-border: #fcd34d;
-  --warning-text: #92400e;
-
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -114,64 +110,6 @@ body {
 
 .maplibregl-ctrl-attrib {
   font-size: 11px;
-}
-
-/* Export is a short, focused choice rather than a separate screen. */
-.modal-backdrop {
-  position: fixed;
-  z-index: 60;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.5);
-}
-.modal-card {
-  width: min(100%, 32rem);
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  background: var(--surface);
-  box-shadow: var(--shadow-md);
-}
-
-/* ---------- Status bar ---------- */
-.statusbar {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  border-top: 1px solid var(--line);
-  background: var(--surface-alt);
-  padding: 0.55rem 1rem;
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-}
-.statusbar-dot {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 999px;
-  background: var(--brand);
-  flex: none;
-}
-
-/* ---------- Callouts ---------- */
-.callout-warning {
-  background: var(--warning-tint);
-  border: 1px solid var(--warning-border);
-  color: var(--warning-text);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 0.75rem;
-  font-size: 0.75rem;
-}
-.callout-info {
-  background: var(--brand-tint);
-  border: 1px solid var(--brand-border);
-  color: var(--brand-dark);
-  border-radius: var(--radius-sm);
-  padding: 0.6rem 0.75rem;
-  font-size: 0.75rem;
 }
 
 /* Printing the Analyse tab is the report: drop the chrome, keep the content. */
