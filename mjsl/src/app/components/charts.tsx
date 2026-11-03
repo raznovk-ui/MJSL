@@ -37,7 +37,9 @@ export function BarChart({
     <figure className="m-0">
       <figcaption className="mb-1 text-xs font-medium">{caption}</figcaption>
       <svg
-        width="100%"
+        width={labelWidth + trackWidth + 46}
+        height={height}
+        className="block h-auto max-w-full"
         viewBox={`0 0 ${labelWidth + trackWidth + 46} ${height}`}
         role="img"
         aria-label={`${caption}. ${data
