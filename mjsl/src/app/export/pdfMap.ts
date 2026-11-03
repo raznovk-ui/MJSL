@@ -167,14 +167,15 @@ type Pdf = {
   setLineDashPattern: (dashArray: number[], dashPhase: number) => void;
   setTextColor: (colour: string) => void;
   text: (text: string | string[], x: number, y: number, options?: { align?: "left" | "center" | "right" }) => void;
+  triangle: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: "F" | "S" | "FD" | "DF") => void;
 };
 
 function drawPage(pdf: Pdf, image: string, layer: MapLayer, bounds: MapBounds, profileLabel: string, basemapAttribution: string) {
-  const mapX = 12;
+  const mapX = 76;
   const mapY = 30;
-  const mapWidth = 208;
+  const mapWidth = 209;
   const mapHeight = 145;
-  const legendX = 230;
+  const legendX = 12;
 
   pdf.setTextColor("#0f172a");
   pdf.setFont("helvetica", "bold");
@@ -185,7 +186,7 @@ function drawPage(pdf: Pdf, image: string, layer: MapLayer, bounds: MapBounds, p
   pdf.setTextColor("#334155");
   pdf.text(layerSubtitle(layer, profileLabel), 12, 21);
   pdf.addImage(image, "PNG", mapX, mapY, mapWidth, mapHeight);
-  drawNorthArrow(pdf, mapX + mapWidth - 10, mapY + 9);
+  drawNorthArrow(pdf, mapX + 12, mapY + 12);
   drawScaleBar(pdf, mapX + 8, mapY + mapHeight - 9, mapWidth, bounds);
   drawLegend(pdf, legendX, 36);
 
@@ -229,15 +230,18 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
 }
 
 function drawNorthArrow(pdf: Pdf, x: number, y: number) {
+  // A white panel keeps the arrow legible on both a pale street map and a dark
+  // score polygon, while its size remains useful on a printed A4 sheet.
+  pdf.setFillColor("#ffffff");
+  pdf.setDrawColor("#0f172a");
+  pdf.rect(x - 8, y - 10, 16, 24, "FD");
   pdf.setTextColor("#0f172a");
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8);
-  pdf.text("N", x, y - 3, { align: "center" });
+  pdf.setFontSize(11);
+  pdf.text("N", x, y - 4, { align: "center" });
   pdf.setFillColor("#0f172a");
   pdf.setDrawColor("#0f172a");
-  pdf.line(x, y, x - 3, y + 8);
-  pdf.line(x, y, x + 3, y + 8);
-  pdf.line(x - 3, y + 8, x + 3, y + 8);
+  pdf.triangle(x, y, x - 4.5, y + 11, x + 4.5, y + 11, "F");
 }
 
 function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds: MapBounds) {
