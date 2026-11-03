@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { MapView } from "./map/MapView.js";
-import { BasemapPicker } from "./components/BasemapPicker.js";
-import { LayerPanel } from "./components/LayerPanel.js";
+import { MapDataSettings } from "./components/MapDataSettings.js";
 import { DataTable } from "./components/DataTable.js";
 import { StatusBar } from "./components/StatusBar.js";
 import { Dashboard } from "./components/Dashboard.js";
@@ -70,8 +69,7 @@ export function App() {
             <ReportForm />
             <ZoneRanking />
             <ZoneInspector />
-            <BasemapPicker />
-            <LayerPanel />
+            <MapDataSettings />
             <section aria-labelledby="limites" className="card">
               <h2 id="limites" className="card-title">
                 Limites
