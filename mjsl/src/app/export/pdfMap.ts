@@ -230,18 +230,18 @@ function drawLegend(pdf: Pdf, x: number, y: number) {
 }
 
 function drawNorthArrow(pdf: Pdf, x: number, y: number) {
-  // A white panel keeps the arrow legible on both a pale street map and a dark
-  // score polygon, while its size remains useful on a printed A4 sheet.
+  // A modest white panel keeps the arrow legible on both a pale street map and
+  // a dark score polygon without competing with the mapped result.
   pdf.setFillColor("#ffffff");
   pdf.setDrawColor("#0f172a");
-  pdf.rect(x - 8, y - 10, 16, 24, "FD");
+  pdf.rect(x - 6, y - 8, 12, 18, "FD");
   pdf.setTextColor("#0f172a");
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(11);
-  pdf.text("N", x, y - 4, { align: "center" });
+  pdf.setFontSize(9);
+  pdf.text("N", x, y - 3, { align: "center" });
   pdf.setFillColor("#0f172a");
   pdf.setDrawColor("#0f172a");
-  pdf.triangle(x, y, x - 4.5, y + 11, x + 4.5, y + 11, "F");
+  pdf.triangle(x, y, x - 3.5, y + 8, x + 3.5, y + 8, "F");
 }
 
 function drawScaleBar(pdf: Pdf, x: number, y: number, mapWidthMm: number, bounds: MapBounds) {
