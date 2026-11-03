@@ -229,31 +229,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* ---------- Tab bar (Carte / Tableau / Analyse) ---------- */
-.tabbar {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-}
-.tab {
-  border-radius: calc(var(--radius-md) - 3px);
-  padding: 0.45rem 1rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-}
-.tab:hover {
-  color: var(--ink);
-}
-.tab[aria-selected="true"] {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: var(--shadow-sm);
-}
-
 /* ---------- Status bar ---------- */
 .statusbar {
   display: flex;

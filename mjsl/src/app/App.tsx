@@ -15,6 +15,7 @@ import { IconPin } from "./components/icons.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
 import { STUDY_AREA } from "./studyArea.js";
 import { useAppStore } from "./state.js";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type View = "map" | "table" | "analysis";
 
@@ -84,36 +85,35 @@ export function App() {
         </aside>
 
         <main id="contenu" className="flex min-h-[70vh] min-w-0 flex-1 flex-col lg:min-h-0" style={{ background: "var(--surface-alt)" }}>
-          <nav aria-label="Mode d'affichage" className="px-4 py-2" style={{ background: "var(--surface)", borderBottom: "1px solid var(--line)" }}>
-            <div role="tablist" className="tabbar">
-              {(["map", "table", "analysis"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="tab"
-                  aria-selected={view === value}
-                  onClick={() => setView(value)}
-                  className="tab"
-                >
-                  {value === "map" ? "Carte" : value === "table" ? "Tableau" : "Analyse"}
-                </button>
-              ))}
-            </div>
-          </nav>
+          <Tabs
+            value={view}
+            onValueChange={(value) => {
+              if (value === "map" || value === "table" || value === "analysis") setView(value);
+            }}
+            className="min-h-0 flex-1 gap-0"
+          >
+            <nav aria-label="Mode d'affichage" className="border-b border-border bg-background px-4 py-2">
+              <TabsList variant="line" aria-label="Mode d'affichage">
+                <TabsTrigger value="map">Carte</TabsTrigger>
+                <TabsTrigger value="table">Tableau</TabsTrigger>
+                <TabsTrigger value="analysis">Analyse</TabsTrigger>
+              </TabsList>
+            </nav>
 
-          {/* The map stays mounted so MapLibre keeps its WebGL context. */}
-          <div className={`relative min-h-0 min-w-0 flex-1 ${view === "map" ? "" : "hidden"}`}>
-            <MapView />
-            <MapOverlayToggles />
-          </div>
-          <div className={`min-h-0 min-w-0 flex-1 overflow-y-auto ${view === "table" ? "" : "hidden"}`}>
-            <DataTable />
-          </div>
-          <div className={`min-h-0 min-w-0 flex-1 overflow-y-auto p-4 ${view === "analysis" ? "" : "hidden"}`}>
-            <Dashboard />
-          </div>
+            {/* The map stays mounted so MapLibre keeps its WebGL context. */}
+            <TabsContent value="map" keepMounted className="relative min-h-0 min-w-0 flex-1 data-hidden:hidden">
+              <MapView />
+              <MapOverlayToggles />
+            </TabsContent>
+            <TabsContent value="table" keepMounted className="min-h-0 min-w-0 flex-1 overflow-y-auto data-hidden:hidden">
+              <DataTable />
+            </TabsContent>
+            <TabsContent value="analysis" keepMounted className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 data-hidden:hidden">
+              <Dashboard />
+            </TabsContent>
 
-          <StatusBar />
+            <StatusBar />
+          </Tabs>
         </main>
 
       </div>
