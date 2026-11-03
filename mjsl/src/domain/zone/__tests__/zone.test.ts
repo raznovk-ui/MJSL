@@ -222,6 +222,28 @@ describe("building the zones from the data", () => {
     expect(zoneOf(build([streetA()], {}), "A").values.parkingReports).toBeUndefined(); // no reports file: no data
   });
 
+  it("lowers a profile score when a saved report is added to a sufficiently mapped zone", () => {
+    // The shipped configuration needs at least 1 km of streets before report densities are scored.
+    const streets = [
+      streetA(),
+      way("w2", {}, [[5.352, LAT0 + 0.004], [5.357, LAT0 + 0.004]]),
+      way("w3", {}, [[5.352, LAT0 + 0.006], [5.357, LAT0 + 0.006]]),
+    ];
+    const withoutReport = zoneOf(build(streets, {}, config), "A");
+    const withReport = zoneOf(build(streets, { reports: [{ lon: 5.354, lat: LAT0 + 0.004, type: "Stationnement gênant fréquent" }] }, config), "A");
+    const score = (zone: Zone) => scoreZone(
+      { ...zone, values: { ...zone.values, slope: 8 }, sources: { ...zone.sources, slope: "official" } },
+      "wheelchair",
+      config,
+    );
+
+    expect(withReport.streetKm).toBeGreaterThanOrEqual(1);
+    expect(withReport.counts.reportsParking).toBe(1);
+    expect(withReport.values.parkingReports).toBeGreaterThan(0);
+    expect(score(withReport).dimensionBarriers.physical).toBeGreaterThan(score(withoutReport).dimensionBarriers.physical!);
+    expect(score(withReport).score).toBeLessThan(score(withoutReport).score!);
+  });
+
   it("counts steps with no ramp, but not steps with one", () => {
     const flight = (id: string, tags: Record<string, string>) => way(id, { highway: "steps", ...tags }, [[5.353, LAT0 + 0.002], [5.3531, LAT0 + 0.002]]);
     const a = zoneOf(build([streetA(), flight("s1", {}), flight("s2", { ramp: "yes" })]), "A");
