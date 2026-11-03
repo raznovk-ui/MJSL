@@ -1,6 +1,11 @@
 import { useId, useState } from "react";
+import { CrosshairIcon, MapPinPlusIcon, Trash2Icon } from "lucide-react";
 import { REPORT_TYPE_OPTIONS } from "./reportStyle.js";
 import { useZoneStore } from "./zoneStore.js";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 
 /**
  * Lets a person add a citizen report from the map: switch the mode on, click the map, choose
@@ -26,80 +31,69 @@ export function ReportForm() {
   const accuracy = target && pending && target.lon === pending.lon && target.lat === pending.lat ? target.accuracyM : null;
 
   return (
-    <section aria-labelledby={`${ids}-h`} className="card">
-      <h2 id={`${ids}-h`} className="card-title">Ajouter un signalement</h2>
-      <p className="mb-2 text-xs text-slate-600">
-        Clique la carte, choisis le type : le point compte dans la zone ou il tombe, comme les autres signalements. Il reste sur
-        cet appareil seulement.
-      </p>
+    <section aria-labelledby={`${ids}-h`}>
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle id={`${ids}-h`} role="heading" aria-level={2}>Signaler un obstacle</CardTitle>
+          <CardDescription>Le signalement compte dans le score de sa zone et reste sur cet appareil.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <Button type="button" variant="secondary" className="w-full" onClick={() => void locateMe()} disabled={!ready || locating}>
+            <CrosshairIcon data-icon="inline-start" />
+            {locating ? "Localisation…" : "Utiliser ma position"}
+          </Button>
+          <Button type="button" variant={addMode ? "default" : "outline"} className="w-full" aria-pressed={addMode} disabled={!ready} onClick={toggleAddMode}>
+            <MapPinPlusIcon data-icon="inline-start" />
+            {addMode ? "Cliquez sur la carte…" : "Placer un point sur la carte"}
+          </Button>
 
-      <button
-        type="button"
-        onClick={() => void locateMe()}
-        disabled={!ready || locating}
-        className="btn btn-secondary btn-block mb-2"
-      >
-        {locating ? "Localisation…" : "Me localiser"}
-      </button>
+          {pending && (
+            <div className="rounded-md bg-muted p-3">
+              <p className="mb-3 font-medium" role="status">Point place{accuracy !== null ? ` (precision ± ${accuracy} m)` : ""}.</p>
+              <FieldGroup className="gap-3">
+                <Field>
+                  <FieldLabel htmlFor={`${ids}-type`}>Type de signalement</FieldLabel>
+                  <NativeSelect id={`${ids}-type`} value={type} onChange={(e) => setType(e.target.value)} className="w-full">
+                    {REPORT_TYPE_OPTIONS.map((option) => (
+                      <NativeSelectOption key={option} value={option}>{option}</NativeSelectOption>
+                    ))}
+                  </NativeSelect>
+                </Field>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" onClick={() => void saveOwnReport(type)}>Enregistrer</Button>
+                  <Button type="button" variant="outline" onClick={cancelPending}>Annuler</Button>
+                </div>
+              </FieldGroup>
+            </div>
+          )}
+        </CardContent>
 
-      <button
-        type="button"
-        aria-pressed={addMode}
-        disabled={!ready}
-        onClick={toggleAddMode}
-        className="btn btn-toggle btn-block"
-      >
-        {addMode ? "Clique sur la carte…" : "Placer un signalement sur la carte"}
-      </button>
-
-      {pending && (
-        <div className="mt-3 space-y-2">
-          <p className="text-xs text-slate-700">
-            Point place sur la carte{accuracy !== null ? ` (precision ± ${accuracy} m)` : ""}.
-          </p>
-          <label htmlFor={`${ids}-type`} className="block text-xs font-medium text-slate-700">Type de signalement</label>
-          <select
-            id={`${ids}-type`}
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full rounded-md border p-1.5 text-sm"
-            style={{ borderColor: "var(--line-strong)" }}
-          >
-            {REPORT_TYPE_OPTIONS.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-          <div className="flex gap-2">
-            <button type="button" onClick={() => void saveOwnReport(type)} className="btn btn-primary">
-              Enregistrer le signalement
-            </button>
-            <button type="button" onClick={cancelPending} className="btn btn-secondary">Annuler</button>
-          </div>
-        </div>
-      )}
-
-      {own.length > 0 && (
-        <div className="mt-3">
-          <p className="mb-1 text-xs font-semibold text-slate-700">Vos signalements sur cet appareil ({own.length})</p>
-          <ul className="space-y-1 text-xs text-slate-700">
-            {own.map((r) => (
-              <li key={r.id} className="flex items-center justify-between gap-2">
-                <span>
-                  {r.type} · {new Date(r.addedAt).toLocaleDateString("fr-FR")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void removeOwnReport(r.id)}
-                  aria-label={`Supprimer le signalement « ${r.type} » du ${new Date(r.addedAt).toLocaleDateString("fr-FR")}`}
-                  className="btn btn-secondary btn-sm"
-                >
-                  Supprimer
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {own.length > 0 && (
+          <CardFooter className="flex-col items-stretch gap-2 border-t">
+            <p className="font-medium">Sur cet appareil <span className="tabular-nums text-muted-foreground">({own.length})</span></p>
+            <ul className="flex flex-col gap-2">
+              {own.map((r) => {
+                const date = new Date(r.addedAt).toLocaleDateString("fr-FR");
+                return (
+                  <li key={r.id} className="flex items-center justify-between gap-2">
+                    <span className="min-w-0 text-muted-foreground">{r.type} · {date}</span>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="xs"
+                      onClick={() => void removeOwnReport(r.id)}
+                      aria-label={`Supprimer le signalement « ${r.type} » du ${date}`}
+                    >
+                      <Trash2Icon data-icon="inline-start" />
+                      Supprimer
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardFooter>
+        )}
+      </Card>
     </section>
   );
 }
