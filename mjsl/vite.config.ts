@@ -4,6 +4,7 @@ import tailwind from "@tailwindcss/vite";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 
@@ -30,6 +31,7 @@ export default defineConfig(({ command }) => ({
   // Every runtime URL is built from import.meta.env.BASE_URL.
   base: command === "build" ? "./" : "/",
   plugins: [react(), tailwind(), copyMaplibreWorker()],
+  resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Pre-bundling maplibre-gl drops its worker file, which Firefox then refuses to
   // load (empty MIME type). Served from node_modules as-is, the worker resolves.
   optimizeDeps: { exclude: ["maplibre-gl"] },
