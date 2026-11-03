@@ -41,6 +41,60 @@ export function scaleDistance(metersAcross: number): number {
   return magnitude / 10;
 }
 
+interface VisibilitySource {
+  readonly hidden: boolean;
+  addEventListener: (type: "visibilitychange", listener: () => void) => void;
+  removeEventListener: (type: "visibilitychange", listener: () => void) => void;
+}
+
+/**
+ * Browsers pause WebGL and tile work for a background tab. A normal timeout
+ * would reject a healthy export while that pause is in progress, so only count
+ * time during which the document is actually visible.
+ */
+export function timeoutWhileVisible(
+  onTimeout: () => void,
+  durationMs: number,
+  visibility: VisibilitySource = document,
+): () => void {
+  let remaining = durationMs;
+  let startedAt: number | undefined;
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  let active = true;
+
+  const clear = () => {
+    if (timeout !== undefined) clearTimeout(timeout);
+    timeout = undefined;
+  };
+  const schedule = () => {
+    if (!active || visibility.hidden) return;
+    startedAt = Date.now();
+    timeout = setTimeout(() => {
+      timeout = undefined;
+      active = false;
+      visibility.removeEventListener("visibilitychange", changed);
+      onTimeout();
+    }, remaining);
+  };
+  const changed = () => {
+    if (visibility.hidden) {
+      if (startedAt !== undefined) remaining = Math.max(0, remaining - (Date.now() - startedAt));
+      startedAt = undefined;
+      clear();
+    } else {
+      schedule();
+    }
+  };
+
+  visibility.addEventListener("visibilitychange", changed);
+  schedule();
+  return () => {
+    active = false;
+    clear();
+    visibility.removeEventListener("visibilitychange", changed);
+  };
+}
+
 export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (message: string) => void): Promise<Blob> {
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4", compress: true });
@@ -127,9 +181,9 @@ function waitForLoad(map: MapLibreMap): Promise<void> {
   return new Promise((resolve, reject) => {
     const loaded = () => finish();
     const failed = () => finish(new Error("Le fond de carte n'a pas pu etre charge."));
-    const timeout = window.setTimeout(failed, 8000);
+    const cancelTimeout = timeoutWhileVisible(failed, 8000);
     function finish(error?: Error) {
-      window.clearTimeout(timeout);
+      cancelTimeout();
       map.off("load", loaded);
       map.off("error", failed);
       if (error) reject(error);
@@ -143,9 +197,9 @@ function waitForLoad(map: MapLibreMap): Promise<void> {
 function waitForIdle(map: MapLibreMap): Promise<void> {
   return new Promise((resolve, reject) => {
     const idle = () => finish();
-    const timeout = window.setTimeout(() => finish(new Error("Le fond de carte est encore en cours de chargement.")), 8000);
+    const cancelTimeout = timeoutWhileVisible(() => finish(new Error("Le fond de carte est encore en cours de chargement.")), 8000);
     function finish(error?: Error) {
-      window.clearTimeout(timeout);
+      cancelTimeout();
       map.off("idle", idle);
       if (error) reject(error);
       else resolve();
