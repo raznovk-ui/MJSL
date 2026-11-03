@@ -1,4 +1,5 @@
-import type { Map as MapLibreMap, StyleSpecification } from "maplibre-gl";
+import type { Map as MapLibreMap } from "maplibre-gl";
+import type { Basemap } from "../map/basemaps.js";
 import { DIMENSION_KEYS, ZONE_CONFIG, dimension, type Zone, type ZoneScore } from "../../domain/zone/index.js";
 import { BASEMAPS } from "../map/basemaps.js";
 import { GRADIENT, zonesGeojson } from "../zone/zoneLayers.js";
@@ -115,7 +116,7 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
 async function renderMap(
   layer: MapLayer,
   input: PdfMapExportInput,
-  style: StyleSpecification,
+  style: Basemap["style"],
 ): Promise<{ image: string; bounds: MapBounds }> {
   const host = document.createElement("div");
   host.style.cssText = `position:fixed;left:-10000px;top:0;width:${MAP_WIDTH_PX}px;height:${MAP_HEIGHT_PX}px;pointer-events:none;`;
@@ -165,7 +166,7 @@ async function renderMap(
   }
 }
 
-async function createMap(style: StyleSpecification, host: HTMLDivElement): Promise<MapLibreMap> {
+async function createMap(style: Basemap["style"], host: HTMLDivElement): Promise<MapLibreMap> {
   const maplibregl = await import("maplibre-gl");
   return new maplibregl.Map({
     container: host,

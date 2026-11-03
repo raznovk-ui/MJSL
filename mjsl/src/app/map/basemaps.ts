@@ -6,7 +6,7 @@ export interface Basemap {
   description: string;
   /** Plain-text attribution for PDF and other non-HTML exports. */
   attribution: string;
-  style: StyleSpecification;
+  style: StyleSpecification | string;
 }
 
 function rasterStyle(id: string, tiles: string[], attribution: string): StyleSpecification {
@@ -17,11 +17,22 @@ function rasterStyle(id: string, tiles: string[], attribution: string): StyleSpe
   };
 }
 
-/**
- * Open tiles only, per the project's constraints. Attribution travels with the
- * source so MapLibre renders it without us having to remember.
- */
+const mapTilerKey = import.meta.env.VITE_MAPTILER_KEY?.trim();
+const positronStyle = mapTilerKey
+  ? `https://api.maptiler.com/maps/positron/style.json?key=${encodeURIComponent(mapTilerKey)}`
+  : null;
+
+/** Attribution travels with the source so MapLibre renders it automatically. */
 export const BASEMAPS: Basemap[] = [
+  ...(positronStyle
+    ? [{
+        id: "positron",
+        label: "Positron",
+        description: "Fond clair et discret, concu pour faire ressortir les donnees MJSL.",
+        attribution: "© contributeurs OpenStreetMap, © MapTiler, © Stamen Design",
+        style: positronStyle,
+      }]
+    : []),
   {
     id: "osm",
     label: "OpenStreetMap",

@@ -46,6 +46,8 @@ jobs:
       # Typechecks, then bundles into mjsl/dist (relative base: works under /<repo>/).
       - name: Build
         run: npm run build
+        env:
+          VITE_MAPTILER_KEY: ${{ secrets.MAPTILER_KEY }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
