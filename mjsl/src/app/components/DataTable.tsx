@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { shortArrondissement } from "../zone/labels.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 
-const PAGE = 50;
+const DEFAULT_PAGE_SIZE = 25;
+const PAGE_SIZE_OPTIONS = [20, 25, 50];
 
 /**
  * The non-map view the accessibility requirement calls for: every zone, its score and
@@ -19,7 +21,9 @@ export function DataTable() {
   const scores = useZoneStore((s) => s.scores);
   const profileId = useZoneStore((s) => s.profileId);
   const select = useZoneStore((s) => s.selectZone);
-  const [limit, setLimit] = useState(PAGE);
+
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [limit, setLimit] = useState(DEFAULT_PAGE_SIZE);
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase("fr-FR"));
 
@@ -38,36 +42,79 @@ export function DataTable() {
     [deferredQuery, rows],
   );
 
-  useEffect(() => setLimit(PAGE), [deferredQuery, profileId]);
+  useEffect(() => setLimit(pageSize), [deferredQuery, profileId, pageSize]);
 
   if (rows.length === 0) {
     return (
       <div className="p-4">
         <Card>
-          <CardContent className="py-6 text-center text-muted-foreground">Aucune zone chargee pour l&apos;instant.</CardContent>
+          <CardContent className="py-6 text-center text-muted-foreground">Aucune zone chargée pour l&apos;instant.</CardContent>
         </Card>
       </div>
     );
   }
 
   const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : v.toFixed(2));
+  const currentCount = Math.min(limit, filteredRows.length);
 
   return (
     <div className="p-4">
       <Card>
         <CardHeader>
           <CardTitle role="heading" aria-level={2}>Toutes les zones</CardTitle>
-          <CardDescription>{rows.length} zones classees de la plus basse a la plus haute pour le profil « {ZONE_CONFIG.profiles[profileId]?.label ?? profileId} ».</CardDescription>
+          <CardDescription>
+            {rows.length} zones classées de la plus basse à la plus haute pour le profil « {ZONE_CONFIG.profiles[profileId]?.label ?? profileId} ».
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field>
-            <FieldLabel htmlFor="zone-search">Rechercher une zone</FieldLabel>
-            <Input id="zone-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nom ou arrondissement" />
-          </Field>
-          <p className="text-muted-foreground" role="status">{filteredRows.length} zone{filteredRows.length > 1 ? "s" : ""} correspondante{filteredRows.length > 1 ? "s" : ""}.</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <Field className="flex-1 max-w-md">
+              <FieldLabel htmlFor="zone-search">Rechercher une zone</FieldLabel>
+              <Input
+                id="zone-search"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Nom ou arrondissement"
+              />
+            </Field>
+
+            <div className="flex items-center gap-2 self-start sm:self-end">
+              <label htmlFor="page-size-select" className="text-xs text-muted-foreground whitespace-nowrap">
+                Par page :
+              </label>
+              <NativeSelect
+                id="page-size-select"
+                size="sm"
+                value={pageSize}
+                onChange={(e) => {
+                  const nextSize = Number(e.target.value);
+                  setPageSize(nextSize);
+                  setLimit(nextSize);
+                }}
+                className="w-20"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <NativeSelectOption key={size} value={size}>
+                    {size}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground" role="status">
+            <span>
+              {filteredRows.length === 0
+                ? "Aucune zone correspondante."
+                : `Affichage de 1 à ${currentCount} sur ${filteredRows.length} zone${filteredRows.length > 1 ? "s" : ""}.`}
+            </span>
+          </div>
 
           {filteredRows.length === 0 ? (
-            <p className="rounded-md bg-muted p-3 text-muted-foreground">Aucune zone ne correspond a cette recherche.</p>
+            <p className="rounded-md bg-muted p-3 text-muted-foreground text-sm">
+              Aucune zone ne correspond à cette recherche.
+            </p>
           ) : (
             <Table className="min-w-[900px]">
               <TableCaption className="sr-only">Scores par zone et par dimension</TableCaption>
@@ -98,10 +145,39 @@ export function DataTable() {
             </Table>
           )}
 
-          {limit < filteredRows.length && (
-            <Button type="button" variant="outline" className="self-start" onClick={() => setLimit((current) => current + PAGE)}>
-              Afficher {Math.min(PAGE, filteredRows.length - limit)} zones de plus
-            </Button>
+          {filteredRows.length > pageSize && (
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              {limit < filteredRows.length && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLimit((current) => current + pageSize)}
+                >
+                  Afficher {Math.min(pageSize, filteredRows.length - limit)} zones de plus
+                </Button>
+              )}
+              {limit < filteredRows.length && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLimit(filteredRows.length)}
+                >
+                  Tout afficher ({filteredRows.length})
+                </Button>
+              )}
+              {limit > pageSize && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLimit(pageSize)}
+                >
+                  Réduire à {pageSize}
+                </Button>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
