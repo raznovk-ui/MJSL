@@ -7,6 +7,28 @@ import type { MapBounds, MapLayer } from "../zone/zoneStore.js";
 
 export const PDF_TITLE = "Matrice de justice spatiale : Cas littoral marseillais";
 
+/** Plain-language export framing mapped to the corresponding MapLibre zoom. */
+export const PDF_ZOOM_LEVELS = [
+  { percent: 25, zoom: 12, label: "Vue d'ensemble de Marseille" },
+  { percent: 50, zoom: 13, label: "Grand secteur" },
+  { percent: 75, zoom: 14, label: "Secteur de quartier" },
+  { percent: 100, zoom: 15, label: "Vue de proximite" },
+] as const;
+
+export interface PdfMapAnchor {
+  id: string;
+  label: string;
+  center: [longitude: number, latitude: number];
+}
+
+export const PDF_MAP_ANCHORS: readonly PdfMapAnchor[] = [
+  { id: "marseille", label: "Marseille centre", center: [5.38, 43.29] },
+  { id: "vieux-port", label: "Vieux-Port", center: [5.3698, 43.2946] },
+  { id: "vallon-des-auffes", label: "Vallon des Auffes", center: [5.3528, 43.2864] },
+  { id: "corniche-kennedy", label: "Corniche Kennedy", center: [5.3609, 43.2707] },
+  { id: "pointe-rouge", label: "Pointe Rouge", center: [5.3725, 43.2445] },
+] as const;
+
 const MAP_WIDTH_PX = 1600;
 const MAP_HEIGHT_PX = 1110;
 // North Arrow N by Jean-Marc Viglino (Font-GIS), CC BY 4.0.
@@ -14,7 +36,8 @@ const NORTH_ARROW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10
 
 export interface PdfMapExportInput {
   layers: MapLayer[];
-  bounds: MapBounds;
+  center: [longitude: number, latitude: number];
+  zoom: number;
   basemapId: string;
   profileId: string;
   zones: Zone[];
@@ -30,6 +53,10 @@ export function layerSubtitle(layer: MapLayer): string {
 export function orderedLayers(layers: Iterable<MapLayer>): MapLayer[] {
   const selected = new Set(layers);
   return (["combined", ...DIMENSION_KEYS] as MapLayer[]).filter((layer) => selected.has(layer));
+}
+
+export function centerOfBounds([west, south, east, north]: MapBounds): [longitude: number, latitude: number] {
+  return [(west + east) / 2, (south + north) / 2];
 }
 
 /** A 1/2/5 scale bar that occupies no more than a quarter of the printed map. */
@@ -108,9 +135,10 @@ export async function buildMapPdf(input: PdfMapExportInput, onProgress?: (messag
 
   for (const [index, layer] of layers.entries()) {
     onProgress?.(`Preparation de la carte ${index + 1} sur ${layers.length}...`);
-    const rendered = await renderMap(layer, input, basemap.style);
+    const rendered = await renderMap(layer, input, basemap);
+    if (rendered.usedFallback) onProgress?.("Fond de carte indisponible : utilisation d'OpenStreetMap.");
     if (index > 0) pdf.addPage("a4", "landscape");
-    drawPage(pdf, rendered.image, northArrowImage, scoreGradientImage, layer, rendered.bounds, basemap.attribution);
+    drawPage(pdf, rendered.image, northArrowImage, scoreGradientImage, layer, rendered.bounds, rendered.attribution);
   }
 
   return pdf.output("blob");
@@ -157,16 +185,29 @@ function renderNorthArrow(): Promise<string> {
 async function renderMap(
   layer: MapLayer,
   input: PdfMapExportInput,
-  style: Basemap["style"],
-): Promise<{ image: string; bounds: MapBounds }> {
+  basemap: Basemap,
+): Promise<{ image: string; bounds: MapBounds; attribution: string; usedFallback: boolean }> {
   const host = document.createElement("div");
   host.style.cssText = `position:fixed;left:-10000px;top:0;width:${MAP_WIDTH_PX}px;height:${MAP_HEIGHT_PX}px;pointer-events:none;`;
   document.body.append(host);
 
   let map: MapLibreMap | undefined;
   try {
-    map = await createMap(style, host);
-    await waitForLoad(map);
+    let attribution = basemap.attribution;
+    let usedFallback = false;
+    map = await createMap(basemap.style, host);
+    try {
+      await waitForLoad(map);
+    } catch (error) {
+      const fallback = BASEMAPS.find((entry) => entry.id === "osm");
+      if (!fallback || basemap.id === fallback.id) throw error;
+      // A missing/restricted style key must not make the evidence export fail.
+      map.remove();
+      map = await createMap(fallback.style, host);
+      await waitForLoad(map);
+      attribution = fallback.attribution;
+      usedFallback = true;
+    }
     const collection = zonesGeojson(input.zones, input.scores, ZONE_CONFIG, layer);
     map.addSource("pdf-zones", { type: "geojson", data: collection });
     map.addLayer({
@@ -189,10 +230,9 @@ async function renderMap(
       filter: ["==", ["get", "cls"], "red"],
       paint: { "line-color": "#7f1d1d", "line-width": 2.5, "line-dasharray": [2, 1.5] },
     });
-    map.fitBounds(
-      [[input.bounds[0], input.bounds[1]], [input.bounds[2], input.bounds[3]]],
-      { animate: false, padding: 0 },
-    );
+    // A fixed camera makes every selected score layer directly comparable on
+    // the printed pages while allowing the person exporting to frame the area.
+    map.jumpTo({ center: input.center, zoom: input.zoom });
     await waitForIdle(map);
     const renderedBounds = map.getBounds();
     return {
@@ -200,6 +240,8 @@ async function renderMap(
       // fitBounds expands an axis to fit the page aspect ratio, so use the
       // actual bounds rather than the requested viewport for the scale bar.
       bounds: [renderedBounds.getWest(), renderedBounds.getSouth(), renderedBounds.getEast(), renderedBounds.getNorth()],
+      attribution,
+      usedFallback,
     };
   } finally {
     map?.remove();
