@@ -1,4 +1,4 @@
-import { layerSubtitle, orderedLayers, PDF_TITLE, scaleDistance, timeoutWhileVisible } from "./pdfMap.js";
+import { centerOfBounds, layerSubtitle, orderedLayers, PDF_MAP_ANCHORS, PDF_TITLE, PDF_ZOOM_LEVELS, scaleDistance, timeoutWhileVisible } from "./pdfMap.js";
 
 function fakeVisibility() {
   const listeners = new Set<() => void>();
@@ -25,6 +25,12 @@ describe("PDF map export helpers", () => {
 
   it("puts selected pages into their stable combined, D1 to D6 order", () => {
     expect(orderedLayers(["political", "physical", "combined"])).toEqual(["combined", "physical", "political"]);
+  });
+
+  it("provides named anchors and derives the current map center from its viewport", () => {
+    expect(PDF_MAP_ANCHORS.map((anchor) => anchor.id)).toContain("vieux-port");
+    expect(centerOfBounds([5.22, 43.17, 5.54, 43.39])).toEqual([5.38, 43.28]);
+    expect(PDF_ZOOM_LEVELS.map((level) => level.percent)).toEqual([25, 50, 75, 100]);
   });
 
   it("chooses a readable scale-bar distance within a quarter of the map", () => {
