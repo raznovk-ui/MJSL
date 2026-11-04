@@ -9,7 +9,7 @@ import type { OverpassPreset } from "./presets.js";
  * WITHOUT CORS headers, which a browser reports as a "CORS error" with no status:
  * the request itself is fine, the server is just refusing. Another mirror usually isn't.
  */
-const REQUEST_TIMEOUT_MS = 70_000;
+const REQUEST_TIMEOUT_MS = 15_000;
 
 const ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
@@ -72,8 +72,10 @@ async function fetchPreset(
     await writeCache(key, geojson);
     return { geojson, fromCache: false, timestamp: Date.now() };
   } catch (error) {
-    // A stale cache beats an empty map when Overpass is down or throttling.
+    // A stale cache or local snapshot beats an empty map when Overpass is down or throttling.
     if (cached) return { geojson: cached.payload, fromCache: true, timestamp: cached.timestamp };
+    const fallbackSnapshot = await fetchSnapshot(preset.id);
+    if (fallbackSnapshot) return { geojson: fallbackSnapshot, fromCache: true, timestamp: Date.now() };
     throw error;
   }
 }
