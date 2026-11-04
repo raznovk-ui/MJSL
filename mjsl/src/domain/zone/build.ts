@@ -21,13 +21,28 @@ function parseMetres(value: unknown): number | undefined {
 
 const plain = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
+const reportKindCache = new WeakMap<ZoneConfig, Map<string, ReportKind>>();
+
 /** Sorts a citizen report into a kind, from the type the citizen chose. */
 export function reportKind(type: string, config: ZoneConfig): ReportKind {
-  const t = plain(type);
-  for (const kind of ["parking", "narrow", "works", "furniture"] as const) {
-    if (config.reports[kind].some((word) => t.includes(plain(word)))) return kind;
+  let byType = reportKindCache.get(config);
+  if (!byType) {
+    byType = new Map<string, ReportKind>();
+    reportKindCache.set(config, byType);
   }
-  return "other";
+  const cached = byType.get(type);
+  if (cached !== undefined) return cached;
+
+  const t = plain(type);
+  let resolved: ReportKind = "other";
+  for (const kind of ["parking", "narrow", "works", "furniture"] as const) {
+    if (config.reports[kind].some((word) => t.includes(plain(word)))) {
+      resolved = kind;
+      break;
+    }
+  }
+  byType.set(type, resolved);
+  return resolved;
 }
 
 /** A hiking trail rather than a pavement: see excludeTrails in the config. */
@@ -86,6 +101,108 @@ interface BuildInput {
   reports?: Report[];
   amp?: AmpIndex;
   noiseIndex?: NoiseIndex;
+  /** Optional pre-built PolygonIndex for `zones` to avoid rebuilding it. */
+  zoneIndex?: PolygonIndex;
+}
+
+const reportZoneCache = new WeakMap<PolygonIndex, WeakMap<Report, string>>();
+
+/**
+ * Applies citizen reports to already-built zones without re-running the expensive
+ * OpenStreetMap, noise map and AMP spatial joins.
+ */
+export function withReports(
+  zones: Zone[],
+  zoneCollection: FeatureCollection,
+  reports: Report[] | undefined,
+  config: ZoneConfig,
+  existingIndex?: PolygonIndex,
+): Zone[] {
+  const index = existingIndex ?? new PolygonIndex(zoneCollection);
+  let byReport = reportZoneCache.get(index);
+  if (!byReport) {
+    byReport = new WeakMap<Report, string>();
+    reportZoneCache.set(index, byReport);
+  }
+  const reportCounts = new Map<string, Record<ReportKind, number>>();
+  if (reports) {
+    for (const r of reports) {
+      let id = byReport.get(r);
+      if (id === undefined) {
+        const hit = index.at([r.lon, r.lat])[0];
+        id = hit ? String(hit.id) : "";
+        byReport.set(r, id);
+      }
+      if (!id) continue;
+      const counts = reportCounts.get(id) ?? { parking: 0, narrow: 0, works: 0, furniture: 0, other: 0 };
+      counts[reportKind(r.type, config)] += 1;
+      reportCounts.set(id, counts);
+    }
+  }
+
+  return zones.map((zone) => {
+    const dense = zone.streetKm >= config.autoData.minStreetKm;
+    const perKm = (n: number) => (dense ? n / zone.streetKm : undefined);
+    const rc = reportCounts.get(zone.id);
+
+    const values = { ...zone.values };
+    const sources = { ...zone.sources };
+    delete values.parkingReports;
+    delete values.narrowReports;
+    delete values.worksReports;
+    delete values.furnitureReports;
+    delete sources.parkingReports;
+    delete sources.narrowReports;
+    delete sources.worksReports;
+    delete sources.furnitureReports;
+
+    if (reports) {
+      const set = (key: string, val: number | undefined) => {
+        if (val !== undefined && Number.isFinite(val)) {
+          values[key] = val;
+          sources[key] = "reported";
+        }
+      };
+      set("parkingReports", perKm(rc?.parking ?? 0));
+      set("narrowReports", perKm(rc?.narrow ?? 0));
+      set("worksReports", perKm(rc?.works ?? 0));
+      set("furnitureReports", perKm(rc?.furniture ?? 0));
+    }
+
+    const counts = { ...zone.counts };
+    delete counts.reportsParking;
+    delete counts.reportsNarrow;
+    delete counts.reportsWorks;
+    delete counts.reportsFurniture;
+    delete counts.reportsOther;
+    if (rc) {
+      counts.reportsParking = rc.parking;
+      counts.reportsNarrow = rc.narrow;
+      counts.reportsWorks = rc.works;
+      counts.reportsFurniture = rc.furniture;
+      counts.reportsOther = rc.other;
+    }
+
+    const sameValues =
+      zone.values.parkingReports === values.parkingReports &&
+      zone.values.narrowReports === values.narrowReports &&
+      zone.values.worksReports === values.worksReports &&
+      zone.values.furnitureReports === values.furnitureReports &&
+      zone.sources.parkingReports === sources.parkingReports &&
+      zone.sources.narrowReports === sources.narrowReports &&
+      zone.sources.worksReports === sources.worksReports &&
+      zone.sources.furnitureReports === sources.furnitureReports;
+    const sameCounts =
+      zone.counts.reportsParking === counts.reportsParking &&
+      zone.counts.reportsNarrow === counts.reportsNarrow &&
+      zone.counts.reportsWorks === counts.reportsWorks &&
+      zone.counts.reportsFurniture === counts.reportsFurniture &&
+      zone.counts.reportsOther === counts.reportsOther;
+
+    if (sameValues && sameCounts) return zone;
+
+    return { ...zone, values, sources, counts };
+  });
 }
 
 /**
@@ -96,8 +213,8 @@ interface BuildInput {
  * per kilometre of street, so a large zone is not penalised for being large, and are
  * left out for a zone with too little street to be meaningful.
  */
-export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseIndex }: BuildInput, config: ZoneConfig): Zone[] {
-  const index = new PolygonIndex(zoneCollection);
+export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseIndex, zoneIndex }: BuildInput, config: ZoneConfig): Zone[] {
+  const index = zoneIndex ?? new PolygonIndex(zoneCollection);
   const zoneAt = (p: LngLat | null): string | undefined => {
     if (!p) return undefined;
     const hit = index.at(p)[0];
@@ -175,16 +292,6 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     seen.any += 1;
   }
 
-  // ---- Citizen reports
-  const reportCounts = new Map<string, Record<ReportKind, number>>();
-  for (const r of reports ?? []) {
-    const id = zoneAt([r.lon, r.lat]);
-    if (!id) continue;
-    const counts = reportCounts.get(id) ?? { parking: 0, narrow: 0, works: 0, furniture: 0, other: 0 };
-    counts[reportKind(r.type, config)] += 1;
-    reportCounts.set(id, counts);
-  }
-
   // ---- Public transport (open data)
   for (const stop of amp?.transit ?? []) {
     const id = zoneAt(stop.p);
@@ -195,6 +302,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
   const sampleBox = bboxOf(zoneCollection);
   if (Number.isFinite(sampleBox[0]) && (noiseIndex || amp)) {
     const { bandMidpointOffsetDb, belowThresholdDb } = config.autoData.noiseMap;
+    const hasParticipation = Boolean(amp && amp.participation.size > 0);
     for (const { p } of lattice(sampleBox, config.autoData.sampleGridM)) {
       const id = zoneAt(p);
       if (!id) continue;
@@ -205,7 +313,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
         acc.noiseSum += band === null ? belowThresholdDb : band + bandMidpointOffsetDb;
         acc.noiseN += 1;
       }
-      if (amp && amp.participation.size > 0 && amp.participation.at(p).length === 0) acc.outsideN += 1;
+      if (hasParticipation && amp!.participation.at(p).length === 0) acc.outsideN += 1;
     }
   }
 
@@ -217,6 +325,12 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     }
     return 10000;
   };
+
+  let tourismGrid: SpatialGrid<LngLat> | null = null;
+  if (amp?.tourism.length) {
+    tourismGrid = new SpatialGrid<LngLat>(500);
+    for (const q of amp.tourism) tourismGrid.addPoint(q, q);
+  }
 
   const out: Zone[] = [];
   for (const feature of zoneCollection.features as Feature[]) {
@@ -238,14 +352,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     };
     const perKm = (n: number) => (dense ? n / streetKm : undefined);
     const n = (key: string) => acc.n[key] ?? 0;
-    const rc = reportCounts.get(id);
 
-    if (reports) {
-      set("parkingReports", perKm(rc?.parking ?? 0), "reported");
-      set("narrowReports", perKm(rc?.narrow ?? 0), "reported");
-      set("worksReports", perKm(rc?.works ?? 0), "reported");
-      set("furnitureReports", perKm(rc?.furniture ?? 0), "reported");
-    }
     set("steps", perKm(n("steps")), "osm");
     if (amp && amp.transit.length > 0) set("transit", acc.modes.size, "official");
     if (acc.roughLen >= 100) set("surface", acc.roughSum / acc.roughLen, "osm");
@@ -259,13 +366,11 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
 
     if (acc.sinLen >= 200) set("legibility", acc.sinSum / acc.sinLen, "osm");
     if (seen.landmarks > 0) set("landmarks", perKm(n("landmarks")), "osm");
-    if (seen.info > 0 || (amp?.tourism.length ?? 0) > 0) {
-      const grid = new SpatialGrid<LngLat>(500);
-      for (const q of amp?.tourism ?? []) grid.addPoint(q, q);
+    if (seen.info > 0 || tourismGrid) {
       let d = Infinity;
-      if (amp?.tourism.length) d = Math.min(d, nearest(grid, centroid));
+      if (tourismGrid) d = Math.min(d, nearest(tourismGrid, centroid));
       if (seen.info > 0) d = Math.min(d, nearest(infoGrid, centroid));
-      set("infoCentres", d, amp?.tourism.length ? "official" : "osm");
+      set("infoCentres", d, tourismGrid ? "official" : "osm");
     }
 
     if (n("freePlaces") + n("privatePlaces") > 0) set("publicPrivate", n("privatePlaces") / (n("freePlaces") + n("privatePlaces")), "osm");
@@ -296,19 +401,19 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
       values,
       sources,
       counts: {
-        ...(rc ? { reportsParking: rc.parking, reportsNarrow: rc.narrow, reportsWorks: rc.works, reportsFurniture: rc.furniture, reportsOther: rc.other } : {}),
         steps: n("steps"), benches: n("benches"), crossings: n("crossings"), signs: n("signs"),
         landmarks: n("landmarks"), shelters: n("shelters"), cameras: n("controls"), freeServices: n("freeServices"),
         activities: n("activities"), freePlaces: n("freePlaces"), privatePlaces: n("privatePlaces"),
       },
     });
   }
-  return out;
+
+  return reports !== undefined ? withReports(out, zoneCollection, reports, config, index) : out;
 }
 
 /** Points of the altitude grid (inside a zone) to fetch from the altimetry service. */
-export function terrainPoints(zones: FeatureCollection, config: ZoneConfig): LngLat[] {
-  const index = new PolygonIndex(zones);
+export function terrainPoints(zones: FeatureCollection, config: ZoneConfig, existingIndex?: PolygonIndex): LngLat[] {
+  const index = existingIndex ?? new PolygonIndex(zones);
   return lattice(bboxOf(zones), config.autoData.terrainGridM).filter(({ p }) => index.at(p).length > 0).map(({ p }) => p);
 }
 
@@ -317,8 +422,15 @@ export function terrainPoints(zones: FeatureCollection, config: ZoneConfig): Lng
  * neighbours, when both lie in the same zone. Returns zones with `slope` filled in
  * (source "official": IGN RGE ALTI), the others unchanged.
  */
-export function withSlope(zones: Zone[], collection: FeatureCollection, altitudes: Record<string, number>, config: ZoneConfig): Zone[] {
-  const index = new PolygonIndex(collection);
+export function withSlope(
+  zones: Zone[],
+  collection: FeatureCollection,
+  altitudes: Record<string, number>,
+  config: ZoneConfig,
+  existingIndex?: PolygonIndex,
+): Zone[] {
+  if (Object.keys(altitudes).length === 0) return zones;
+  const index = existingIndex ?? new PolygonIndex(collection);
   const grid = config.autoData.terrainGridM;
   const cells = new Map<string, { zone: string; z: number }>();
   for (const { i, j, p } of lattice(bboxOf(collection), grid)) {

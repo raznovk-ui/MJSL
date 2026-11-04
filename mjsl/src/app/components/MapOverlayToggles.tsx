@@ -1,6 +1,6 @@
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import { Layers3Icon } from "lucide-react";
-import { DIMENSION_KEYS, ZONE_CONFIG, dimension as meta, reportKind } from "../../domain/zone/index.js";
+import { DIMENSION_KEYS, ZONE_CONFIG, dimension as meta, reportKind, type ReportKind } from "../../domain/zone/index.js";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,12 +27,21 @@ export function MapOverlayToggles() {
   const ids = useId();
   const presets = useAppStore((s) => s.presets);
   const visible = useZoneStore((s) => s.visible);
+  const hoverScoreVisible = useZoneStore((s) => s.hoverScoreVisible);
   const reportsVisible = useZoneStore((s) => s.reportsVisible);
   const zoneCount = useZoneStore((s) => s.zones.length);
   const layer = useZoneStore((s) => s.layer);
   const reportKinds = useZoneStore((s) => s.reportKinds);
   const reports = useZoneStore((s) => s.reports);
   const setLayer = useZoneStore((s) => s.setLayer);
+
+  const reportCountsByKind = useMemo(() => {
+    const counts: Record<ReportKind, number> = { parking: 0, narrow: 0, works: 0, furniture: 0, other: 0 };
+    for (const report of reports) {
+      counts[reportKind(report.type, ZONE_CONFIG)] += 1;
+    }
+    return counts;
+  }, [reports]);
 
   const osmVisible = Object.values(presets).some((preset) => preset.visible);
   const allHidden = !visible && !osmVisible && !reportsVisible;
@@ -88,6 +97,18 @@ export function MapOverlayToggles() {
                     {zoneCount === 0 && <FieldDescription>Calcul en cours.</FieldDescription>}
                   </FieldContent>
                 </Field>
+                <Field orientation="horizontal" data-disabled={!visible || zoneCount === 0 || undefined}>
+                  <Checkbox
+                    id={`${ids}-hover-score`}
+                    checked={hoverScoreVisible && visible}
+                    disabled={!visible || zoneCount === 0}
+                    onCheckedChange={() => useZoneStore.getState().toggleHoverScore()}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`${ids}-hover-score`}>Afficher le score au survol</FieldLabel>
+                    <FieldDescription>Infobulle dynamique avec score et détails.</FieldDescription>
+                  </FieldContent>
+                </Field>
                 <Field orientation="horizontal">
                   <Checkbox id={`${ids}-reports`} checked={reportsVisible} onCheckedChange={() => useZoneStore.getState().toggleReports()} />
                   <FieldLabel htmlFor={`${ids}-reports`}>Signalements des habitants</FieldLabel>
@@ -100,7 +121,7 @@ export function MapOverlayToggles() {
                         <FieldGroup className="gap-3">
                           {REPORT_KINDS.map((kind) => {
                             const style = REPORT_STYLE[kind];
-                            const count = reports.filter((report) => reportKind(report.type, ZONE_CONFIG) === kind).length;
+                            const count = reportCountsByKind[kind];
                             return (
                               <Field key={kind} orientation="horizontal">
                                 <Checkbox id={`${ids}-${kind}`} checked={reportKinds[kind]} onCheckedChange={() => useZoneStore.getState().toggleReportKind(kind)} />
@@ -148,12 +169,12 @@ export function MapOverlayToggles() {
                   </Accordion>
                 )}
               </FieldGroup>
+
+              <Button type="button" variant="outline" size="sm" onClick={() => setAll(allHidden)}>
+                {allHidden ? "Tout afficher" : "Tout masquer"}
+              </Button>
             </FieldSet>
           </FieldGroup>
-
-          <Button type="button" variant="outline" className="w-full" onClick={() => setAll(allHidden)}>
-            {allHidden ? "Tout afficher" : "Carte seule"}
-          </Button>
         </PopoverContent>
       </Popover>
     </div>

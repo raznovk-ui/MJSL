@@ -5,8 +5,19 @@ import { BASEMAPS } from "./basemaps.js";
 import { STUDY_AREA } from "../studyArea.js";
 import { OVERPASS_PRESETS } from "../overpass/presets.js";
 import { useAppStore } from "../state.js";
-import { ZONE_CONFIG, bboxOfCoordinates } from "../../domain/zone/index.js";
-import { syncZoneLayers } from "../zone/zoneLayers.js";
+import { ZONE_CONFIG, bboxOfCoordinates, dimension } from "../../domain/zone/index.js";
+import {
+  ensureZoneLayers,
+  syncZoneData,
+  syncReportsData,
+  syncPendingData,
+  syncSelectedZone,
+  syncHoveredZone,
+  syncReportFilter,
+  syncZoneVisibility,
+  layerValue,
+  gradientColour,
+} from "../zone/zoneLayers.js";
 import { OSM_STYLE, ensureOsmIcons, osmKind } from "./osmStyle.js";
 import { useZoneStore } from "../zone/zoneStore.js";
 
@@ -29,6 +40,7 @@ export function MapView() {
   const scores = useZoneStore((s) => s.scores);
   const profileId = useZoneStore((s) => s.profileId);
   const visible = useZoneStore((s) => s.visible);
+  const hoverScoreVisible = useZoneStore((s) => s.hoverScoreVisible);
   const layer = useZoneStore((s) => s.layer);
   const selectedZoneId = useZoneStore((s) => s.selectedZoneId);
   const reports = useZoneStore((s) => s.reports);
@@ -109,12 +121,138 @@ export function MapView() {
     instance.once("idle", () => setStyleReady(true));
   }, [basemap]);
 
-  // The zones, coloured by the selected profile and layer.
+  // Initialise zone and report layers once the style is parsed.
   useEffect(() => {
     const instance = map.current;
     if (!instance || !styleReady) return;
-    syncZoneLayers(instance, { zones, scores: scores[profileId], visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending }, ZONE_CONFIG);
-  }, [styleReady, zones, scores, profileId, visible, layer, selectedZoneId, reports, reportsVisible, reportKinds, pending]);
+    ensureZoneLayers(instance);
+  }, [styleReady]);
+
+  // Zone polygons & score styling: only re-generates GeoJSON when zones, active profile scores or layer change.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncZoneData(instance, zones, scores[profileId], ZONE_CONFIG, layer);
+  }, [styleReady, zones, scores, profileId, layer]);
+
+  // Citizen reports GeoJSON: only updates when reports list or visibility changes.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncReportsData(instance, reports, reportsVisible);
+  }, [styleReady, reports, reportsVisible]);
+
+  // Pending report point.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncPendingData(instance, pending);
+  }, [styleReady, pending]);
+
+  const [hoverInfo, setHoverInfo] = useState<{
+    zoneId: string;
+    zoneName: string;
+    scoreVal: number | null;
+    scoreFmt: string;
+    layerLabel: string;
+    colour: string;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  // Mousemove handler for zone hover score & highlight
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+
+    const onMouseMove = (event: maplibregl.MapMouseEvent) => {
+      // Don't show score tooltip in addMode
+      if (useZoneStore.getState().addMode) {
+        setHoverInfo(null);
+        syncHoveredZone(instance, null);
+        return;
+      }
+
+      if (!instance.getLayer("zone-fill") || !useZoneStore.getState().visible) {
+        setHoverInfo(null);
+        syncHoveredZone(instance, null);
+        return;
+      }
+
+      const hit = instance.queryRenderedFeatures(event.point, { layers: ["zone-fill"] });
+      if (hit.length > 0 && hit[0]?.properties?.id) {
+        const id = String(hit[0].properties.id);
+        instance.getCanvas().style.cursor = "pointer";
+        syncHoveredZone(instance, id);
+
+        if (!useZoneStore.getState().hoverScoreVisible) {
+          setHoverInfo(null);
+          return;
+        }
+
+        const state = useZoneStore.getState();
+        const currentZone = state.zones.find((z) => z.id === id);
+        const activeScore = state.scores[state.profileId]?.[id];
+        const val = layerValue(activeScore, state.layer);
+        const col = val !== null ? gradientColour(val) : "#94a3b8";
+        const layerLbl =
+          state.layer === "combined"
+            ? "Score combiné"
+            : `${dimension(state.layer).mjslCode} ${dimension(state.layer).label}`;
+
+        setHoverInfo({
+          zoneId: id,
+          zoneName: currentZone?.name ?? String(hit[0].properties.name ?? id),
+          scoreVal: val,
+          scoreFmt: val !== null ? `${Math.round(val * 100)} %` : "En attente",
+          layerLabel: layerLbl,
+          colour: col,
+          x: event.point.x,
+          y: event.point.y,
+        });
+      } else {
+        instance.getCanvas().style.cursor = useZoneStore.getState().addMode ? "crosshair" : "";
+        syncHoveredZone(instance, null);
+        setHoverInfo(null);
+      }
+    };
+
+    const canvas = instance.getCanvas();
+    const onMouseOut = () => {
+      syncHoveredZone(instance, null);
+      setHoverInfo(null);
+    };
+
+    instance.on("mousemove", onMouseMove);
+    canvas.addEventListener("mouseleave", onMouseOut);
+
+    return () => {
+      instance.off("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseleave", onMouseOut);
+      syncHoveredZone(instance, null);
+    };
+  }, [styleReady]);
+
+  // Selected zone outline: instantaneous (<0.1 ms) layer filter update, NEVER re-uploads GeoJSON.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncSelectedZone(instance, selectedZoneId);
+  }, [styleReady, selectedZoneId]);
+
+  // Report kinds filter: fast MapLibre filter update.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncReportFilter(instance, reportKinds);
+  }, [styleReady, reportKinds]);
+
+  // Layer visibility toggles.
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance || !styleReady) return;
+    syncZoneVisibility(instance, visible, reportsVisible);
+  }, [styleReady, visible, reportsVisible]);
 
   // A position found by "Me localiser": the map flies to it, close enough to place a point.
   useEffect(() => {
@@ -133,11 +271,11 @@ export function MapView() {
   // Choosing a zone in the list frames it on the map.
   useEffect(() => {
     const instance = map.current;
-    const zone = zones.find((z) => z.id === selectedZoneId);
+    const zone = useZoneStore.getState().zones.find((z) => z.id === selectedZoneId);
     if (!instance || !zone) return;
     const [w, s, e, n] = bboxOfCoordinates(zone.geometry.coordinates);
     instance.fitBounds([[w, s], [e, n]], { padding: 80, maxZoom: 16, animate: !prefersReducedMotion() });
-  }, [selectedZoneId, zones]);
+  }, [selectedZoneId]);
 
   // Re-runs whenever the data changes or the style becomes ready again, so the
   // two can arrive in either order.
@@ -148,13 +286,36 @@ export function MapView() {
   }, [presets, styleReady]);
 
   return (
-    <div
-      ref={container}
-      className="h-full w-full"
-      // The map is decorative to a screen reader; the table view carries the data.
-      role="application"
-      aria-label="Carte du littoral marseillais. Les memes donnees sont disponibles en tableau."
-    />
+    <div className="relative h-full w-full">
+      <div
+        ref={container}
+        className="h-full w-full"
+        // The map is decorative to a screen reader; the table view carries the data.
+        role="application"
+        aria-label="Carte du littoral marseillais. Les memes donnees sont disponibles en tableau."
+      />
+
+      {hoverInfo && hoverScoreVisible && visible && (
+        <div
+          className="pointer-events-none absolute z-20 flex flex-col gap-0.5 rounded-lg border border-slate-200/80 bg-white/95 px-3 py-2 text-xs shadow-lg backdrop-blur-md transition-transform duration-75 dark:border-slate-800 dark:bg-slate-900/95"
+          style={{
+            left: `${hoverInfo.x + 14}px`,
+            top: `${hoverInfo.y - 12}px`,
+            transform: hoverInfo.x > (container.current?.clientWidth ?? 800) - 180 ? "translateX(-110%)" : "none",
+          }}
+        >
+          <div className="font-semibold text-slate-900 dark:text-slate-100">{hoverInfo.zoneName}</div>
+          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/10"
+              style={{ backgroundColor: hoverInfo.colour }}
+            />
+            <span className="font-medium text-slate-700 dark:text-slate-300">{hoverInfo.layerLabel} :</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">{hoverInfo.scoreFmt}</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

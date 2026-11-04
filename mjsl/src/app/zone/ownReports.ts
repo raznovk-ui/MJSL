@@ -42,12 +42,18 @@ export async function writeOwnReports(list: OwnReport[]): Promise<void> {
   }
 }
 
+const zoneIndexCache = new WeakMap<Zone[], PolygonIndex>();
+
 /** The zone a point falls in, or undefined when it is outside the city. */
-export function zoneContaining(zones: Zone[], lon: number, lat: number): Zone | undefined {
-  const index = new PolygonIndex({
-    type: "FeatureCollection",
-    features: zones.map((z) => ({ type: "Feature" as const, properties: { id: z.id }, geometry: z.geometry })),
-  });
+export function zoneContaining(zones: Zone[], lon: number, lat: number, existingIndex?: PolygonIndex): Zone | undefined {
+  let index = existingIndex ?? zoneIndexCache.get(zones);
+  if (!index) {
+    index = new PolygonIndex({
+      type: "FeatureCollection",
+      features: zones.map((z) => ({ type: "Feature" as const, properties: { id: z.id }, geometry: z.geometry })),
+    });
+    zoneIndexCache.set(zones, index);
+  }
   const hit = index.at([lon, lat])[0];
   return hit ? zones.find((z) => z.id === String(hit.id)) : undefined;
 }

@@ -11,6 +11,7 @@ import { ZoneRanking } from "./zone/ZoneRanking.js";
 import { ZoneInspector } from "./zone/ZoneInspector.js";
 import { useZoneStore } from "./zone/zoneStore.js";
 import { MapOverlayToggles } from "./components/MapOverlayToggles.js";
+import { LoadingOverlay } from "./components/LoadingOverlay.js";
 import { OVERPASS_PRESETS } from "./overpass/presets.js";
 import { STUDY_AREA } from "./studyArea.js";
 import { useAppStore } from "./state.js";
@@ -31,6 +32,8 @@ export function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30 text-foreground antialiased lg:h-screen">
+      <LoadingOverlay />
+
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>

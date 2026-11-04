@@ -71,12 +71,21 @@ export async function decodeSnapshot(bytes: ArrayBuffer): Promise<FeatureCollect
 }
 
 const snapshotUrl = (presetId: string) => `${import.meta.env.BASE_URL}data/osm/${presetId}.geojson.gz`;
+const memorySnapshots = new Map<string, FeatureCollection>();
 
 export async function fetchSnapshot(presetId: string, fetchImpl: typeof fetch = fetch): Promise<FeatureCollection | null> {
+  if (fetchImpl === fetch) {
+    const cached = memorySnapshots.get(presetId);
+    if (cached) return cached;
+  }
   try {
     const response = await fetchImpl(snapshotUrl(presetId));
     if (!response.ok) return null;
-    return await decodeSnapshot(await response.arrayBuffer());
+    const decoded = await decodeSnapshot(await response.arrayBuffer());
+    if (decoded && fetchImpl === fetch) {
+      memorySnapshots.set(presetId, decoded);
+    }
+    return decoded;
   } catch {
     return null;
   }
