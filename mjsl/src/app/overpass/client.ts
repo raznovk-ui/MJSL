@@ -40,6 +40,8 @@ export interface LoadPresetOptions {
   forceRefresh?: boolean;
   /** Use the snapshot, but revalidate it with the server instead of the in-memory copy. */
   reloadSnapshot?: boolean;
+  /** Global data version, appended to snapshot URLs. */
+  dataVersion?: string;
 }
 
 export function loadPreset(
@@ -47,7 +49,7 @@ export function loadPreset(
   options: LoadPresetOptions = {},
 ): Promise<OverpassResult> {
   const mode = options.forceRefresh ? "refresh" : options.reloadSnapshot ? "reload" : "normal";
-  const dedupeKey = `${preset.id}:${mode}`;
+  const dedupeKey = `${preset.id}:${mode}:${options.dataVersion ?? ""}`;
   const pending = inFlight.get(dedupeKey);
   if (pending) return pending;
 
@@ -58,13 +60,13 @@ export function loadPreset(
 
 async function fetchPreset(
   preset: OverpassPreset,
-  { forceRefresh = false, reloadSnapshot = false }: LoadPresetOptions = {},
+  { forceRefresh = false, reloadSnapshot = false, dataVersion }: LoadPresetOptions = {},
 ): Promise<OverpassResult> {
   // A prepared copy shipped with the app comes first: the app then works with no
   // Overpass at all. "Refresh" skips it and asks Overpass for fresh data; "reload"
   // keeps the snapshot but revalidates it, so a new deployment is picked up quickly.
   if (!forceRefresh) {
-    const snapshot = await fetchSnapshot(preset.id, fetch, { forceReload: reloadSnapshot });
+    const snapshot = await fetchSnapshot(preset.id, fetch, { forceReload: reloadSnapshot, dataVersion });
     if (snapshot) return { geojson: snapshot, fromCache: true, timestamp: Date.now() };
   }
 
@@ -83,7 +85,7 @@ async function fetchPreset(
   } catch (error) {
     // A stale cache or local snapshot beats an empty map when Overpass is down or throttling.
     if (cached) return { geojson: cached.payload, fromCache: true, timestamp: cached.timestamp };
-    const fallbackSnapshot = await fetchSnapshot(preset.id);
+    const fallbackSnapshot = await fetchSnapshot(preset.id, fetch, { dataVersion });
     if (fallbackSnapshot) return { geojson: fallbackSnapshot, fromCache: true, timestamp: Date.now() };
     throw error;
   }

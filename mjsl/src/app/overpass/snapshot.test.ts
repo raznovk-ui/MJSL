@@ -49,6 +49,16 @@ describe("OSM snapshots", () => {
     expect(seen?.cache).toBe("no-cache");
   });
 
+  it("appends the global data version to a snapshot URL", async () => {
+    let url = "";
+    const mock = ((input: unknown) => {
+      url = String(input);
+      return Promise.resolve(new Response(JSON.stringify(sample)));
+    }) as unknown as typeof fetch;
+    expect(await fetchSnapshot("versioned-test", mock, { dataVersion: "v1" })).not.toBeNull();
+    expect(url).toContain("?v=v1");
+  });
+
   it("reads the snapshot manifest and rejects a missing or malformed one", async () => {
     const manifest = { generatedAt: "2026-11-22T00:00:00.000Z", version: "v1", files: { r0c0: "abc" } };
     const ok = (() => Promise.resolve(new Response(JSON.stringify(manifest)))) as typeof fetch;

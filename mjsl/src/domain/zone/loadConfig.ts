@@ -29,14 +29,24 @@ export interface ZoneConfig {
     terrainGridM: number;
     noiseMap: { bandMidpointOffsetDb: number; belowThresholdDb: number };
     participation: { outsideBarrier: number };
+    rent: { ucPerHousehold: number };
+    publicSpace: {
+      gridM: number;
+      minBuiltUpSamples: number;
+      publicLeisure: string[];
+      publicAmenities: string[];
+      publicLanduse: string[];
+      publicPlaces: string[];
+      naturalLanduse: string[];
+      naturalTags: string[];
+      streetWidthsM: Record<string, number>;
+      defaultStreetWidthM: number;
+    };
     streetHighways: string[];
     excludeTrails: { tags: string[]; nameStartsWith: string[]; unpavedSurfaces: string[] };
     surfaceRoughness: Record<string, number>;
     surfaceGlare: Record<string, number>;
     places: {
-      freeAmenities: string[];
-      freeLeisure: string[];
-      privateAmenities: string[];
       freeServiceAmenities: string[];
       activityAmenities: string[];
       activityLeisure: string[];
@@ -140,6 +150,17 @@ export function validateZoneConfig(raw: unknown): ZoneConfig {
   for (const key of ["bandMidpointOffsetDb", "belowThresholdDb"]) need(isNumber(noiseMap[key]), `"autoData.noiseMap.${key}" must be a number.`);
   const participation = section(auto, "participation", "autoData.");
   need(isNumber(participation.outsideBarrier) && (participation.outsideBarrier as number) >= 0 && (participation.outsideBarrier as number) <= 1, `"autoData.participation.outsideBarrier" must be a number between 0 and 1.`);
+  const rent = section(auto, "rent", "autoData.");
+  need(isNumber(rent.ucPerHousehold) && (rent.ucPerHousehold as number) > 0, `"autoData.rent.ucPerHousehold" must be a number above 0.`);
+  const publicSpace = section(auto, "publicSpace", "autoData.");
+  for (const key of ["gridM", "minBuiltUpSamples", "defaultStreetWidthM"]) {
+    need(isNumber(publicSpace[key]) && (publicSpace[key] as number) > 0, `"autoData.publicSpace.${key}" must be a number above 0.`);
+  }
+  const publicList = (key: string) => list(publicSpace, key, "autoData.publicSpace.");
+  const widths = stripNotes(section(publicSpace, "streetWidthsM", "autoData.publicSpace."));
+  for (const [name, value] of Object.entries(widths)) {
+    need(isNumber(value) && value > 0, `"autoData.publicSpace.streetWidthsM.${name}" must be a number above 0.`);
+  }
   const trails = section(auto, "excludeTrails", "autoData.");
   const places = section(auto, "places", "autoData.");
   const placeList = (key: string) => list(places, key, "autoData.places.");
@@ -151,6 +172,19 @@ export function validateZoneConfig(raw: unknown): ZoneConfig {
     terrainGridM: auto.terrainGridM as number,
     noiseMap: { bandMidpointOffsetDb: noiseMap.bandMidpointOffsetDb as number, belowThresholdDb: noiseMap.belowThresholdDb as number },
     participation: { outsideBarrier: participation.outsideBarrier as number },
+    rent: { ucPerHousehold: rent.ucPerHousehold as number },
+    publicSpace: {
+      gridM: publicSpace.gridM as number,
+      minBuiltUpSamples: publicSpace.minBuiltUpSamples as number,
+      publicLeisure: publicList("publicLeisure"),
+      publicAmenities: publicList("publicAmenities"),
+      publicLanduse: publicList("publicLanduse"),
+      publicPlaces: publicList("publicPlaces"),
+      naturalLanduse: publicList("naturalLanduse"),
+      naturalTags: publicList("naturalTags"),
+      streetWidthsM: widths as Record<string, number>,
+      defaultStreetWidthM: publicSpace.defaultStreetWidthM as number,
+    },
     streetHighways: list(auto, "streetHighways", "autoData."),
     excludeTrails: {
       tags: list(trails, "tags", "autoData.excludeTrails."),
@@ -160,9 +194,6 @@ export function validateZoneConfig(raw: unknown): ZoneConfig {
     surfaceRoughness: table(auto, "surfaceRoughness", "autoData."),
     surfaceGlare: table(auto, "surfaceGlare", "autoData."),
     places: {
-      freeAmenities: placeList("freeAmenities"),
-      freeLeisure: placeList("freeLeisure"),
-      privateAmenities: placeList("privateAmenities"),
       freeServiceAmenities: placeList("freeServiceAmenities"),
       activityAmenities: placeList("activityAmenities"),
       activityLeisure: placeList("activityLeisure"),

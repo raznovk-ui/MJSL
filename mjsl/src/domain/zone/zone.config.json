@@ -23,7 +23,8 @@
     "landmarks": { "label": "Reperes (commerces, arrets)", "unit": "reperes / km de rue", "dimension": "cognitive", "kind": "linear", "noProblemAt": 15, "totalObstacleAt": 0 },
     "infoCentres": { "label": "Centres d'information", "unit": "m depuis le centre de la zone", "dimension": "cognitive", "kind": "linear", "noProblemAt": 500, "totalObstacleAt": 4000 },
 
-    "publicPrivate": { "label": "Espaces prives plutot que publics", "unit": "part (0 a 1)", "dimension": "economic", "kind": "share", "_comment": "Private places (terraces, cafes, restaurants) as a share of all places that are either private or free and public (benches, drinking water, free toilets, parks)." },
+    "rentBurden": { "label": "Effort pour le loyer", "unit": "% du revenu", "dimension": "economic", "kind": "linear", "noProblemAt": 25, "totalObstacleAt": 50, "_comment": "Part du revenu disponible consacree au loyer : loyer median mensuel OLL 2025 x 12, divise par le revenu disponible median FiLoSoFi 2021 x nombre d'unites de consommation. STARTING VALUES: 25 % = pas d'obstacle, 50 % = obstacle total." },
+    "publicSpaceShare": { "label": "Espaces publics", "unit": "part (0 a 1)", "dimension": "economic", "kind": "linear", "noProblemAt": 0.24, "totalObstacleAt": 0.1, "_comment": "Part d'espace public au sens UN-Habitat 11.7.1 : (parcs, places, emprises d'equipements + rues) / surface batie. 24 % (3e quartile des 382 IRIS avec donnees, novembre 2026) = pas d'obstacle, 10 % (1er quartile) = obstacle total ; la norme internationale de 20 % est gardee comme repere. STARTING VALUES, a recalibrer." },
     "freeServices": { "label": "Services gratuits", "unit": "services / km de rue", "dimension": "economic", "kind": "linear", "noProblemAt": 0.6, "totalObstacleAt": 0 },
     "furnitureReports": { "label": "Terrasses et mobilier signales", "unit": "signalements / km de rue", "dimension": "economic", "kind": "evidence", "noProblemAt": 0, "totalObstacleAt": 1.5 },
 
@@ -54,6 +55,20 @@
     "terrainGridM": 200,
     "noiseMap": { "bandMidpointOffsetDb": 2.5, "belowThresholdDb": 52.5 },
     "participation": { "outsideBarrier": 0.5 },
+    "rent": { "ucPerHousehold": 1.5, "_comment": "Approximation du nombre d'unites de consommation par menage, en attendant une valeur IRIS. Sert a convertir le revenu par UC en revenu par menage pour le taux d'effort." },
+    "publicSpace": {
+      "_comment": "Parametres du calcul UN-Habitat 11.7.1 (scripts/computePublicSpace.ts). Les listes disent quels tags OSM comptent comme espace public, comme nature a exclure de la surface batie, et quelles largeurs de rue utiliser.",
+      "gridM": 50,
+      "minBuiltUpSamples": 20,
+      "publicLeisure": ["park", "garden", "playground", "sports_centre", "nature_reserve"],
+      "publicAmenities": ["school", "townhall", "community_centre", "social_centre", "library", "marketplace", "place_of_worship", "arts_centre", "theatre", "cinema"],
+      "publicLanduse": ["recreation_ground", "cemetery", "village_green"],
+      "publicPlaces": ["square"],
+      "naturalLanduse": ["forest", "meadow", "farmland", "orchard", "vineyard", "aquaculture"],
+      "naturalTags": ["wood", "scrub", "grassland", "heath", "water", "wetland", "beach", "sand", "rock", "bare_rock", "scree"],
+      "streetWidthsM": { "footway": 3, "path": 2, "pedestrian": 5, "steps": 2.5, "residential": 6, "living_street": 6, "tertiary": 7, "unclassified": 6, "trunk": 14, "primary": 12, "secondary": 10 },
+      "defaultStreetWidthM": 5
+    },
     "streetHighways": ["footway", "path", "pedestrian", "steps", "residential", "living_street", "tertiary", "unclassified"],
     "excludeTrails": {
       "_comment": "Hiking trails are not pavements, so they are left out. A path, footway or steps is a trail when it carries any of the 'tags', or its name starts with one of 'nameStartsWith', or it is a plain 'path' on one of the 'unpavedSurfaces'.",
@@ -70,9 +85,6 @@
     },
     "places": {
       "_comment": "Which OpenStreetMap places count for which indicator.",
-      "freeAmenities": ["bench", "drinking_water", "toilets", "shelter", "fountain"],
-      "freeLeisure": ["park", "garden", "playground"],
-      "privateAmenities": ["cafe", "restaurant", "bar", "pub", "fast_food", "ice_cream", "biergarten"],
       "freeServiceAmenities": ["drinking_water", "toilets", "library", "community_centre", "social_centre", "youth_centre"],
       "activityAmenities": ["cafe", "restaurant", "bar", "pub", "library", "community_centre", "social_centre", "arts_centre", "theatre", "cinema", "marketplace", "place_of_worship"],
       "activityLeisure": ["park", "playground", "garden", "sports_centre"],

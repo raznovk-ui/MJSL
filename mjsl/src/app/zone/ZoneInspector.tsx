@@ -18,6 +18,16 @@ export function ZoneInspector() {
 
   if (!zone || !score || !profile) return null;
 
+  const rentLevel = zone.counts.rentLevel;
+  const rentMonthly = zone.counts.rentMonthly;
+  const rentZone = zone.counts.rentZone;
+  const rentPlr = zone.counts.rentPlr;
+  const rentAsking = zone.counts.rentAsking;
+  const rentBurden = zone.values.rentBurden;
+  const publicSpaceShare = zone.values.publicSpaceShare;
+  const publicSpaceLow = zone.counts.publicSpaceLow;
+  const num = (v: number | undefined, digits = 1) => (v === undefined ? "—" : v.toFixed(digits));
+
   return (
     <Sheet open onOpenChange={(open) => { if (!open) select(null); }}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl" showCloseButton={false}>
@@ -34,6 +44,27 @@ export function ZoneInspector() {
             <p className="text-muted-foreground">
               Stationnement {zone.counts.reportsParking ?? 0} · trottoir / poteau {zone.counts.reportsNarrow ?? 0} · chantier / encombrants {zone.counts.reportsWorks ?? 0} · terrasses / mobilier {zone.counts.reportsFurniture ?? 0}.
             </p>
+          </section>
+
+          <section>
+            <h3 className="mb-2 text-xs font-medium">Loyer et espaces publics</h3>
+            <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 text-muted-foreground">
+              <dt>Loyer médian observé (OLL 2025)</dt>
+              <dd className="text-right tabular-nums">{rentLevel === undefined ? "pas de donnee" : `${num(rentLevel, 1)} €/m²`}</dd>
+              <dt>Loyer mensuel médian</dt>
+              <dd className="text-right tabular-nums">{rentMonthly === undefined ? "pas de donnee" : `${Math.round(rentMonthly)} €`}</dd>
+              <dt>Taux d&apos;effort</dt>
+              <dd className="text-right tabular-nums">{rentBurden === undefined ? "pas de donnee" : `${num(rentBurden, 1)} % du revenu`}</dd>
+              <dt>Loyer d&apos;annonce (arrondissement)</dt>
+              <dd className="text-right tabular-nums">{rentAsking === undefined ? "pas de donnee" : `${num(rentAsking, 1)} €/m²`}</dd>
+              <dt>Espaces publics (UN-Habitat 11.7.1)</dt>
+              <dd className="text-right tabular-nums">{publicSpaceShare === undefined ? "pas de donnee" : `${num(publicSpaceShare * 100, 1)} % de la surface bâtie`}</dd>
+            </dl>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {rentZone ? `Zone OLL ${rentZone}` : "Loyer non disponible"} · {rentPlr === 1 ? "parc locatif restreint" : rentPlr === 0 ? "parc locatif suffisant" : "qualite inconnue"}.
+              {publicSpaceLow === 1 ? " Espaces publics : échantillon bâti trop faible." : ""}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Sources : OLL 13 / ADIL13 2025, INSEE FiLoSoFi 2021, Carte des loyers 2025, OpenStreetMap.</p>
           </section>
 
           <section>

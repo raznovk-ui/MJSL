@@ -4,6 +4,8 @@ import { KX, KY, bboxOfCoordinates, coordKey, distanceM, polylineLengthM } from 
 import type { ZoneConfig } from "./loadConfig.js";
 import { bandAt, type NoiseIndex } from "./noiseMap.js";
 import { PolygonIndex, SpatialGrid } from "./spatial.js";
+import type { EconomicIndex } from "./economic.js";
+import { MARSEILLE_TERRITORY, type TerritoryConfig } from "./territory.js";
 import type { LngLat, Report, ReportKind, ValueSource, Zone } from "./types.js";
 import { anchorOf, areaAndCentroid } from "./zoneGeometry.js";
 
@@ -94,13 +96,17 @@ const bboxOf = (zones: FeatureCollection) =>
   bboxOfCoordinates(zones.features.map((f) => (f.geometry as { coordinates: unknown } | null)?.coordinates ?? []));
 
 interface BuildInput {
-  /** The zones: polygons with `id`, `name`, `arr`, `poverty`, `households` properties (scripts/fetchAmp.mjs). */
+  /** The zones: polygons with the properties named by the territory config (scripts/fetchAmp.mjs). */
   zones: FeatureCollection;
   /** Loaded OpenStreetMap features (as produced by osmToGeojson). */
   osm: FeatureCollection;
   reports?: Report[];
   amp?: AmpIndex;
   noiseIndex?: NoiseIndex;
+  /** OLL rents, INSEE income and public-space shares, joined by zone id. */
+  economic?: EconomicIndex;
+  /** Which zone properties hold the id, name, type, income... Defaults to Marseille. */
+  territory?: TerritoryConfig;
   /** Optional pre-built PolygonIndex for `zones` to avoid rebuilding it. */
   zoneIndex?: PolygonIndex;
 }
@@ -206,7 +212,10 @@ export function withReports(
  * per kilometre of street, so a large zone is not penalised for being large, and are
  * left out for a zone with too little street to be meaningful.
  */
-export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseIndex, zoneIndex }: BuildInput, config: ZoneConfig): Zone[] {
+export function buildZones(
+  { zones: zoneCollection, osm, reports, amp, noiseIndex, economic, territory = MARSEILLE_TERRITORY, zoneIndex }: BuildInput,
+  config: ZoneConfig,
+): Zone[] {
   const index = zoneIndex ?? new PolygonIndex(zoneCollection);
   const zoneAt = (p: LngLat | null): string | undefined => {
     if (!p) return undefined;
@@ -265,10 +274,6 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     }
 
     if (amenity === "bench") { bump(acc, "benches"); seen.benches += 1; }
-    if ((amenity && places.freeAmenities.includes(amenity)) || (leisure && places.freeLeisure.includes(leisure))) {
-      if (str(tags.fee) !== "yes") bump(acc, "freePlaces");
-    }
-    if ((amenity && places.privateAmenities.includes(amenity)) || str(tags.outdoor_seating) === "yes") bump(acc, "privatePlaces");
     if (amenity && places.freeServiceAmenities.includes(amenity) && str(tags.fee) !== "yes") { bump(acc, "freeServices"); seen.freeServices += 1; }
     if ((amenity && places.activityAmenities.includes(amenity)) || (leisure && places.activityLeisure.includes(leisure))) { bump(acc, "activities"); seen.activities += 1; }
     if (amenity === "shelter" || str(tags.covered) === "yes" || str(tags.shelter) === "yes" || str(tags["building:part"]) === "arcade") { bump(acc, "shelters"); seen.shelters += 1; }
@@ -330,7 +335,8 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     const g = feature.geometry;
     if (!g || (g.type !== "Polygon" && g.type !== "MultiPolygon")) continue;
     const p = (feature.properties ?? {}) as Tags;
-    const id = String(p.id ?? "");
+    const properties = territory.zoneProperties;
+    const id = String(p[properties.id] ?? "");
     if (!id) continue;
     const acc = accs.get(id) ?? newAcc();
     const { areaKm2, centroid } = areaAndCentroid(g as Polygon | MultiPolygon);
@@ -338,6 +344,7 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     const dense = streetKm >= config.autoData.minStreetKm;
     const values: Record<string, number> = {};
     const sources: Record<string, ValueSource> = {};
+    const counts: Record<string, number> = {};
     const set = (key: string, value: number | undefined, source: ValueSource) => {
       if (value === undefined || !Number.isFinite(value)) return;
       values[key] = value;
@@ -345,6 +352,9 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     };
     const perKm = (n: number) => (dense ? n / streetKm : undefined);
     const n = (key: string) => acc.n[key] ?? 0;
+    const income = economic?.income.get(id);
+    const rent = economic?.rent.get(id);
+    const publicSpace = economic?.publicSpace.get(id);
 
     set("steps", perKm(n("steps")), "osm");
     if (amp && amp.transit.length > 0) set("transit", acc.modes.size, "official");
@@ -366,11 +376,46 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
       set("infoCentres", d, tourismGrid ? "official" : "osm");
     }
 
-    if (n("freePlaces") + n("privatePlaces") > 0) set("publicPrivate", n("privatePlaces") / (n("freePlaces") + n("privatePlaces")), "osm");
     if (seen.freeServices > 0) set("freeServices", perKm(n("freeServices")), "osm");
 
-    const poverty = typeof p.poverty === "number" ? p.poverty : undefined;
+    // Income: prefer the 2021 FiLoSoFi file, keep the 2014 zone property as fallback.
+    const fallbackPoverty = typeof p[properties.poverty] === "number" ? (p[properties.poverty] as number) : undefined;
+    const poverty = income?.poverty ?? fallbackPoverty;
     set("poverty", poverty, "official");
+    if (income) {
+      counts.medianIncome = income.median;
+      counts.incomeYear = 2021;
+    } else if (typeof p[properties.median] === "number") {
+      counts.medianIncome = p[properties.median] as number;
+      counts.incomeYear = 2014;
+    }
+
+    // Rent: observed OLL median, turned into a share of disposable income. The
+    // observed level is shown even when income is masked, but the scored burden
+    // stays missing in that case (never fall back to an older income year).
+    if (rent) {
+      counts.rentLevel = rent.sMed;
+      counts.rentMonthly = rent.mMed;
+      counts.rentZone = Number(rent.zone) || 0;
+      counts.rentSample = rent.nbEnq ?? 0;
+      counts.rentPlr = rent.plr ? 1 : 0;
+      const asking = economic?.askingByArrondissement.get(id.slice(0, 5));
+      if (asking) counts.rentAsking = asking.median;
+
+      if (income && rent.mMed > 0 && income.median > 0) {
+        const burden = ((rent.mMed * 12) / (income.median * config.autoData.rent.ucPerHousehold)) * 100;
+        set("rentBurden", burden, "official");
+      }
+    }
+
+    // Public space: UN-Habitat 11.7.1 share computed by scripts/computePublicSpace.ts.
+    if (publicSpace?.share !== undefined && Number.isFinite(publicSpace.share)) {
+      set("publicSpaceShare", publicSpace.share, "official");
+      counts.publicSpacePct = publicSpace.share * 100;
+      counts.publicSpaceM2 = publicSpace.publicM2 ?? 0;
+      counts.builtUpM2 = publicSpace.builtUpM2 ?? 0;
+      if (publicSpace.quality === "low") counts.publicSpaceLow = 1;
+    }
     if (seen.shelters > 0) set("shelter", perKm(n("shelters")), "osm");
     if (seen.controls > 0) set("surveillance", perKm(n("controls")), "osm");
     if (acc.taggedWays >= config.autoData.minTaggedWays) set("coPresence", 1 - acc.wideWays / acc.taggedWays, "osm");
@@ -381,22 +426,25 @@ export function buildZones({ zones: zoneCollection, osm, reports, amp, noiseInde
     }
     if (seen.civic > 0) set("civic", nearest(civicGrid, centroid), "osm");
 
+    const zoneType = p[properties.type];
+    const households = typeof p[properties.households] === "number" ? (p[properties.households] as number) : 0;
     out.push({
       id,
-      name: String(p.name ?? id),
-      zoneType: p.type === "activite" || p.type === "divers" ? p.type : "habitat",
-      arrondissement: String(p.arr ?? ""),
+      name: String(p[properties.name] ?? id),
+      zoneType: zoneType === "activite" || zoneType === "divers" ? zoneType : "habitat",
+      arrondissement: String(p[properties.arrondissement] ?? ""),
       geometry: g as Polygon | MultiPolygon,
       areaKm2,
       centroid,
       streetKm,
-      households: typeof p.households === "number" ? p.households : 0,
+      households,
       values,
       sources,
       counts: {
+        ...counts,
         steps: n("steps"), benches: n("benches"), crossings: n("crossings"), signs: n("signs"),
         landmarks: n("landmarks"), shelters: n("shelters"), cameras: n("controls"), freeServices: n("freeServices"),
-        activities: n("activities"), freePlaces: n("freePlaces"), privatePlaces: n("privatePlaces"),
+        activities: n("activities"),
       },
     });
   }

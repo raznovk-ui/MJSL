@@ -6,6 +6,7 @@ import {
   ZONE_CONFIG as config,
   ZoneConfigError,
   buildAmpIndex,
+  buildEconomicIndex,
   buildNoiseIndex,
   buildZones,
   classify,
@@ -151,6 +152,16 @@ describe("config validation", () => {
     delete c.indicators.participation;
     expect(() => validateZoneConfig(c)).toThrow(/Dimension "political" has no indicator/);
   });
+
+  it("validates the rent and public-space settings", () => {
+    const c = clone();
+    c.autoData.rent.ucPerHousehold = 0;
+    c.autoData.publicSpace.gridM = 0;
+    let message = "";
+    try { validateZoneConfig(c); } catch (e) { message = (e as Error).message; }
+    expect(message).toMatch(/autoData.rent.ucPerHousehold/);
+    expect(message).toMatch(/autoData.publicSpace.gridM/);
+  });
 });
 
 describe("zone geometry", () => {
@@ -259,9 +270,25 @@ describe("building the zones from the data", () => {
     expect(zoneOf(build([streetA()]), "A").values.crossings).toBeUndefined();
   });
 
-  it("free versus private places, and a paying toilet is not free", () => {
-    const places = [node(...inA(0.002, 0.003), { amenity: "bench" }), node(...inA(0.003, 0.003), { amenity: "cafe" }), node(...inA(0.004, 0.003), { amenity: "toilets", fee: "yes" })];
-    expect(zoneOf(build([streetA(), ...places]), "A").values.publicPrivate).toBeCloseTo(0.5, 6);
+  it("turns observed rent and income into a rent burden, and keeps it missing without income", () => {
+    const rent = { zone: "1", sMed: 13, mMed: 650, plr: false };
+    const income = { median: 18000, poverty: 20 };
+    const withIncome = buildEconomicIndex({ rent: { observed: { A: rent } }, income: { iris: { A: income } } });
+    const a = zoneOf(build([streetA()], { economic: withIncome }), "A");
+    expect(a.values.rentBurden).toBeCloseTo(((650 * 12) / (18000 * config.autoData.rent.ucPerHousehold)) * 100, 6);
+    expect(a.counts.rentLevel).toBe(13);
+    expect(a.counts.medianIncome).toBe(18000);
+    expect(a.counts.incomeYear).toBe(2021);
+
+    const withoutIncome = buildEconomicIndex({ rent: { observed: { A: rent } } });
+    expect(zoneOf(build([streetA()], { economic: withoutIncome }), "A").values.rentBurden).toBeUndefined();
+  });
+
+  it("carries the public-space share into the economic indicators", () => {
+    const economic = buildEconomicIndex({ publicSpace: { iris: { A: { share: 0.12, quality: "osm" } } } });
+    const a = zoneOf(build([streetA()], { economic }), "A");
+    expect(a.values.publicSpaceShare).toBeCloseTo(0.12, 6);
+    expect(a.counts.publicSpacePct).toBeCloseTo(12, 6);
   });
 
   it("co-presence needs enough tagged widths, and counts the narrow ones", () => {

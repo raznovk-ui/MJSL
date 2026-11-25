@@ -16,7 +16,11 @@
     "data:zones": "node scripts/fetchAmp.mjs && node scripts/clipZones.mjs",
     "data:reports": "node scripts/prepareReports.mjs",
     "data:osm": "vite-node scripts/fetchOsm.ts",
-    "data:manifest": "node scripts/writeOsmManifest.mjs"
+    "data:osm-manifest": "node scripts/writeOsmManifest.mjs",
+    "data:rent": "node scripts/fetchRent.mjs",
+    "data:income": "node scripts/fetchIncome.mjs",
+    "data:public-space": "vite-node scripts/computePublicSpace.ts",
+    "data:economy": "node scripts/fetchRent.mjs && node scripts/fetchIncome.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

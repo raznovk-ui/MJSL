@@ -96,15 +96,35 @@ record it, not that every zone has none.
 | `legibility` | length-weighted mean sinuosity $\sum_k (\ell_k/c_k)\,\ell_k / \sum_k \ell_k$, where $c_k$ is the straight distance between the ends of way $k$ (ways with $c_k \ge 10$ m) | less than 200 m |
 | `landmarks` | shops, amenities, tourism, historic objects, bus stops per km | $L<1$ or none |
 | `infoCentres` | distance (m) from the centroid to the nearest tourist office | none in the data |
-| `publicPrivate` | $n_\text{private} / (n_\text{private} + n_\text{free})$ | no such place |
+| `rentBurden` | $(12 \times \text{loyer médian mensuel OLL}) / (\text{revenu disponible médian FiLoSoFi} \times \text{UC})$ × 100, in % of income | OLL rent or FiLoSoFi income missing |
+| `publicSpaceShare` | UN-Habitat 11.7.1: (public open spaces + streets) / built-up area | no public-space sample or built-up area too small |
 | `freeServices` | free water, toilets, libraries, community centres per km | $L<1$ or none |
-| `poverty` | % of households under the poverty line (INSEE 2014) | not published for the IRIS |
+| `poverty` | % of households under the poverty line (FiLoSoFi 2021, 2014 fallback) | not published for the IRIS |
 | `shelter` | shelters, covered ways, arcades per km | $L<1$ or none |
 | `surveillance` | cameras and gates per km | $L<1$ or none |
 | `coPresence` | $1 - n_{\text{width} \ge 1.5\,\text{m}} / n_\text{width tagged}$ | fewer than 5 tagged ways |
 | `activities` | cafes, libraries, parks, places of worship... per km | $L<1$ or none |
 | `participation` | $0.5 \times$ share of the zone's lattice points outside every QPV and urban-project perimeter | no perimeter file |
 | `civic` | distance (m) from the centroid to the nearest town hall, community or social centre | none in the data |
+
+**Rent burden.** The numerator is the median monthly rent of the OLL 13 (observatory of
+private rents, millésime 2025), annualised. The denominator is the median disposable
+income per consumption unit from INSEE FiLoSoFi 2021, multiplied by the configured
+average number of consumption units per household (1.5 by default, until an IRIS value
+is available). The result is a percentage; 25 % is the "no problem" point and 50 % the
+"total obstacle" point. OLL values are zone-level (8 zones for Marseille), so the map
+shows eight rent levels; 69 IRIS are flagged `plr=oui` (restricted private rental stock)
+and 71 IRIS have no 2021 income (statistical secrecy), leaving the burden missing there.
+
+**Public space.** The 50 m lattice of `scripts/computePublicSpace.ts` classifies each
+point as built-up unless it falls in a natural/agricultural OSM polygon; it is public if
+it falls in a public OSM polygon (parks, gardens, squares, public facilities) or within
+the estimated width of a street. The share is public points / built-up points. The
+denominator is therefore a built-up-area proxy, not the whole IRIS area; zones with too
+few built-up points (Calanques, large natural areas) are left missing. The config uses
+the Marseille interquartile range as a starting calibration: 24 % (third quartile) means
+"no problem", 10 % (first quartile) means "total obstacle"; the international 20 %
+reference is kept in the comments.
 
 **Noise.** The official map gives polygons by 5 dB band ($\ge 55$, $\ge 60$, ...). A point's
 level is estimated at the middle of its band ($\text{band} + 2.5$); a point outside every
@@ -342,7 +362,8 @@ A zone with these values (no political data):
 | | `lighting` | 0.2 | share | 0.20 |
 | cognitive | `legibility` | 1.2 | 1.1 -> 1.6 | 0.20 |
 | | `landmarks` | 9 /km | 15 -> 0 | 0.40 |
-| economic | `publicPrivate` | 0.6 | share | 0.60 |
+| economic | `rentBurden` | 30 % | 25 -> 50 | 0.20 |
+| | `publicSpaceShare` | 0.15 | 0.24 -> 0.10 | 0.643 |
 | | `freeServices` | 0.3 /km | 0.6 -> 0 | 0.50 |
 | social | `poverty` | 27 % | 15 -> 45 | 0.40 |
 | | `shelter` | 0.5 /km | 1 -> 0 | 0.50 |
@@ -354,7 +375,7 @@ A zone with these values (no political data):
   $B_\text{phys} = 1 - (1 - 0.4375) \times 0.4 = 1 - 0.225 = 0.775$.
   Without the reports it would be 0.4375: they nearly double the obstacle.
 * Sensory: $(0.3 + 0.4 + 0.2)/3 = 0.30$. Cognitive: $(0.2 + 0.4)/2 = 0.30$.
-* Economic: $(0.6 + 0.5)/2 = 0.55$. Social: $(0.4 + 0.5)/2 = 0.45$.
+* Economic: $(0.20 + 0.643 + 0.50)/3 = 0.448$. Social: $(0.4 + 0.5)/2 = 0.45$.
 * Political: no data, so it is left out.
 
 **Score for the wheelchair profile (section 4).** Weights 0.35, 0.10, 0.10, 0.15, 0.15
@@ -365,19 +386,20 @@ A zone with these values (no political data):
 | physical | 0.225 | 0.4118 | 0.5411 |
 | sensory | 0.700 | 0.1176 | 0.9589 |
 | cognitive | 0.700 | 0.1176 | 0.9589 |
-| economic | 0.450 | 0.1765 | 0.8686 |
+| economic | 0.552 | 0.1765 | 0.9006 |
 | social | 0.550 | 0.1765 | 0.8999 |
 
-$$S_\text{wheelchair} = 0.5411 \times 0.9589 \times 0.9589 \times 0.8686 \times 0.8999 \approx 0.389 \;\Rightarrow\; \textbf{red}\ (< 0.42)$$
+$$S_\text{wheelchair} = 0.5411 \times 0.9589 \times 0.9589 \times 0.9006 \times 0.8999 \approx 0.403 \;\Rightarrow\; \textbf{red}\ (< 0.42)$$
 
-For comparison, a weighted *arithmetic* mean of the same $1 - B_d$ would give 0.434,
-which is orange: averaging would let the good sensory and cognitive conditions hide a
-physical barrier of 0.775, which is exactly what the product is there to prevent.
+For comparison, a weighted *arithmetic* mean of the same $1 - B_d$ would give 0.384.
+On other zones it can be more permissive: averaging lets good sensory and cognitive
+conditions hide a physical barrier of 0.775, which is exactly what the product is there
+to prevent.
 
 **Same zone, low-income profile.** Weights 0.15, 0.05, 0.10, 0.40, 0.20 (political, 0.10,
 is missing), $W_p = 0.90$. The economic dimension now carries the largest exponent
 (0.444) and the physical one a small exponent (0.167):
-$S_\text{low income} \approx 0.451$, **orange**. Same measurements, different priorities.
+$S_\text{low income} \approx 0.494$, **orange**. Same measurements, different priorities.
 
 These figures are what `scoreZone` returns for these inputs; the "Verifier un calcul"
 panel of the app shows the same table for any zone that is clicked.

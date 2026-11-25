@@ -10,7 +10,7 @@ const zone = (id: string, values: Record<string, number>): Zone => ({
 });
 
 describe("map layers", () => {
-  const z = zone("a", { slope: 8, noise: 85, publicPrivate: 0 }); // physical obstacle 0.5, sensory 1, economic 0
+  const z = zone("a", { slope: 8, noise: 85, freeServices: 0.6 }); // physical obstacle 0.5, sensory 1, economic 0
   const score = scoreZone(z, "blind", config);
 
   it("a dimension layer shows 1 minus that dimension's obstacle; combined shows the profile score", () => {

@@ -37,5 +37,7 @@ Pushing to `main` tests, builds and publishes `mjsl/` to GitHub Pages
 ## Licence and data
 
 Code: CC0 1.0 (public domain), see [`LICENSE`](LICENSE). Data: OpenStreetMap contributors (ODbL); Metropole
-Aix-Marseille-Provence (Licence Ouverte 2.0); IGN RGE ALTI; "Galere pietons" (Marsactu),
-reuse licence to be confirmed.
+Aix-Marseille-Provence (Licence Ouverte 2.0); IGN RGE ALTI; OLL 13 / ADIL13 and INSEE
+FiLoSoFi 2021 (Licence Ouverte 2.0); Carte des loyers 2025, ANIL / ministere de la
+Transition ecologique (Licence Ouverte 2.0); "Galere pietons" (Marsactu), reuse licence
+to be confirmed.

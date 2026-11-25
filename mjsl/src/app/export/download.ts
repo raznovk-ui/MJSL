@@ -20,7 +20,11 @@ const ATTRIBUTION = [
   "Interrogees via Overpass API.",
   "Bruit : carte de bruit routier (Lden), Metropole Aix-Marseille-Provence, Licence Ouverte 2.0 (data.gouv.fr).",
   "Altitudes : IGN RGE ALTI.",
-  "Zones, revenus et pauvrete (IRIS 2014), transports, offices de tourisme, QPV et projets urbains : Metropole Aix-Marseille-Provence, Licence Ouverte 2.0.",
+  "Zones, transports, offices de tourisme, QPV et projets urbains : Metropole Aix-Marseille-Provence, Licence Ouverte 2.0.",
+  "Revenus et pauvrete : INSEE FiLoSoFi 2021 (IRIS), Licence Ouverte 2.0 ; revenus 2014 en secours.",
+  "Loyers observes : Observatoire local des loyers 13 / ADIL13 via Metropole Aix-Marseille-Provence, Licence Ouverte 2.0.",
+  "Loyers d'annonce : Carte des loyers 2025, ANIL / ministere de la Transition ecologique, Licence Ouverte 2.0.",
+  "Espaces publics : OpenStreetMap (ODbL), methode UN-Habitat 11.7.1.",
   "Signalements des habitants : \"Galere pietons\" (Marsactu) ; licence de reutilisation a verifier.",
 ];
 

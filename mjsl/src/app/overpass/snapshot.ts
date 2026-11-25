@@ -1,4 +1,5 @@
 import type { Feature, FeatureCollection } from "geojson";
+import { versionedUrl } from "../dataManifest.js";
 
 /**
  * Prepared copies of the OpenStreetMap data, shipped with the app in
@@ -70,16 +71,19 @@ export async function decodeSnapshot(bytes: ArrayBuffer): Promise<FeatureCollect
   }
 }
 
-const snapshotUrl = (presetId: string) => `${import.meta.env.BASE_URL}data/osm/${presetId}.geojson.gz`;
+const snapshotUrl = (presetId: string, version?: string) =>
+  versionedUrl(`${import.meta.env.BASE_URL}data/osm/${presetId}.geojson.gz`, version);
 const manifestUrl = () => `${import.meta.env.BASE_URL}data/osm/manifest.json`;
 const memorySnapshots = new Map<string, FeatureCollection>();
 
 export interface SnapshotOptions {
   /** Revalidate the file with the server even if this session already decoded it. */
   forceReload?: boolean;
+  /** Global data version, appended to the URL so a new deployment cannot reuse old cached bytes. */
+  dataVersion?: string;
 }
 
-/** Hashes of every snapshot file, made by `npm run data:osm` (or `data:manifest`). */
+/** Hashes of every snapshot file, made by `npm run data:osm` (or `data:osm-manifest`). */
 export interface SnapshotManifest {
   generatedAt: string;
   version: string;
@@ -107,16 +111,17 @@ export async function fetchSnapshot(
   fetchImpl: typeof fetch = fetch,
   options: SnapshotOptions = {},
 ): Promise<FeatureCollection | null> {
+  const memoryKey = `${presetId}:${options.dataVersion ?? ""}`;
   if (!options.forceReload && fetchImpl === fetch) {
-    const cached = memorySnapshots.get(presetId);
+    const cached = memorySnapshots.get(memoryKey);
     if (cached) return cached;
   }
   try {
-    const response = await fetchImpl(snapshotUrl(presetId), options.forceReload ? { cache: "no-cache" } : undefined);
+    const response = await fetchImpl(snapshotUrl(presetId, options.dataVersion), options.forceReload ? { cache: "no-cache" } : undefined);
     if (!response.ok) return null;
     const decoded = await decodeSnapshot(await response.arrayBuffer());
     if (decoded && fetchImpl === fetch) {
-      memorySnapshots.set(presetId, decoded);
+      memorySnapshots.set(memoryKey, decoded);
     }
     return decoded;
   } catch {

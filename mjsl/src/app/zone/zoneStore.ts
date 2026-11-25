@@ -3,7 +3,9 @@ import { create } from "zustand";
 import {
   PolygonIndex,
   ZONE_CONFIG,
+  MARSEILLE_TERRITORY,
   buildAmpIndex,
+  buildEconomicIndex,
   buildNoiseIndex,
   buildZones,
   rankZones,
@@ -13,6 +15,8 @@ import {
   withSlope,
   type AmpData,
   type AmpIndex,
+  type EconomicData,
+  type EconomicIndex,
   type NoiseIndex,
   type RankedZone,
   type Report,
@@ -22,6 +26,7 @@ import {
   type ZoneScore,
   type LngLat,
 } from "../../domain/zone/index.js";
+import { fetchDataManifest, versionedUrl } from "../dataManifest.js";
 import { loadPreset } from "../overpass/client.js";
 import { mergeTiles } from "../overpass/mergeTiles.js";
 import { fetchSnapshotManifest, type SnapshotManifest } from "../overpass/snapshot.js";
@@ -34,6 +39,9 @@ import { locate } from "./locate.js";
 const NOISE_MAP_URL = `${import.meta.env.BASE_URL}data/noise_lden_all.geojson`;
 const REPORTS_URL = `${import.meta.env.BASE_URL}data/reports.json`;
 const AMP_BASE = `${import.meta.env.BASE_URL}data/amp/`;
+const RENT_URL = `${AMP_BASE}rent.json`;
+const INCOME_URL = `${AMP_BASE}income_2021.json`;
+const PUBLIC_SPACE_URL = `${AMP_BASE}public_space.json`;
 
 /** What the map shows for each zone: the profile's combined score, or one dimension. */
 export type MapLayer = "combined" | Dimension;
@@ -125,6 +133,8 @@ const rankingOf = (zones: Zone[], scores: ZoneState["scores"], profileId: string
 
 /** Manifest version of the snapshots currently loaded in `inputs.osm`. */
 let osmManifestVersion: string | null = null;
+/** Global data manifest version of the files currently loaded into `inputs`. */
+let dataManifestVersion: string | null = null;
 
 interface CityData {
   /** Null when a reload found the deployed manifest unchanged. */
@@ -146,6 +156,7 @@ interface CityData {
 export async function loadCity(
   reloadSnapshots: boolean,
   onProgress: (done: number, total: number) => void,
+  dataVersion?: string,
 ): Promise<CityData> {
   // Only trust the manifest after a reload: the initial load may have come from an
   // older HTTP cache, so comparing its version to a fresh manifest could make a later
@@ -176,7 +187,7 @@ export async function loadCity(
     while (cursor < OSM_TILES.length) {
       const i = cursor++;
       try {
-        const result = await loadPreset(OSM_TILES[i]!, { reloadSnapshot: reloadSnapshots });
+        const result = await loadPreset(OSM_TILES[i]!, { reloadSnapshot: reloadSnapshots, dataVersion });
         if (!result.fromCache) fromCache = false;
         tiles[i] = result.geojson;
       } catch (error) {
@@ -197,7 +208,7 @@ export async function loadCity(
     const next: number[] = [];
     for (const i of pending) {
       try {
-        const result = await loadPreset(OSM_TILES[i]!, { reloadSnapshot: reloadSnapshots });
+        const result = await loadPreset(OSM_TILES[i]!, { reloadSnapshot: reloadSnapshots, dataVersion });
         if (!result.fromCache) {
           fromCache = false;
           await new Promise((r) => setTimeout(r, 1500));
@@ -216,7 +227,7 @@ export async function loadCity(
   await Promise.allSettled(
     SOCIAL_TILES.map(async (tile, i) => {
       try {
-        tiles[OSM_TILES.length + i] = (await loadPreset(tile, { reloadSnapshot: reloadSnapshots })).geojson;
+        tiles[OSM_TILES.length + i] = (await loadPreset(tile, { reloadSnapshot: reloadSnapshots, dataVersion })).geojson;
       } catch {
         /* the indicators built on these stay "no data" */
       }
@@ -232,9 +243,9 @@ export async function loadCity(
   return { geojson: mergeTiles(tiles), fromCache, failed, unchanged: false };
 }
 
-async function getJson<T>(url: string): Promise<T | undefined> {
+async function getJson<T>(url: string, options: { noCache?: boolean; version?: string } = {}): Promise<T | undefined> {
   try {
-    const response = await fetch(url);
+    const response = await fetch(versionedUrl(url, options.version), options.noCache ? { cache: "no-cache" } : undefined);
     return response.ok ? ((await response.json()) as T) : undefined;
   } catch {
     return undefined;
@@ -242,8 +253,8 @@ async function getJson<T>(url: string): Promise<T | undefined> {
 }
 
 /** The official noise map, trimmed to the study area (npm run data:noise). */
-async function loadNoiseIndex(): Promise<NoiseIndex | undefined> {
-  const data = await getJson<FeatureCollection>(NOISE_MAP_URL);
+async function loadNoiseIndex(dataVersion?: string): Promise<NoiseIndex | undefined> {
+  const data = await getJson<FeatureCollection>(NOISE_MAP_URL, { version: dataVersion });
   if (!data) return undefined;
   const index = buildNoiseIndex(data);
   return index.size > 0 ? index : undefined;
@@ -254,20 +265,39 @@ async function loadNoiseIndex(): Promise<NoiseIndex | undefined> {
  * transport, tourist offices, priority neighbourhoods and project perimeters. Only the
  * zones are required; each other file is optional and leaves its indicators at "no data".
  */
-async function loadAmp(): Promise<{ zones?: FeatureCollection; amp?: AmpIndex }> {
+async function loadAmp(dataVersion?: string): Promise<{ zones?: FeatureCollection; amp?: AmpIndex }> {
+  const options = { version: dataVersion };
   const [zones, transit, tourism, qpv, projects] = await Promise.all([
-    getJson<FeatureCollection>(AMP_BASE + "zones.geojson"),
-    getJson<AmpData["transit"]>(AMP_BASE + "transit.json"),
-    getJson<AmpData["tourism"]>(AMP_BASE + "tourism.json"),
-    getJson<AmpData["qpv"]>(AMP_BASE + "qpv.geojson"),
-    getJson<AmpData["projects"]>(AMP_BASE + "projects.geojson"),
+    getJson<FeatureCollection>(AMP_BASE + "zones.geojson", options),
+    getJson<AmpData["transit"]>(AMP_BASE + "transit.json", options),
+    getJson<AmpData["tourism"]>(AMP_BASE + "tourism.json", options),
+    getJson<AmpData["qpv"]>(AMP_BASE + "qpv.geojson", options),
+    getJson<AmpData["projects"]>(AMP_BASE + "projects.geojson", options),
   ]);
   const any = transit || tourism || qpv || projects;
   return { zones, amp: any ? buildAmpIndex({ transit, tourism, qpv, projects }) : undefined };
 }
 
+/** Rents, income and public-space shares, all optional. Missing files leave their indicators "no data". */
+async function loadEconomic(reload: boolean, dataVersion?: string): Promise<EconomicIndex | undefined> {
+  const options = { noCache: reload, version: dataVersion };
+  const [rent, income, publicSpace] = await Promise.all([
+    getJson<EconomicData["rent"]>(RENT_URL, options),
+    getJson<EconomicData["income"]>(INCOME_URL, options),
+    getJson<EconomicData["publicSpace"]>(PUBLIC_SPACE_URL, options),
+  ]);
+  return buildEconomicIndex({ rent, income, publicSpace });
+}
+
 /** What the zones are built from. Kept outside the store so a new report re-scores without downloading again. */
-let inputs: { collection: FeatureCollection; osm: FeatureCollection; base: Report[] | undefined; amp?: AmpIndex; noiseIndex?: NoiseIndex } | null = null;
+let inputs: {
+  collection: FeatureCollection;
+  osm: FeatureCollection;
+  base: Report[] | undefined;
+  amp?: AmpIndex;
+  noiseIndex?: NoiseIndex;
+  economic?: EconomicIndex;
+} | null = null;
 /** Altitudes at the grid points, once downloaded (or read from the cache). */
 let terrain: Record<string, number> = {};
 /** Cached spatial index and built zones so report or slope updates never re-run the expensive OSM/noise joins. */
@@ -302,6 +332,8 @@ function recompute(
         osm: inputs.osm,
         ...(inputs.amp ? { amp: inputs.amp } : {}),
         ...(inputs.noiseIndex ? { noiseIndex: inputs.noiseIndex } : {}),
+        ...(inputs.economic ? { economic: inputs.economic } : {}),
+        territory: MARSEILLE_TERRITORY,
         zoneIndex: cachedZoneIndex,
       },
       ZONE_CONFIG,
@@ -352,9 +384,15 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
 
   load: async ({ reloadSnapshots = false } = {}) => {
     if (get().loadState === "loading" || get().refreshing) return;
-    // Once the map is ready, "Recharger les donnees" revalidates the deployed snapshots
-    // in the background: no full-screen overlay and no 60 Overpass queries.
+    // Once the map is ready, "Recharger les donnees" compares the global data manifest
+    // first: if no runtime file changed, nothing is downloaded or rebuilt.
     const background = reloadSnapshots && get().loadState === "ready";
+    const manifest = await fetchDataManifest();
+    const dataVersion = manifest?.version;
+    if (background && dataManifestVersion && dataVersion === dataManifestVersion) {
+      say("Donnees deja a jour : aucun fichier n'a change.");
+      return;
+    }
     if (background) {
       set({ refreshing: true, error: null });
       say("Rechargement des donnees publiees...");
@@ -365,22 +403,23 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
         error: null,
         auto: IDLE_AUTO,
       });
-      say("Chargement des zones, des donnees OpenStreetMap, des signalements et de la carte de bruit...");
+      say("Chargement des zones, des donnees OpenStreetMap, des signalements, des loyers, des revenus et de la carte de bruit...");
     }
     try {
-      const [osm, { zones: collection, amp }, reports, noiseIndex] = await Promise.all([
+      const [osm, { zones: collection, amp }, reports, noiseIndex, economic] = await Promise.all([
         loadCity(reloadSnapshots, (done, total) => {
           set({ loadProgress: { done, total } });
           say(`${background ? "Rechargement" : "Chargement"} de la ville : zone ${Math.min(done + 1, total)} sur ${total}...`);
-        }),
-        loadAmp(),
-        getJson<Report[]>(REPORTS_URL),
-        loadNoiseIndex(),
+        }, dataVersion),
+        loadAmp(dataVersion),
+        getJson<Report[]>(REPORTS_URL, { noCache: reloadSnapshots, version: dataVersion }),
+        loadNoiseIndex(dataVersion),
+        loadEconomic(reloadSnapshots, dataVersion),
       ]);
       if (!collection) throw new Error("Les zones (data/amp/zones.geojson) sont introuvables : lance « npm run data:zones ».");
       const osmCollection = osm.unchanged ? inputs?.osm : osm.geojson;
       if (!osmCollection) throw new Error("Les donnees OpenStreetMap sont introuvables : lance « npm run data:osm ».");
-      inputs = { collection, osm: osmCollection, base: reports, amp, noiseIndex };
+      inputs = { collection, osm: osmCollection, base: reports, amp, noiseIndex, economic };
       cachedZoneIndex = null;
       cachedBuiltZones = null;
       cachedSlopedZones = null;
@@ -394,6 +433,8 @@ export const useZoneStore = create<ZoneState>((set, get) => ({
       // Microtask yield: allows the browser to paint progress updates and smooth animations before CPU computation
       await new Promise((resolve) => setTimeout(resolve, 30));
       recompute({ rebuild: true, extraState: { loadState: "ready", loadProgress: null, refreshing: false } });
+      // Baseline only after a complete city load; a partial OSM load must retry next time.
+      dataManifestVersion = osm.failed === 0 ? dataVersion ?? null : null;
       say(
         `${useZoneStore.getState().zones.length} zones notees` +
           (osm.unchanged ? " ; donnees OSM deja a jour." : osm.fromCache ? " (snapshots locaux)." : " (Overpass).") +

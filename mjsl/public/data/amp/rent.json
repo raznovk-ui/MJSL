@@ -1,0 +1,4039 @@
+{
+  "source": "OLL 13 / ADIL13 via Metropole AMP (millesime 2025)",
+  "license": "Licence Ouverte 2.0",
+  "observedMillesime": "2025",
+  "observed": {
+    "132010101": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132010102": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132010103": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132010104": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132010201": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132010202": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132010203": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132010301": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132010302": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132010303": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132010401": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132010402": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132010501": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132010502": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132010503": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132010504": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132010505": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132010601": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132010602": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132020101": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132020201": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132020202": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132020203": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132020204": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132020205": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132020301": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132020302": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132020303": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132020401": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132020402": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132020403": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132020404": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132030101": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030102": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030103": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030104": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030105": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030201": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132030202": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030203": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030204": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132030205": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030301": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030302": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030303": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030304": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030305": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030306": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132030401": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132030402": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132030403": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132040101": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040102": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132040103": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040104": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040105": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132040106": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132040201": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132040202": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132040203": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040204": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040205": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132040301": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132040302": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040303": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040304": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132040401": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132040402": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132040403": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132040404": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050101": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050102": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132050103": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132050104": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050105": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050201": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132050202": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050203": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132050204": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050205": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050206": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050207": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050301": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050302": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050303": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050304": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050305": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132050401": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132050402": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132050403": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132060101": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060102": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060103": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132060201": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132060202": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060203": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060204": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132060301": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132060302": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132060303": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132060401": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132060402": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132060403": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132060501": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132060502": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132060601": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060602": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132060603": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132060604": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070101": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132070102": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132070201": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132070202": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132070203": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132070301": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132070401": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132070402": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132070403": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070501": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132070502": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132070601": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070602": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070603": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070604": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132070701": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070702": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132070703": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080101": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080102": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080103": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": true
+    },
+    "132080201": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080301": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080302": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080303": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": true
+    },
+    "132080401": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132080402": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080403": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080404": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080405": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080406": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080501": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080502": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": true
+    },
+    "132080601": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080602": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080603": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132080604": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080701": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080702": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080703": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132080704": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080801": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132080802": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132080803": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080804": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080805": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080806": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132080901": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132080902": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080903": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080904": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132080905": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132081001": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132081002": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132081003": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132081004": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132090101": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090102": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090103": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132090104": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132090201": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132090202": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132090203": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132090204": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090301": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132090401": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090402": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132090403": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090404": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090405": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090406": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090407": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132090408": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132090409": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132090501": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132090502": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132090503": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090601": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090602": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132090603": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132090701": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132090702": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132090703": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132090704": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090801": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132090802": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132090803": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132090804": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132090805": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090806": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090807": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132090808": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132090809": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132090901": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132090902": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132100101": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132100102": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132100103": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132100104": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132100201": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132100202": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132100301": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132100302": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132100401": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132100402": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132100403": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132100404": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132100405": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132100406": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132100407": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132100408": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": true
+    },
+    "132100501": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132100502": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132100503": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132100504": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132100505": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132100506": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132100601": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132100602": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132100603": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132110101": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132110201": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132110202": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": true
+    },
+    "132110301": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132110401": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132110501": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132110502": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132110601": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": true
+    },
+    "132110602": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132110603": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132110604": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132110605": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132110606": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132110607": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132110608": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132110609": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132110701": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132110702": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132110703": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132110704": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": true
+    },
+    "132110705": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132110706": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132110801": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132110802": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132110901": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": true
+    },
+    "132111001": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132111002": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132111003": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132111004": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132111005": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132111101": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132111102": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": true
+    },
+    "132120101": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132120102": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132120103": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120201": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120202": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120301": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132120302": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120303": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132120304": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132120305": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132120401": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132120402": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132120403": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132120404": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132120405": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132120406": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132120501": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132120601": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132120602": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132120603": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132120604": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120701": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132120702": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132130102": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132130103": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132130201": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132130202": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132130301": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132130302": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132130303": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132130304": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132130401": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": true
+    },
+    "132130501": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132130601": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132130602": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132130603": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132130604": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132130605": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132130607": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132130701": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132130802": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132130803": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132130804": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132130805": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132130806": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132130901": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132130902": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132130903": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132130904": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132131001": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132131002": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132131003": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132131004": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132131005": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132131006": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132131101": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132131102": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132131103": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132140101": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132140102": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140103": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132140201": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132140202": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132140203": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140204": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132140205": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140301": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140302": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140303": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132140401": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": true
+    },
+    "132140402": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132140403": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140404": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132140405": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132140501": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132140502": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140503": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140504": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132140505": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132140506": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132140507": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140601": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132140602": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132140603": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132140701": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132140702": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132140703": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132150101": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132150102": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132150103": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132150104": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132150201": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132150202": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132150301": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150302": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132150303": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132150304": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150401": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150402": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150501": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150502": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132150601": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150602": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150603": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": true
+    },
+    "132150604": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132150701": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132150702": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150703": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150705": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132150706": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132150801": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150802": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": false
+    },
+    "132150803": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132150901": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150902": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132150903": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132151001": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132151002": {
+      "zone": "5",
+      "sMed": 13,
+      "mMed": 652,
+      "sQ1": 11.1,
+      "sQ3": 15.9,
+      "surface": 55,
+      "nbEnq": 4089,
+      "plr": true
+    },
+    "132151003": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": true
+    },
+    "132151101": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132151102": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": false
+    },
+    "132160101": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": false
+    },
+    "132160102": {
+      "zone": "3",
+      "sMed": 13.8,
+      "mMed": 781,
+      "sQ1": 11.8,
+      "sQ3": 16.2,
+      "surface": 62,
+      "nbEnq": 3137,
+      "plr": false
+    },
+    "132160103": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    },
+    "132160104": {
+      "zone": "1",
+      "sMed": 16.4,
+      "mMed": 850,
+      "sQ1": 13.9,
+      "sQ3": 19.9,
+      "surface": 61,
+      "nbEnq": 3458,
+      "plr": false
+    },
+    "132160105": {
+      "zone": "7",
+      "sMed": 12.4,
+      "mMed": 650,
+      "sQ1": 10.8,
+      "sQ3": 14.9,
+      "surface": 59,
+      "nbEnq": 3864,
+      "plr": true
+    },
+    "132160201": {
+      "zone": "2",
+      "sMed": 15.1,
+      "mMed": 820,
+      "sQ1": 12.7,
+      "sQ3": 17.9,
+      "surface": 62,
+      "nbEnq": 2770,
+      "plr": false
+    },
+    "132160301": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132160302": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132160401": {
+      "zone": "6",
+      "sMed": 12.9,
+      "mMed": 670,
+      "sQ1": 11.1,
+      "sQ3": 15.2,
+      "surface": 57,
+      "nbEnq": 4453,
+      "plr": false
+    },
+    "132160402": {
+      "zone": "8",
+      "sMed": 11.3,
+      "mMed": 630,
+      "sQ1": 9.2,
+      "sQ3": 13.6,
+      "surface": 60,
+      "nbEnq": 3505,
+      "plr": true
+    },
+    "132160403": {
+      "zone": "4",
+      "sMed": 13.4,
+      "mMed": 720,
+      "sQ1": 11.4,
+      "sQ3": 15.8,
+      "surface": 60,
+      "nbEnq": 4434,
+      "plr": false
+    }
+  },
+  "askingCrossCheck": {
+    "source": "Carte des loyers 2025, ANIL / ministere de la Transition ecologique (loyers d'annonce, charges comprises)",
+    "license": "Licence Ouverte 2.0",
+    "byArrondissement": {
+      "13201": {
+        "median": 14.6702188823419,
+        "low": 11.1546225460487,
+        "high": 19.2938238086826,
+        "observations": 10197
+      },
+      "13202": {
+        "median": 16.5924506978796,
+        "low": 12.4955246735644,
+        "high": 22.0326418740952,
+        "observations": 4866
+      },
+      "13203": {
+        "median": 14.9222072671906,
+        "low": 11.6795980553288,
+        "high": 19.0650627418983,
+        "observations": 8698
+      },
+      "13204": {
+        "median": 15.4585057853391,
+        "low": 12.384386810525,
+        "high": 19.2956990742792,
+        "observations": 13834
+      },
+      "13205": {
+        "median": 16.2456413225693,
+        "low": 12.9613441481141,
+        "high": 20.3621521784816,
+        "observations": 17245
+      },
+      "13206": {
+        "median": 16.7839268146096,
+        "low": 12.8058457242465,
+        "high": 21.9977817462537,
+        "observations": 16412
+      },
+      "13207": {
+        "median": 18.4112054552338,
+        "low": 13.4812158127758,
+        "high": 25.1440590390664,
+        "observations": 8044
+      },
+      "13208": {
+        "median": 18.0840847666464,
+        "low": 13.6366947343704,
+        "high": 23.9819199752991,
+        "observations": 12114
+      },
+      "13209": {
+        "median": 17.4279705798502,
+        "low": 13.8501416130151,
+        "high": 21.930039924408,
+        "observations": 8679
+      },
+      "13210": {
+        "median": 16.0197968402794,
+        "low": 12.9924286837596,
+        "high": 19.7525725982715,
+        "observations": 12611
+      },
+      "13211": {
+        "median": 16.7944597074398,
+        "low": 13.0615839406127,
+        "high": 21.5941556665133,
+        "observations": 3787
+      },
+      "13212": {
+        "median": 17.2411190026994,
+        "low": 14.1408610990527,
+        "high": 21.0210808509502,
+        "observations": 10723
+      },
+      "13213": {
+        "median": 16.4770074251889,
+        "low": 12.9383454801526,
+        "high": 20.9835001010135,
+        "observations": 6346
+      },
+      "13214": {
+        "median": 14.3052556110107,
+        "low": 11.5472389701753,
+        "high": 17.7220146413275,
+        "observations": 6927
+      },
+      "13215": {
+        "median": 14.3370286984553,
+        "low": 11.3433110343074,
+        "high": 18.120845957468,
+        "observations": 6378
+      },
+      "13216": {
+        "median": 16.1318272844016,
+        "low": 12.3782793217482,
+        "high": 21.0235885594002,
+        "observations": 1228
+      }
+    }
+  }
+}

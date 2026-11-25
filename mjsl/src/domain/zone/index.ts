@@ -8,5 +8,7 @@ export * from "./build.js";
 export * from "./toGeojson.js";
 export * from "./noiseMap.js";
 export * from "./ampData.js";
+export * from "./economic.js";
+export * from "./territory.js";
 export { bboxOfCoordinates, coordKey } from "./geo.js";
 export { PolygonIndex } from "./spatial.js";

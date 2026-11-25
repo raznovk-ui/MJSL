@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeDataManifest } from "./scripts/dataManifest.mjs";
 
 const require = createRequire(import.meta.url);
 
@@ -13,6 +14,27 @@ const require = createRequire(import.meta.url);
  * into the build, so the production map would fail to load them (the server answers
  * with the HTML page, which the browser refuses as a worker). Copy them beside the app.
  */
+/**
+ * Generates public/data/manifest.json from every runtime data file, at build and
+ * at dev-server start. The app uses its `version` to skip a full reload when no
+ * data changed. Never edit this file by hand.
+ */
+function dataManifest() {
+  const dataDir = fileURLToPath(new URL("./public/data", import.meta.url));
+  return {
+    name: "data-manifest",
+    enforce: "pre" as const,
+    async buildStart() {
+      const manifest = await writeDataManifest(dataDir);
+      console.log(`data manifest: ${Object.keys(manifest.files).length} files, version ${manifest.version.slice(0, 12)}`);
+    },
+    async configureServer() {
+      const manifest = await writeDataManifest(dataDir);
+      console.log(`data manifest (dev): ${Object.keys(manifest.files).length} files, version ${manifest.version.slice(0, 12)}`);
+    },
+  };
+}
+
 function copyMaplibreWorker() {
   return {
     name: "copy-maplibre-worker",
@@ -30,7 +52,7 @@ export default defineConfig(({ command }) => ({
   // GitHub Pages project URL (/<repo>/), a sub-folder, or a plain static server.
   // Every runtime URL is built from import.meta.env.BASE_URL.
   base: command === "build" ? "./" : "/",
-  plugins: [react(), tailwind(), copyMaplibreWorker()],
+  plugins: [dataManifest(), react(), tailwind(), copyMaplibreWorker()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   // Pre-bundling maplibre-gl drops its worker file, which Firefox then refuses to
   // load (empty MIME type). Served from node_modules as-is, the worker resolves.

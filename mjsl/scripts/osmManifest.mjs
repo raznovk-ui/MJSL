@@ -4,7 +4,7 @@
  * snapshots, so "Recharger les donnees" is instant when nothing changed.
  *
  * Called by fetchOsm.ts at the end of a data:osm run, and available alone as
- * `npm run data:manifest` after replacing snapshot files by hand.
+ * `npm run data:osm-manifest` after replacing snapshot files by hand.
  */
 import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile } from "node:fs/promises";
